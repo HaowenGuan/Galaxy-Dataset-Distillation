@@ -237,7 +237,7 @@ Y=Y[ID!=-999]
 ID=ID[ID!=-999]
 
 
-#separete E/S0
+#separete {E&S0}
 Y_o=np.copy(Y)    #Very important to avoid overwritting!!
 #Y[Y_o <= 0]=0    #2536
 Y[Y_o <= 0]=0    #4433
