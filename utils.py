@@ -255,13 +255,14 @@ def get_network(model, channel, num_classes, im_size=(32, 32), dist=True):
             ## Dense layers
             nn.Flatten(0, -1),
 
-            nn.Linear(2097152, 128),
+            nn.Linear(9469952, 128),
             nn.Dropout(0.5),
 
             nn.Linear(128, 64),
             nn.Dropout(0.5),
 
             nn.Linear(64, 1)
+
         )
     elif model == 'MLP':
         net = MLP(channel=channel, num_classes=num_classes)
@@ -397,6 +398,8 @@ def epoch(mode, dataloader, net, optimizer, criterion, args, aug, texture=False)
         n_b = lab.shape[0]
 
         output = net(img)
+
+        print(output, lab)
         loss = criterion(output, lab)
 
         acc = np.sum(np.equal(np.argmax(output.cpu().data.numpy(), axis=-1), lab.cpu().data.numpy()))
