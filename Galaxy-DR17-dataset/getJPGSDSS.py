@@ -47,28 +47,20 @@ if __name__ == '__main__':
     print("Multi-thread processing with", cpu_count(), "core(s).")
     with Pool(max(cpu_count(), 8)) as pool:
         args = []
-        # for j in range(0, ID.shape[0]):
-        #     k = np.where(ID_NSA == ID_Manga[j])  # find galaxy in NSA
-        #
-        #     if np.shape(k) == (1, 1):  # galaxy exists in NSA
-        #         args.append(['MaNGA/image/' + str(ID[j]) + ".jpg", ra[j], dec[j], R_NSA[k] * 0.024])
-
         for j in range(0, ID.shape[0]):
             k = np.where(ID_NSA == ID_Manga[j])  # find galaxy in NSA
 
-            if np.shape(k) != (1, 1):  # galaxy exists in NSA
-                args.append(['MaNGA/image/excluded_from_NSA/' + str(ID[j]) + ".jpg", ra[j], dec[j], R_S[j] * 0.024])
+            if np.shape(k) == (1, 1):  # galaxy exists in NSA
+                args.append(['MaNGA/image/' + str(ID[j]) + ".jpg", ra[j], dec[j], R_NSA[k] * 0.024])
 
-        results = pool.starmap(_fetch, args)
+        # for j in range(0, ID.shape[0]):
+        #     k = np.where(ID_NSA == ID_Manga[j])  # find galaxy in NSA
+        #
+        #     if np.shape(k) != (1, 1):  # galaxy exists in NSA
+        #         args.append(['MaNGA/image/excluded_from_NSA/' + str(ID[j]) + ".jpg", ra[j], dec[j], R_S[j] * 0.024])
+        #
+        # results = pool.starmap(_fetch, args)
 
-    # for j in range(0, ID.shape[0]):
-    #     k = np.where(ID_NSA == ID_Manga[j])  # find galaxy in NSA
-    #
-    #     if np.shape(k) == (1, 1):  # galaxy exists in NSA
-    #         print("Number galaxy", j, ID[j], ID_Manga[j], ID_NSA[k])
-    #         print("Radii", R_S[j], R_NSA[k])
-    #
-    #         _fetch('MaNGA/image/' + str(ID[j]) + ".jpg", ra[j], dec[j], scale=R_NSA[k] * 0.024)
 
     exit(0)
 
