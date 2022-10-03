@@ -8,6 +8,7 @@ from matplotlib import image
 from astropy.io import fits
 from astropy.table import Table
 from multiprocessing import Pool, cpu_count, get_context
+import argparse
 
 
 def _fetch(outfile, RA, DEC, scale, width=424, height=424):
@@ -27,6 +28,30 @@ def _fetch(outfile, RA, DEC, scale, width=424, height=424):
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Parameter Processing')
+    parser.add_argument('--download', action='store_true', help='download-dataset')
+    parser.add_argument('--dataset', type=str, default='dl-DR17', help='dataset')
+    # parser.add_argument('--subset', type=str, default='imagenette', help='subset')
+    # parser.add_argument('--model', type=str, default='ConvNet', help='model')
+    # parser.add_argument('--num_experts', type=int, default=100, help='training iterations')
+    # parser.add_argument('--lr_teacher', type=float, default=0.01, help='learning rate for updating network parameters')
+    # parser.add_argument('--batch_train', type=int, default=256, help='batch size for training networks')
+    # parser.add_argument('--batch_real', type=int, default=256, help='batch size for real loader')
+    # parser.add_argument('--dsa', type=str, default='True', choices=['True', 'False'],
+    #                     help='whether to use differentiable Siamese augmentation.')
+    # parser.add_argument('--dsa_strategy', type=str, default='color_crop_cutout_flip_scale_rotate',
+    #                     help='differentiable Siamese augmentation strategy')
+    # parser.add_argument('--data_path', type=str, default='data', help='dataset path')
+    # parser.add_argument('--buffer_path', type=str, default='./buffers', help='buffer path')
+    # parser.add_argument('--train_epochs', type=int, default=50)
+    # parser.add_argument('--zca', action='store_true')
+    # parser.add_argument('--decay', action='store_true')
+    # parser.add_argument('--mom', type=float, default=0, help='momentum')
+    # parser.add_argument('--l2', type=float, default=0, help='l2 regularization')
+    # parser.add_argument('--save_interval', type=int, default=10)
+
+    args = parser.parse_args()
+
     if not os.path.exists('temp/image'):
         os.makedirs('temp/image')
 
@@ -35,31 +60,37 @@ if __name__ == '__main__':
     R_NSA = cat['NSA_SERSIC_TH50']
 
     data = fits.getdata(os.path.join('MaNGA', 'manga-pymorph-DR17.fits'))
+    dl17 = fits.open(os.path.join('MaNGA', 'manga-morphology-dl-DR17.fits'))[1].data
     # Reference: https://academic.oup.com/mnras/article/483/2/2057/5188692
     ID_Manga = data['MANGA_ID']  # MaNGA identification
     ID = data['INTID']  # Internal identification number
     ra = data['RA']  # Object right ascension (deg)
     dec = data['DEC']  # Object declination (deg)
     R_S = data['A_HL_S']  # Half-light semimajor axis (arcsec) from Sérsic fit
+    tt = (dl17["T-Type"] + 0.5).astype(int)
 
     print("Number of images to be read", ID.shape[0])
 
-    print("Multi-thread processing with", cpu_count(), "core(s).")
-    with Pool(max(cpu_count(), 8)) as pool:
-        args = []
-        for j in range(0, ID.shape[0]):
-            k = np.where(ID_NSA == ID_Manga[j])  # find galaxy in NSA
+    if args.download:
+        print("Multi-thread processing with", cpu_count(), "core(s).")
+        if not os.path.exists('MaNGA/image/excluded_from_NSA/'):
+            os.makedirs('MaNGA/image/excluded_from_NSA/')
 
-            if np.shape(k) == (1, 1):  # galaxy exists in NSA
-                args.append(['MaNGA/image/' + str(ID[j]) + ".jpg", ra[j], dec[j], R_NSA[k] * 0.024])
+        with Pool(max(cpu_count(), 8)) as pool:
+            args = []
 
-        # for j in range(0, ID.shape[0]):
-        #     k = np.where(ID_NSA == ID_Manga[j])  # find galaxy in NSA
-        #
-        #     if np.shape(k) != (1, 1):  # galaxy exists in NSA
-        #         args.append(['MaNGA/image/excluded_from_NSA/' + str(ID[j]) + ".jpg", ra[j], dec[j], R_S[j] * 0.024])
-        #
-        # results = pool.starmap(_fetch, args)
+            for j in range(0, ID.shape[0]):
+                k = np.where(ID_NSA == ID_Manga[j])  # find galaxy in NSA
+
+                if np.shape(k) == (1, 1):  # galaxy exists in NSA
+                    args.append(['MaNGA/image/' + str(ID[j]) + ".jpg", ra[j], dec[j], R_NSA[k] * 0.024])
+                else:
+                    args.append(['MaNGA/image/excluded_from_NSA/' + str(ID[j]) + ".jpg", ra[j], dec[j], R_S[j] * 0.024])
+
+            results = pool.starmap(_fetch, args)
+
+
+
 
 
     exit(0)
@@ -107,7 +138,7 @@ if __name__ == '__main__':
         ID = data['INTID']
         ra = data['RA']
         dec = data['DEC']
-        R_S = data['A_hl_S_TRUNC']
+        R_S = data['A_hl_S']
 
         print("Number of images to be read", ID.shape[0])
 

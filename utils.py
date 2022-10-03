@@ -13,6 +13,8 @@ from torch.utils.data import Dataset
 from torchvision import datasets, transforms
 from scipy.ndimage.interpolation import rotate as scipyrotate
 from networks import MLP, ConvNet, LeNet, AlexNet, VGG11BN, VGG11, ResNet18, ResNet18BN_AP, ResNet18_AP
+from astropy.io import fits
+import cv2 as cv
 
 class Config:
     imagenette = [0, 217, 482, 491, 497, 566, 569, 571, 574, 701]
@@ -49,7 +51,42 @@ def get_dataset(dataset, data_path, batch_size=1, subset="imagenette", args=None
     loader_train_dict = None
     class_map_inv = None
 
-    if dataset == 'CIFAR10':
+    if dataset == 'dl-DR17':
+        channel = 3
+        im_size = (69, 69)
+        num_classes = 13
+
+        mean = [0.0695364302974106, 0.060510241696901314, 0.04756364403842208]
+        std = [0.123113038980545, 0.10351957804657039, 0.09070320107800815]
+
+        dl17 = fits.open(os.path.join('Galaxy-DR17-dataset/MaNGA', 'manga-morphology-dl-DR17.fits'))[1].data
+        tt = dict()
+        for d in dl17:
+            tt[d['INTID']] = int(d['T-Type'] + 0.5) + 3
+
+        path = 'Galaxy-DR17-dataset/MaNGA/image'
+        dst_total = []
+        for image in os.listdir(path):
+            image_dir = os.path.join(path, image)
+            if os.path.isdir(image_dir):
+                continue
+
+            id = int(image[:-4])
+            img = cv.imread(image_dir)
+            img = cv.resize(img, (69, 69), interpolation=cv.INTER_AREA) / 255
+            img = torch.from_numpy(img.T)
+            img = transforms.Normalize(mean, std)(img)
+
+            dst_total.append((img, tt[id]))
+
+        np.random.shuffle(dst_total)
+        dst_train = dst_total[:int(0.8 * len(dst_total))]
+        dst_test = dst_total[int(0.8 * len(dst_total)):]
+
+        class_names = [str(i) for i in range(-3, 10)]
+        class_map = {x:x for x in range(num_classes)}
+
+    elif dataset == 'CIFAR10':
         channel = 3
         im_size = (32, 32)
         num_classes = 10
@@ -195,7 +232,38 @@ def get_network(model, channel, num_classes, im_size=(32, 32), dist=True):
     torch.random.manual_seed(int(time.time() * 1000) % 100000)
     net_width, net_depth, net_act, net_norm, net_pooling = get_default_convnet_setting()
 
-    if model == 'MLP':
+    if model == 'galaxy':
+        net = nn.Sequential(
+            nn.Conv2d(3, 32, (6, 6), padding="same"),
+            nn.ReLU(),
+            nn.Dropout(0.5),
+
+            nn.Conv2d(32, 64, (5, 5), padding="same"),
+            nn.ReLU(),
+            nn.MaxPool2d((2, 2)),
+            nn.Dropout(0.25),
+
+            nn.Conv2d(64, 128, (2, 2), padding="same"),
+            nn.ReLU(),
+            nn.MaxPool2d((2, 2)),
+            nn.Dropout(0.25),
+
+            nn.Conv2d(128, 128, (3, 3), padding="same"),
+            nn.ReLU(),
+            nn.Dropout(0.25),
+
+            ## Dense layers
+            nn.Flatten(0, -1),
+
+            nn.Linear(2097152, 128),
+            nn.Dropout(0.5),
+
+            nn.Linear(128, 64),
+            nn.Dropout(0.5),
+
+            nn.Linear(64, 1)
+        )
+    elif model == 'MLP':
         net = MLP(channel=channel, num_classes=num_classes)
     elif model == 'ConvNet':
         net = ConvNet(channel=channel, num_classes=num_classes, net_width=net_width, net_depth=net_depth, net_act=net_act, net_norm=net_norm, net_pooling=net_pooling, im_size=im_size)
