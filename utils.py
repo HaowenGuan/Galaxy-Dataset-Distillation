@@ -66,11 +66,14 @@ def get_dataset(dataset, data_path, batch_size=1, subset="imagenette", args=None
 
         path = 'Galaxy-DR17-dataset/MaNGA/image'
         dst_total = []
+        count = 0
         for image in os.listdir(path):
             image_dir = os.path.join(path, image)
             if os.path.isdir(image_dir):
                 continue
-
+            count += 1
+            if count > 1000:
+                break
             id = int(image[:-4])
             img = cv.imread(image_dir)
             img = cv.resize(img, (69, 69), interpolation=cv.INTER_AREA) / 255
