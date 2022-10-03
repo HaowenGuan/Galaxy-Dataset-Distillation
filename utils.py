@@ -72,7 +72,7 @@ def get_dataset(dataset, data_path, batch_size=1, subset="imagenette", args=None
             if os.path.isdir(image_dir):
                 continue
             count += 1
-            if count > 1000:
+            if count > 20000:
                 break
             id = int(image[:-4])
             img = cv.imread(image_dir)
@@ -256,16 +256,16 @@ def get_network(model, channel, num_classes, im_size=(32, 32), dist=True):
             nn.Dropout(0.25),
 
             ## Dense layers
-            nn.Flatten(0, -1),
+            nn.Flatten(1, -1),
 
-            nn.Linear(9469952, 128),
+            nn.Linear(36992, 128),
             nn.Dropout(0.5),
 
             nn.Linear(128, 64),
             nn.Dropout(0.5),
 
-            nn.Linear(64, 1)
-
+            nn.Linear(64, 13),
+            nn.Softmax(dim=1)
         )
     elif model == 'MLP':
         net = MLP(channel=channel, num_classes=num_classes)
@@ -402,7 +402,6 @@ def epoch(mode, dataloader, net, optimizer, criterion, args, aug, texture=False)
 
         output = net(img)
 
-        print(output, lab)
         loss = criterion(output, lab)
 
         acc = np.sum(np.equal(np.argmax(output.cpu().data.numpy(), axis=-1), lab.cpu().data.numpy()))
