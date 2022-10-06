@@ -54,15 +54,38 @@ def get_dataset(dataset, data_path, batch_size=1, subset="imagenette", args=None
     if dataset == 'dl-DR17':
         channel = 3
         im_size = (69, 69)
-        num_classes = 13
+        num_classes = 10
 
         mean = [0.0695364302974106, 0.060510241696901314, 0.04756364403842208]
         std = [0.123113038980545, 0.10351957804657039, 0.09070320107800815]
 
         dl17 = fits.open(os.path.join('Galaxy-DR17-dataset/MaNGA', 'manga-morphology-dl-DR17.fits'))[1].data
-        tt = dict()
+        classes = dict()
         for d in dl17:
-            tt[d['INTID']] = int(d['T-Type'] + 0.5) + 3
+            if (d['T-Type'] < 0):
+                if (d['P_S0'] < 0.5):
+                    classes[d['INTID']] = 0
+                else:
+                    classes[d['INTID']] = 1
+            elif (d['T-Type'] > 0 and d['T-Type'] < 3):
+                if (d['P_bar'] > 0.8 and d['P_edge'] < 0.8):
+                    classes[d['INTID']] = 2
+                elif (d['P_bar'] < 0.8 and d['P_edge'] > 0.8):
+                    classes[d['INTID']] = 3
+                elif (d['P_bar'] > 0.8 and d['P_edge'] > 0.8):
+                    classes[d['INTID']] = 4
+                else: 
+                    classes[d['INTID']] = 5
+            else:
+                if (d['P_bar'] > 0.8 and d['P_edge'] < 0.8):
+                    classes[d['INTID']] = 6
+                elif (d['P_bar'] < 0.8 and d['P_edge'] > 0.8):
+                    classes[d['INTID']] = 7
+                elif (d['P_bar'] > 0.8 and d['P_edge'] > 0.8):
+                    classes[d['INTID']] = 8
+                else: 
+                    classes[d['INTID']] = 9
+            
 
         path = 'Galaxy-DR17-dataset/MaNGA/image'
         dst_total = []
@@ -80,13 +103,13 @@ def get_dataset(dataset, data_path, batch_size=1, subset="imagenette", args=None
             img = torch.from_numpy(img.T)
             img = transforms.Normalize(mean, std)(img)
 
-            dst_total.append((img, tt[id]))
+            dst_total.append((img, classes[id]))
 
         np.random.shuffle(dst_total)
         dst_train = dst_total[:int(0.8 * len(dst_total))]
         dst_test = dst_total[int(0.8 * len(dst_total)):]
 
-        class_names = [str(i) for i in range(-3, 10)]
+        class_names = ['E','S0','S1_bar','S1_edge_on', 'S1_bar_edgeon', 'S1_none', 'S2_bar', 'S2_edge_on', 'S2_bar_edgeon', 'S2_none']
         class_map = {x:x for x in range(num_classes)}
 
     elif dataset == 'CIFAR10':
