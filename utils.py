@@ -62,26 +62,26 @@ def get_dataset(dataset, data_path, batch_size=1, subset="imagenette", args=None
         dl17 = fits.open(os.path.join('Galaxy-DR17-dataset/MaNGA', 'manga-morphology-dl-DR17.fits'))[1].data
         classes = dict()
         for d in dl17:
-            if (d['T-Type'] < 0):
-                if (d['P_S0'] < 0.5):
+            if d['T-Type'] < 0:
+                if d['P_S0'] < 0.5:
                     classes[d['INTID']] = 0
                 else:
                     classes[d['INTID']] = 1
-            elif (d['T-Type'] > 0 and d['T-Type'] < 3):
-                if (d['P_bar'] > 0.8 and d['P_edge'] < 0.8):
+            elif 0 < d['T-Type'] < 3:
+                if d['P_bar'] > 0.8 and d['P_edge'] < 0.8:
                     classes[d['INTID']] = 2
-                elif (d['P_bar'] < 0.8 and d['P_edge'] > 0.8):
+                elif d['P_bar'] < 0.8 and d['P_edge'] > 0.8:
                     classes[d['INTID']] = 3
-                elif (d['P_bar'] > 0.8 and d['P_edge'] > 0.8):
+                elif d['P_bar'] > 0.8 and d['P_edge'] > 0.8:
                     classes[d['INTID']] = 4
                 else: 
                     classes[d['INTID']] = 5
             else:
-                if (d['P_bar'] > 0.8 and d['P_edge'] < 0.8):
+                if d['P_bar'] > 0.8 and d['P_edge'] < 0.8:
                     classes[d['INTID']] = 6
-                elif (d['P_bar'] < 0.8 and d['P_edge'] > 0.8):
+                elif d['P_bar'] < 0.8 and d['P_edge'] > 0.8:
                     classes[d['INTID']] = 7
-                elif (d['P_bar'] > 0.8 and d['P_edge'] > 0.8):
+                elif d['P_bar'] > 0.8 and d['P_edge'] > 0.8:
                     classes[d['INTID']] = 8
                 else: 
                     classes[d['INTID']] = 9
@@ -105,6 +105,7 @@ def get_dataset(dataset, data_path, batch_size=1, subset="imagenette", args=None
 
             dst_total.append((img, classes[id]))
 
+        np.random.seed(0)
         np.random.shuffle(dst_total)
         dst_train = dst_total[:int(0.8 * len(dst_total))]
         dst_test = dst_total[int(0.8 * len(dst_total)):]
