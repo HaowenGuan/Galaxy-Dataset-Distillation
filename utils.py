@@ -111,7 +111,7 @@ def get_dataset(dataset, data_path, batch_size=1, subset="imagenette", args=None
         dst_train = dst_total[:int(0.8 * len(dst_total))]
         dst_test = dst_total[int(0.8 * len(dst_total)):]
 
-        class_names = ['E','S0','S1_bar','S1_edge_on', 'S1_bar_edgeon', 'S1_none', 'S2_bar', 'S2_edge_on', 'S2_bar_edgeon', 'S2_none']
+        class_names = ['E','S0','S1_bar','S1_edge_on', 'S1_none', 'S2_bar', 'S2_edge_on', 'S2_none']
         class_map = {x:x for x in range(num_classes)}
 
     elif dataset == 'CIFAR10':
