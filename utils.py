@@ -44,6 +44,7 @@ class Config:
     }
 
 config = Config()
+np.random.seed(1)
 
 def get_dataset(dataset, data_path, batch_size=1, subset="imagenette", args=None):
 
@@ -53,59 +54,59 @@ def get_dataset(dataset, data_path, batch_size=1, subset="imagenette", args=None
 
     if dataset == 'dl-DR17':
         channel = 3
-        im_size = (69, 69)
-        num_classes = 10
+        im_size = (128, 128)
+        num_classes = 8
 
         mean = [0.0695364302974106, 0.060510241696901314, 0.04756364403842208]
         std = [0.123113038980545, 0.10351957804657039, 0.09070320107800815]
 
         dl17 = fits.open(os.path.join('Galaxy-DR17-dataset/MaNGA', 'manga-morphology-dl-DR17.fits'))[1].data
         classes = dict()
+        bar_edgeon = []
         for d in dl17:
-            if d['T-Type'] < 0:
-                if d['P_S0'] < 0.5:
+            if (d['T-Type'] < 0):
+                if (d['P_S0'] < 0.5):
                     classes[d['INTID']] = 0
                 else:
                     classes[d['INTID']] = 1
-            elif 0 < d['T-Type'] < 3:
-                if d['P_bar'] > 0.8 and d['P_edge'] < 0.8:
+            elif (d['T-Type'] > 0 and d['T-Type'] < 3):
+                if (d['P_bar'] > 0.8 and d['P_edge'] < 0.8):
                     classes[d['INTID']] = 2
-                elif d['P_bar'] < 0.8 and d['P_edge'] > 0.8:
+                elif (d['P_bar'] < 0.8 and d['P_edge'] > 0.8):
                     classes[d['INTID']] = 3
-                elif d['P_bar'] > 0.8 and d['P_edge'] > 0.8:
+                elif (d['P_bar'] > 0.8 and d['P_edge'] > 0.8):
+                    bar_edgeon.append(d['INTID'])
+                else: 
                     classes[d['INTID']] = 4
-                else: 
-                    classes[d['INTID']] = 5
             else:
-                if d['P_bar'] > 0.8 and d['P_edge'] < 0.8:
+                if (d['P_bar'] > 0.8 and d['P_edge'] < 0.8):
+                    classes[d['INTID']] = 5
+                elif (d['P_bar'] < 0.8 and d['P_edge'] > 0.8):
                     classes[d['INTID']] = 6
-                elif d['P_bar'] < 0.8 and d['P_edge'] > 0.8:
-                    classes[d['INTID']] = 7
-                elif d['P_bar'] > 0.8 and d['P_edge'] > 0.8:
-                    classes[d['INTID']] = 8
+                elif (d['P_bar'] > 0.8 and d['P_edge'] > 0.8):
+                    bar_edgeon.append(d['INTID'])
                 else: 
-                    classes[d['INTID']] = 9
+                    classes[d['INTID']] = 7
             
-
+        bar_edgeon_name = [str(i)+".jpg" for i in bar_edgeon]
         path = 'Galaxy-DR17-dataset/MaNGA/image'
         dst_total = []
         count = 0
         for image in os.listdir(path):
-            image_dir = os.path.join(path, image)
-            if os.path.isdir(image_dir):
+            if ".jpg" not in image or image in bar_edgeon_name:
                 continue
+            image_dir = os.path.join(path, image)
             count += 1
             if count > 20000:
                 break
             id = int(image[:-4])
             img = cv.imread(image_dir)
-            img = cv.resize(img, (69, 69), interpolation=cv.INTER_AREA) / 255
+            img = cv.resize(img, (128, 128), interpolation=cv.INTER_AREA) / 255
             img = torch.from_numpy(img.T)
             img = transforms.Normalize(mean, std)(img)
 
             dst_total.append((img, classes[id]))
 
-        np.random.seed(0)
         np.random.shuffle(dst_total)
         dst_train = dst_total[:int(0.8 * len(dst_total))]
         dst_test = dst_total[int(0.8 * len(dst_total)):]

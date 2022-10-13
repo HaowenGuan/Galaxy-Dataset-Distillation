@@ -95,8 +95,13 @@ def main(args):
     images_all = torch.cat(images_all, dim=0).to("cpu")
     labels_all = torch.tensor(labels_all, dtype=torch.long, device="cpu")
 
+    class_weights = []
     for c in range(num_classes):
+        class_weights.append(1-len(indices_class[c])/len(labels_all))
         print('class c = %d: %d real images'%(c, len(indices_class[c])))
+
+    print("Class Weights:", class_weights)
+    class_weights = torch.tensor(class_weights).to(args.device)
 
     for ch in range(channel):
         print('real images channel %d, mean = %.4f, std = %.4f'%(ch, torch.mean(images_all[:, ch]), torch.std(images_all[:, ch])))
@@ -139,7 +144,7 @@ def main(args):
     optimizer_lr = torch.optim.SGD([syn_lr], lr=args.lr_lr, momentum=0.5)
     optimizer_img.zero_grad()
 
-    criterion = nn.CrossEntropyLoss().to(args.device)
+    criterion = nn.CrossEntropyLoss(weight = class_weights).to(args.device)
     print('%s training begins'%get_time())
 
     expert_dir = os.path.join(args.buffer_path, args.dataset)
