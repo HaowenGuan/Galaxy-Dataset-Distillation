@@ -107,24 +107,21 @@ def main(args):
                 teacher_optim = torch.optim.SGD(teacher_net.parameters(), lr=lr, momentum=args.mom, weight_decay=args.l2)
                 teacher_optim.zero_grad()
 
-        # total_acc = None
-        # acc_f = Accuracy(num_classes=num_classes, average='none').to(args.device)
-        #
-        # for i_batch, datum in enumerate(trainloader):
-        #     img = datum[0].float().to(args.device)
-        #     lab = datum[1].long().to(args.device)
-        #
-        #     output = teacher_net(img)
-        #     print(output.shape)
-        #     acc = acc_f(output, lab)
-        #     print(acc)
-        #
-        #     if total_acc is not None:
-        #         total_acc = acc * args.batch_train
-        #     else:
-        #         total_acc += acc * args.batch_train
-        #
-        # print("ACC of each class", total_acc / class_count)
+        for dataset, name in [[trainloader, "train"],[testloader, "test"]]:
+            total_acc = torch.zeros(num_classes)
+
+            for i_batch, datum in enumerate(dataset):
+                img = datum[0].float().to(args.device)
+                lab = datum[1].long().to(args.device)
+
+                output = teacher_net(img)
+                output = torch.argmax(output, 1)
+
+                for i in range(lab.shape[0]):
+                    if output[i] == lab[i]:
+                        total_acc[lab[i]] += 1
+
+            print(name, "set ACC of each class", total_acc / class_count)
 
         trajectories.append(timestamps)
 
