@@ -107,7 +107,7 @@ def main(args):
                 teacher_optim = torch.optim.SGD(teacher_net.parameters(), lr=lr, momentum=args.mom, weight_decay=args.l2)
                 teacher_optim.zero_grad()
 
-        for dataset, name in [[trainloader, "train"],[testloader, "test"]]:
+        for dataset, name, count in [[trainloader, "train", len(dst_train)],[testloader, "test", len(dst_test)]]:
             total_acc = torch.zeros(num_classes)
 
             for i_batch, datum in enumerate(dataset):
@@ -121,7 +121,7 @@ def main(args):
                     if output[i] == lab[i]:
                         total_acc[lab[i]] += 1
 
-            print(name, "set ACC of each class", total_acc / class_count)
+            print(name, "set ACC of each class", total_acc / count)
 
         trajectories.append(timestamps)
 
