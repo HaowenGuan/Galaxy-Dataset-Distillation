@@ -6,6 +6,7 @@ from tqdm import tqdm
 from utils import get_dataset, get_network, get_daparam,\
     TensorDataset, epoch, ParamDiffAug
 import copy
+from torchmetrics import Accuracy
 
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -53,13 +54,15 @@ def main(args):
         print('real images channel %d, mean = %.4f, std = %.4f'%(ch, torch.mean(images_all[:, ch]), torch.std(images_all[:, ch])))
 
     # Calculate the weight for loss function
-    loss_weight = torch.zeros(num_classes)
+    class_count = torch.zeros(num_classes)
     dataset_count = 0
     for c in range(num_classes):
-        loss_weight[c] = len(indices_class[c])
+        class_count[c] = len(indices_class[c])
         dataset_count += len(indices_class[c])
-    loss_weight = 1 - (loss_weight / dataset_count)
+    loss_weight = dataset_count / class_count
+    loss_weight = loss_weight / torch.mean(loss_weight)
     print('Add weight to loss function', loss_weight)
+
     criterion = nn.CrossEntropyLoss(weight=loss_weight).to(args.device)
 
     trajectories = []
@@ -103,6 +106,25 @@ def main(args):
                 lr *= 0.1
                 teacher_optim = torch.optim.SGD(teacher_net.parameters(), lr=lr, momentum=args.mom, weight_decay=args.l2)
                 teacher_optim.zero_grad()
+
+        # total_acc = None
+        # acc_f = Accuracy(num_classes=num_classes, average='none').to(args.device)
+        #
+        # for i_batch, datum in enumerate(trainloader):
+        #     img = datum[0].float().to(args.device)
+        #     lab = datum[1].long().to(args.device)
+        #
+        #     output = teacher_net(img)
+        #     print(output.shape)
+        #     acc = acc_f(output, lab)
+        #     print(acc)
+        #
+        #     if total_acc is not None:
+        #         total_acc = acc * args.batch_train
+        #     else:
+        #         total_acc += acc * args.batch_train
+        #
+        # print("ACC of each class", total_acc / class_count)
 
         trajectories.append(timestamps)
 
