@@ -52,7 +52,15 @@ def main(args):
     for ch in range(channel):
         print('real images channel %d, mean = %.4f, std = %.4f'%(ch, torch.mean(images_all[:, ch]), torch.std(images_all[:, ch])))
 
-    criterion = nn.CrossEntropyLoss().to(args.device)
+    # Calculate the weight for loss function
+    loss_weight = torch.zeros(num_classes)
+    dataset_count = 0
+    for c in range(num_classes):
+        loss_weight[c] = len(indices_class[c])
+        dataset_count += len(indices_class[c])
+    loss_weight = 1 - (loss_weight / dataset_count)
+    print('Add weight to loss function', loss_weight)
+    criterion = nn.CrossEntropyLoss(weight=loss_weight).to(args.device)
 
     trajectories = []
 

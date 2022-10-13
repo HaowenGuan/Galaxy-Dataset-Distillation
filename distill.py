@@ -144,7 +144,7 @@ def main(args):
     optimizer_lr = torch.optim.SGD([syn_lr], lr=args.lr_lr, momentum=0.5)
     optimizer_img.zero_grad()
 
-    criterion = nn.CrossEntropyLoss(weight = class_weights).to(args.device)
+    criterion = nn.CrossEntropyLoss().to(args.device)
     print('%s training begins'%get_time())
 
     expert_dir = os.path.join(args.buffer_path, args.dataset)
