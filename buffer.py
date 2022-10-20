@@ -6,7 +6,11 @@ from tqdm import tqdm
 from utils import get_dataset, get_network, get_daparam,\
     TensorDataset, epoch, ParamDiffAug
 import copy
-from torchmetrics import Accuracy
+from sklearn.metrics import confusion_matrix
+import numpy as np
+import pandas as pd
+import seaborn as sn
+import matplotlib.pyplot as plt
 
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -107,9 +111,12 @@ def main(args):
                 teacher_optim = torch.optim.SGD(teacher_net.parameters(), lr=lr, momentum=args.mom, weight_decay=args.l2)
                 teacher_optim.zero_grad()
 
+
         for dataset, name, count in [[trainloader, "train", len(dst_train)],[testloader, "test", len(dst_test)]]:
             total_acc = torch.zeros(num_classes)
 
+            pred = []
+            true = []
             for i_batch, datum in enumerate(dataset):
                 img = datum[0].float().to(args.device)
                 lab = datum[1].long().to(args.device)
@@ -117,11 +124,22 @@ def main(args):
                 output = teacher_net(img)
                 output = torch.argmax(output, 1)
 
+                pred += output.tolist()
+                true += lab.tolist()
+
                 for i in range(lab.shape[0]):
                     if output[i] == lab[i]:
                         total_acc[lab[i]] += 1
 
             print(name, "set ACC of each class", total_acc / count)
+        
+            cf_matrix = confusion_matrix(true, pred)
+            print(cf_matrix)
+            df_cm = pd.DataFrame(cf_matrix/np.sum(cf_matrix) *10, index = [i for i in class_names],
+                     columns = [i for i in class_names])
+            plt.figure(figsize = (12,7))
+            sn.heatmap(df_cm, annot=True, fmt='g')
+            plt.savefig('confusion_matrix_{}.png'.format(name))
 
         trajectories.append(timestamps)
 
