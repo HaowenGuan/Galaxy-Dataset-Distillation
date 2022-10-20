@@ -57,7 +57,9 @@ def get_dataset(dataset, data_path, batch_size=1, subset="imagenette", args=None
         im_size = (128, 128)
         num_classes = 8
 
+        #0.0592 #
         mean = [0.0695364302974106, 0.060510241696901314, 0.04756364403842208]
+        #0.1058 #
         std = [0.123113038980545, 0.10351957804657039, 0.09070320107800815]
 
         dl17 = fits.open(os.path.join('Galaxy-DR17-dataset/MaNGA', 'manga-morphology-dl-DR17.fits'))[1].data
@@ -76,7 +78,7 @@ def get_dataset(dataset, data_path, batch_size=1, subset="imagenette", args=None
                     classes[d['INTID']] = 3
                 elif (d['P_bar'] > 0.8 and d['P_edge'] > 0.8):
                     bar_edgeon.append(d['INTID'])
-                else: 
+                else:
                     classes[d['INTID']] = 4
             else:
                 if (d['P_bar'] > 0.8 and d['P_edge'] < 0.8):
@@ -85,9 +87,9 @@ def get_dataset(dataset, data_path, batch_size=1, subset="imagenette", args=None
                     classes[d['INTID']] = 6
                 elif (d['P_bar'] > 0.8 and d['P_edge'] > 0.8):
                     bar_edgeon.append(d['INTID'])
-                else: 
+                else:
                     classes[d['INTID']] = 7
-            
+
         bar_edgeon_name = [str(i)+".jpg" for i in bar_edgeon]
         path = 'Galaxy-DR17-dataset/MaNGA/image'
         dst_total = []
@@ -101,7 +103,13 @@ def get_dataset(dataset, data_path, batch_size=1, subset="imagenette", args=None
                 break
             id = int(image[:-4])
             img = cv.imread(image_dir)
+            # TODO
+            img = cv.cvtColor(img, cv.COLOR_BGR2RGB)
+            #
             img = cv.resize(img, (128, 128), interpolation=cv.INTER_AREA) / 255
+            # TODO
+            #img = cv.cvtColor(np.float32(img), cv.COLOR_BGR2GRAY)
+            #
             img = torch.from_numpy(img.T)
             img = transforms.Normalize(mean, std)(img)
 
