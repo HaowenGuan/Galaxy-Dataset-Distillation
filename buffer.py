@@ -135,11 +135,14 @@ def main(args):
         
             cf_matrix = confusion_matrix(true, pred)
             print(cf_matrix)
-            df_cm = pd.DataFrame(cf_matrix/np.sum(cf_matrix) *10, index = [i for i in class_names],
+            df_cm = pd.DataFrame(cf_matrix, index = [i for i in class_names],
                      columns = [i for i in class_names])
             plt.figure(figsize = (12,7))
             sn.heatmap(df_cm, annot=True, fmt='g')
-            plt.savefig('confusion_matrix_{}.png'.format(name))
+            plt.title('Confusion Matrix Expert{} {}.png'.format(it,name))
+            plt.xlabel("Prediction")
+            plt.ylabel("True Label")
+            plt.savefig('cf_expert{}_{}.png'.format(it,name))
 
         trajectories.append(timestamps)
 
