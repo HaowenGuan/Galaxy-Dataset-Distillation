@@ -139,7 +139,7 @@ def main(args):
                      columns = [i for i in class_names])
             plt.figure(figsize = (12,7))
             sn.heatmap(df_cm, annot=True, fmt='g')
-            plt.title('Confusion Matrix Expert{} {}.png'.format(it,name))
+            plt.title('Confusion Matrix Expert{} {}'.format(it,name))
             plt.xlabel("Prediction")
             plt.ylabel("True Label")
             plt.savefig('cf_expert{}_{}.png'.format(it,name))
