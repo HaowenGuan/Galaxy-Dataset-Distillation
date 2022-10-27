@@ -1,8 +1,10 @@
 import os
 # import urllib2 #this need of python 2, otherwise
 from urllib.request import urlopen
-import pylab as pl
+
 import numpy as np
+import pylab as pl
+import numpy as numpy
 import pdb
 from matplotlib import image
 from astropy.io import fits
@@ -30,7 +32,7 @@ def _fetch(outfile, RA, DEC, scale, width=424, height=424):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Parameter Processing')
     parser.add_argument('--download', action='store_true', help='download-dataset')
-    parser.add_argument('--dataset', type=str, default='dl-DR17', help='dataset')
+    parser.add_argument('--dataset', type=str, default='gzoo2', help='dataset')
     # parser.add_argument('--subset', type=str, default='imagenette', help='subset')
     # parser.add_argument('--model', type=str, default='ConvNet', help='model')
     # parser.add_argument('--num_experts', type=int, default=100, help='training iterations')
@@ -52,42 +54,79 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    if not os.path.exists('temp/image'):
-        os.makedirs('temp/image')
+    if args.dataset == "gzoo2":
+        # gzoo2 here -----------------------------------------
+        if not os.path.exists('gzoo2/image'):
+            os.makedirs('gzoo2/image')
 
-    cat = fits.getdata(os.path.join('MaNGA', 'MaNGA_targets_extNSA_tiled_ancillary.fits'))
-    ID_NSA = cat['MANGAID']
-    R_NSA = cat['NSA_SERSIC_TH50']
+        data = []
+        ttype = dict()
+        with open(os.path.join('gzoo2', 'table2.dat')) as file:
+            for line in file:
+                cur = line.rstrip().split()
+                if len(cur) == 60:
+                    cur.pop(-2)
+                data.append(cur)
+                ttype[cur[0]] = cur[-11]
 
-    data = fits.getdata(os.path.join('MaNGA', 'manga-pymorph-DR17.fits'))
-    dl17 = fits.open(os.path.join('MaNGA', 'manga-morphology-dl-DR17.fits'))[1].data
-    # Reference: https://academic.oup.com/mnras/article/483/2/2057/5188692
-    ID_Manga = data['MANGA_ID']  # MaNGA identification
-    ID = data['INTID']  # Internal identification number
-    ra = data['RA']  # Object right ascension (deg)
-    dec = data['DEC']  # Object declination (deg)
-    R_S = data['A_HL_S']  # Half-light semimajor axis (arcsec) from Sérsic fit
-    tt = (dl17["T-Type"] + 0.5).astype(int)
+        gzoo = fits.open(os.path.join('gzoo2', 'zoo2MainSpecz.fits'))[1].data
+        ID = gzoo['dr7objid']
+        ra = gzoo['ra']
+        dec = gzoo['dec']
+        R_90 = gzoo['petroR90_r']
+        R = R_90
 
-    print("Number of images to be read", ID.shape[0])
+        print("Number of images to be read", ID.shape[0])
+        # pdb.set_trace()
 
-    if args.download:
-        print("Multi-thread processing with", cpu_count(), "core(s).")
-        if not os.path.exists('MaNGA/image/excluded_from_NSA/'):
-            os.makedirs('MaNGA/image/excluded_from_NSA/')
+        for j in range(0, ID.shape[0]):
+            # for j in range(0,138966):
 
-        with Pool(max(cpu_count(), 8)) as pool:
-            args = []
+            print("Number galaxy", j, ID[j])
+            print("Radii", R[j], R_90[j])
+            file_name = dir + '/jpgs/' + str(ID[j]) + ".jpg"
 
-            for j in range(0, ID.shape[0]):
-                k = np.where(ID_NSA == ID_Manga[j])  # find galaxy in NSA
+            if not os.path.exists(file_name):
+                _fetch(file_name, ra[j], dec[j], scale=R_90[j] * 0.024)
 
-                if np.shape(k) == (1, 1):  # galaxy exists in NSA
-                    args.append(['MaNGA/image/' + str(ID[j]) + ".jpg", ra[j], dec[j], R_NSA[k] * 0.024])
-                else:
-                    args.append(['MaNGA/image/excluded_from_NSA/' + str(ID[j]) + ".jpg", ra[j], dec[j], R_S[j] * 0.024])
 
-            results = pool.starmap(_fetch, args)
+    elif args.dataset == "dl-DR17":
+        if not os.path.exists('MaNGA/image'):
+            os.makedirs('MaNGA/image')
+
+        cat = fits.getdata(os.path.join('MaNGA', 'MaNGA_targets_extNSA_tiled_ancillary.fits'))
+        ID_NSA = cat['MANGAID']
+        R_NSA = cat['NSA_SERSIC_TH50']
+
+        data = fits.getdata(os.path.join('MaNGA', 'manga-pymorph-DR17.fits'))
+        dl17 = fits.open(os.path.join('MaNGA', 'manga-morphology-dl-DR17.fits'))[1].data
+        # Reference: https://academic.oup.com/mnras/article/483/2/2057/5188692
+        ID_Manga = data['MANGA_ID']  # MaNGA identification
+        ID = data['INTID']  # Internal identification number
+        ra = data['RA']  # Object right ascension (deg)
+        dec = data['DEC']  # Object declination (deg)
+        R_S = data['A_HL_S']  # Half-light semimajor axis (arcsec) from Sérsic fit
+        tt = (dl17["T-Type"] + 0.5).astype(int)
+
+        print("Number of images to be read", ID.shape[0])
+
+        if args.download:
+            print("Multi-thread processing with", cpu_count(), "core(s).")
+            if not os.path.exists('MaNGA/image/excluded_from_NSA/'):
+                os.makedirs('MaNGA/image/excluded_from_NSA/')
+
+            with Pool(max(cpu_count(), 8)) as pool:
+                args = []
+
+                for j in range(0, ID.shape[0]):
+                    k = np.where(ID_NSA == ID_Manga[j])  # find galaxy in NSA
+
+                    if np.shape(k) == (1, 1):  # galaxy exists in NSA
+                        args.append(['MaNGA/image/' + str(ID[j]) + ".jpg", ra[j], dec[j], R_NSA[k] * 0.024])
+                    else:
+                        args.append(['MaNGA/image/excluded_from_NSA/' + str(ID[j]) + ".jpg", ra[j], dec[j], R_S[j] * 0.024])
+
+                results = pool.starmap(_fetch, args)
 
 
 

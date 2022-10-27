@@ -118,7 +118,13 @@ def main(args):
     if args.texture:
         image_syn = torch.randn(size=(num_classes * args.ipc, channel, im_size[0]*args.canvas_size, im_size[1]*args.canvas_size), dtype=torch.float)
     else:
-        image_syn = torch.randn(size=(num_classes * args.ipc, channel, im_size[0], im_size[1]), dtype=torch.float)
+        image_syn = torch.zeros(size=(num_classes * args.ipc, channel, im_size[0], im_size[1]), dtype=torch.float)
+        image_syn[:, :, im_size[0] // 4: (im_size[0] * 3) // 4, im_size[1] // 4: (im_size[1] * 3) // 4] = torch.randn(size=(num_classes * args.ipc, channel, im_size[0] // 2, im_size[1] // 2), dtype=torch.float)
+        from torchvision import transforms
+        blur = transforms.GaussianBlur(kernel_size=(3, 3), sigma=(0.2, 0.4))
+        for i in range(16):
+            image_syn = blur(image_syn)
+
 
     syn_lr = torch.tensor(args.lr_teacher).to(args.device)
 
@@ -187,7 +193,13 @@ def main(args):
 
     best_std = {m: 0 for m in model_eval_pool}
 
+    from torchvision import transforms
+    blur = transforms.GaussianBlur(kernel_size=(3, 3), sigma=(0.2, 0.3))
+
     for it in range(0, args.Iteration+1):
+        image_syn = blur(image_syn)
+        image_syn = image_syn.detach().to(args.device).requires_grad_(True)
+        optimizer_img = torch.optim.SGD([image_syn], lr=args.lr_img, momentum=0.5)
         save_this_it = False
 
         # writer.add_scalar('Progress', it, it)
@@ -431,7 +443,7 @@ if __name__ == '__main__':
     parser.add_argument('--eval_it', type=int, default=100, help='how often to evaluate')
 
     parser.add_argument('--epoch_eval_train', type=int, default=1000, help='epochs to train a model with synthetic data')
-    parser.add_argument('--Iteration', type=int, default=5000, help='how many distillation steps to perform')
+    parser.add_argument('--Iteration', type=int, default=4000, help='how many distillation steps to perform')
 
     parser.add_argument('--lr_img', type=float, default=1000, help='learning rate for updating synthetic images')
     parser.add_argument('--lr_lr', type=float, default=1e-05, help='learning rate for updating... learning rate')
