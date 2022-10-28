@@ -31,7 +31,7 @@ def _fetch(outfile, RA, DEC, scale, width=424, height=424):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Parameter Processing')
-    parser.add_argument('--download', action='store_true', help='download-dataset')
+    parser.add_argument('--download', action='store_true', default=True, help='download-dataset')
     parser.add_argument('--dataset', type=str, default='gzoo2', help='dataset')
     # parser.add_argument('--subset', type=str, default='imagenette', help='subset')
     # parser.add_argument('--model', type=str, default='ConvNet', help='model')
@@ -69,7 +69,7 @@ if __name__ == '__main__':
                 data.append(cur)
                 ttype[cur[0]] = cur[-11]
 
-        gzoo = fits.open(os.path.join('gzoo2', 'zoo2MainSpecz.fits'))[1].data
+        gzoo = fits.open(os.path.join('gzoo2', 'zoo2MainSpecz_sizes.fit'))[1].data
         ID = gzoo['dr7objid']
         ra = gzoo['ra']
         dec = gzoo['dec']
@@ -79,15 +79,14 @@ if __name__ == '__main__':
         print("Number of images to be read", ID.shape[0])
         # pdb.set_trace()
 
-        for j in range(0, ID.shape[0]):
-            # for j in range(0,138966):
+        if args.download:
+            with Pool(max(cpu_count(), 8)) as pool:
+                args = []
 
-            print("Number galaxy", j, ID[j])
-            print("Radii", R[j], R_90[j])
-            file_name = dir + '/jpgs/' + str(ID[j]) + ".jpg"
+                for j in range(0, ID.shape[0]):
+                    args.append(['gzoo2/image/' + str(ID[j]) + ".jpg", ra[j], dec[j], R_90[j] * 0.024])
 
-            if not os.path.exists(file_name):
-                _fetch(file_name, ra[j], dec[j], scale=R_90[j] * 0.024)
+                results = pool.starmap(_fetch, args)
 
 
     elif args.dataset == "dl-DR17":

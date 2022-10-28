@@ -156,6 +156,7 @@ def main(args):
 
 
 if __name__ == '__main__':
+    import argparse
     parser = argparse.ArgumentParser(description='Parameter Processing')
     parser.add_argument('--dataset', type=str, default='CIFAR10', help='dataset')
     parser.add_argument('--subset', type=str, default='imagenette', help='subset')
