@@ -159,6 +159,10 @@ def main(args):
 
         # print total confusion matrix across all experts
         for name, cf_matrix in [["train", total_train_cf],["test", total_test_cf]]:
+            for r in cf_matrix:
+                t = sum(r)
+                for i in len(r):
+                    r[i] /= t
             df_cm = pd.DataFrame(cf_matrix, index=[i for i in class_names], columns=[i for i in class_names])
             plt.figure(figsize=(12, 7))
             sn.heatmap(df_cm, annot=True, fmt='g')
