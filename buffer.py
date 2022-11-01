@@ -79,6 +79,8 @@ def main(args):
     args.dc_aug_param['strategy'] = 'crop_scale_rotate'  # for whole-dataset training
     print('DC augmentation parameters: \n', args.dc_aug_param)
 
+    total_train_cf, total_test_cf = confusion_matrix([0] * num_classes, [0] * num_classes), confusion_matrix([0] * num_classes, [0] * num_classes)
+
     for it in range(0, args.num_experts):
 
         ''' Train synthetic data '''
@@ -112,7 +114,7 @@ def main(args):
                 teacher_optim.zero_grad()
 
 
-        for dataset, name, count in [[trainloader, "train", len(dst_train)],[testloader, "test", len(dst_test)]]:
+        for dataset, name, count, total in [[trainloader, "train", len(dst_train), total_train_cf],[testloader, "test", len(dst_test), total_test_cf]]:
             total_acc = torch.zeros(num_classes)
 
             pred = []
@@ -134,6 +136,7 @@ def main(args):
             print(name, "set ACC of each class", total_acc / count)
         
             cf_matrix = confusion_matrix(true, pred)
+            total += cf_matrix
             print(cf_matrix)
             df_cm = pd.DataFrame(cf_matrix, index = [i for i in class_names],
                      columns = [i for i in class_names])
@@ -154,6 +157,15 @@ def main(args):
             torch.save(trajectories, os.path.join(save_dir, "replay_buffer_{}.pt".format(n)))
             trajectories = []
 
+        # print total confusion matrix across all experts
+        for name, cf_matrix in [["train", total_train_cf],["test", total_test_cf]]:
+            df_cm = pd.DataFrame(cf_matrix, index=[i for i in class_names], columns=[i for i in class_names])
+            plt.figure(figsize=(12, 7))
+            sn.heatmap(df_cm, annot=True, fmt='g')
+            plt.title('Confusion Matrix total {}'.format(name))
+            plt.xlabel("Prediction")
+            plt.ylabel("True Label")
+            plt.savefig('cf_total_{}.png'.format(it, name))
 
 if __name__ == '__main__':
     import argparse
