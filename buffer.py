@@ -79,7 +79,7 @@ def main(args):
     args.dc_aug_param['strategy'] = 'crop_scale_rotate'  # for whole-dataset training
     print('DC augmentation parameters: \n', args.dc_aug_param)
 
-    total_train_cf, total_test_cf = confusion_matrix([0] * num_classes, [0] * num_classes), confusion_matrix([0] * num_classes, [0] * num_classes)
+    total_train_cf, total_test_cf = np.array([[0] * num_classes for _ in range(num_classes)]), np.array([[0] * num_classes for _ in range(num_classes)])
 
     for it in range(0, args.num_experts):
 
@@ -136,7 +136,7 @@ def main(args):
             print(name, "set ACC of each class", total_acc / count)
         
             cf_matrix = confusion_matrix(true, pred)
-            total += cf_matrix
+            total += np.array(cf_matrix)
             print(cf_matrix)
             df_cm = pd.DataFrame(cf_matrix, index = [i for i in class_names],
                      columns = [i for i in class_names])
@@ -158,18 +158,19 @@ def main(args):
             trajectories = []
 
         # print total confusion matrix across all experts
-        for name, cf_matrix in [["train", total_train_cf],["test", total_test_cf]]:
-            for r in cf_matrix:
-                t = sum(r)
-                for i in len(r):
-                    r[i] /= t
-            df_cm = pd.DataFrame(cf_matrix, index=[i for i in class_names], columns=[i for i in class_names])
-            plt.figure(figsize=(12, 7))
-            sn.heatmap(df_cm, annot=True, fmt='g')
-            plt.title('Confusion Matrix total {}'.format(name))
-            plt.xlabel("Prediction")
-            plt.ylabel("True Label")
-            plt.savefig('cf_total_{}.png'.format(it, name))
+    for name, cf_matrix in [["train", total_train_cf],["test", total_test_cf]]:
+        cf_matrix = cf_matrix.tolist()
+        for r in cf_matrix:
+            t = sum(r)
+            for i in range(len(r)):
+                r[i] /= t
+        df_cm = pd.DataFrame(cf_matrix, index=[i for i in class_names], columns=[i for i in class_names])
+        plt.figure(figsize=(12, 7))
+        sn.heatmap(df_cm, annot=True, fmt='g')
+        plt.title('Confusion Matrix total {}'.format(name))
+        plt.xlabel("Prediction")
+        plt.ylabel("True Label")
+        plt.savefig('cf_total_{}.png'.format(name))
 
 if __name__ == '__main__':
     import argparse
