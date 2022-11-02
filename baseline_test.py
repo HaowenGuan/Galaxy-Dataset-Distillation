@@ -20,62 +20,67 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 def main(args):
 
-	args.device = 'cuda' if torch.cuda.is_available() else 'cpu'
-	args.dsa_param = ParamDiffAug()
+    args.device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    args.dsa_param = ParamDiffAug()
 
-	channel, im_size, num_classes, class_names, mean, std, dst_train, dst_test, testloader, loader_train_dict, class_map, class_map_inv = get_dataset(args.dataset, args.data_path, args.batch_real, args.subset, args=args)
+    channel, im_size, num_classes, class_names, mean, std, dst_train, dst_test, testloader, loader_train_dict, class_map, class_map_inv = get_dataset(args.dataset, args.data_path, args.batch_real, args.subset, args=args)
 
-	images_all = []
-	labels_all = []
-	indices_class = [[] for c in range(num_classes)]
-	print("BUILDING DATASET")
-	for i in tqdm(range(len(dst_train))):
-		sample = dst_train[i]
-		images_all.append(torch.unsqueeze(sample[0], dim=0))
-		labels_all.append(class_map[torch.tensor(sample[1]).item()])
+    images_all = []
+    labels_all = []
+    indices_class = [[] for c in range(num_classes)]
+    print("BUILDING DATASET")
+    for i in tqdm(range(len(dst_train))):
+        sample = dst_train[i]
+        images_all.append(torch.unsqueeze(sample[0], dim=0))
+        labels_all.append(class_map[torch.tensor(sample[1]).item()])
 
-	for i, lab in tqdm(enumerate(labels_all)):
-		indices_class[lab].append(i)
-	images_all = torch.cat(images_all, dim=0).to("cpu")
-	labels_all = torch.tensor(labels_all, dtype=torch.long, device="cpu")
+    for i, lab in tqdm(enumerate(labels_all)):
+        indices_class[lab].append(i)
+    images_all = torch.cat(images_all, dim=0).to("cpu")
+    labels_all = torch.tensor(labels_all, dtype=torch.long, device="cpu")
 
-	def get_images(c, n):  # get random n images from class c
-		idx_shuffle = np.random.permutation(indices_class[c])[:n]
-		return images_all[idx_shuffle]
+    def get_images(c, n):  # get random n images from class c
+        idx_shuffle = np.random.permutation(indices_class[c])[:n]
+        return images_all[idx_shuffle]
+    
+    mean_acc_all = []
+    for image_set in range(10):
 
-	label_syn = torch.tensor([np.ones(args.ipc)*i for i in range(num_classes)], dtype=torch.long, requires_grad=False, device=args.device).view(-1)
-	image_syn = torch.randn(size=(num_classes * args.ipc, channel, im_size[0], im_size[1]), dtype=torch.float)
+        label_syn = torch.tensor([np.ones(args.ipc)*i for i in range(num_classes)], dtype=torch.long, requires_grad=False, device=args.device).view(-1)
+        image_syn = torch.randn(size=(num_classes * args.ipc, channel, im_size[0], im_size[1]), dtype=torch.float)
 
-	for c in range(num_classes):
-		image_syn.data[c * args.ipc:(c + 1) * args.ipc] = get_images(c, args.ipc).detach().data
+        for c in range(num_classes):
+            image_syn.data[c * args.ipc:(c + 1) * args.ipc] = get_images(c, args.ipc).detach().data
 
-	# eval_it_pool = np.arange(0, args.Iteration + 1, args.eval_it).tolist()
-	model_eval_pool = get_eval_pool(args.eval_mode, args.model, args.model)
-	syn_lr = torch.tensor(args.lr_teacher).to(args.device)
+        # eval_it_pool = np.arange(0, args.Iteration + 1, args.eval_it).tolist()
+        model_eval_pool = get_eval_pool(args.eval_mode, args.model, args.model)
+        syn_lr = torch.tensor(args.lr_teacher).to(args.device)
 
 
-	for model_eval in model_eval_pool:
+        for model_eval in model_eval_pool:
 
-		accs_test = []
-		accs_train = []
-		for it_eval in range(args.num_eval):
-			net_eval = get_network(model_eval, channel, num_classes, im_size).to(args.device) # get a random model
+            accs_test = []
+            accs_train = []
+            for it_eval in range(args.num_eval):
+                net_eval = get_network(model_eval, channel, num_classes, im_size).to(args.device) # get a random model
 
-			eval_labs = label_syn
-			with torch.no_grad():
-				image_save = image_syn
-			image_syn_eval, label_syn_eval = copy.deepcopy(image_save.detach()), copy.deepcopy(eval_labs.detach()) # avoid any unaware modification
+                eval_labs = label_syn
+                with torch.no_grad():
+                    image_save = image_syn
+                image_syn_eval, label_syn_eval = copy.deepcopy(image_save.detach()), copy.deepcopy(eval_labs.detach()) # avoid any unaware modification
 
-			args.lr_net = syn_lr.item()
-			_, acc_train, acc_test = evaluate_synset(it_eval, net_eval, image_syn_eval, label_syn_eval, testloader, args, texture=args.texture)
-			accs_test.append(acc_test)
-			accs_train.append(acc_train)
-		accs_test = np.array(accs_test)
-		accs_train = np.array(accs_train)
-		acc_test_mean = np.mean(accs_test)
-		acc_test_std = np.std(accs_test)
-
-		print('Evaluate %d random %s, test acc mean = %.4f std = %.4f\n-------------------------'%(len(accs_test), model_eval, acc_test_mean, acc_test_std))
+                args.lr_net = syn_lr.item()
+                _, acc_train, acc_test = evaluate_synset(it_eval, net_eval, image_syn_eval, label_syn_eval, testloader, args, texture=args.texture)
+                accs_test.append(acc_test)
+                accs_train.append(acc_train)
+            accs_test = np.array(accs_test)
+            accs_train = np.array(accs_train)
+            acc_test_mean = np.mean(accs_test)
+            acc_test_std = np.std(accs_test)
+            mean_acc_all.append(acc_test_mean)
+            print('Random Image set %d Evaluate %d random %s, test acc mean = %.4f std = %.4f\n-------------------------'%(image_set, len(accs_test), model_eval, acc_test_mean, acc_test_std))
+    print(mean_acc_all)
+    print("Mean test accuracy of 10 ramdom sets:", sum(mean_acc_all)/len(mean_acc_all))
 
 
 
@@ -93,7 +98,7 @@ if __name__ == '__main__':
     parser.add_argument('--eval_mode', type=str, default='S',
                         help='eval_mode, check utils.py for more info')
 
-    parser.add_argument('--num_eval', type=int, default=5, help='how many networks to evaluate on')
+    parser.add_argument('--num_eval', type=int, default=10, help='how many networks to evaluate on')
 
     parser.add_argument('--eval_it', type=int, default=100, help='how often to evaluate')
 
@@ -145,4 +150,3 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     main(args)
-
