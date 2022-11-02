@@ -10,6 +10,9 @@ from utils import get_dataset, get_network, get_eval_pool, evaluate_synset, get_
 import wandb
 import copy
 import random
+import pandas as pd
+import seaborn as sn
+import matplotlib.pyplot as plt
 from reparam_module import ReparamModule
 
 import warnings
@@ -216,6 +219,9 @@ def main(args):
 
                 accs_test = []
                 accs_train = []
+                
+                total_train_cf, total_test_cf = np.array([[0] * num_classes for _ in range(num_classes)]), np.array([[0] * num_classes for _ in range(num_classes)])
+                
                 for it_eval in range(args.num_eval):
                     net_eval = get_network(model_eval, channel, num_classes, im_size).to(args.device) # get a random model
 
@@ -225,9 +231,12 @@ def main(args):
                     image_syn_eval, label_syn_eval = copy.deepcopy(image_save.detach()), copy.deepcopy(eval_labs.detach()) # avoid any unaware modification
 
                     args.lr_net = syn_lr.item()
-                    _, acc_train, acc_test = evaluate_synset(it_eval, net_eval, image_syn_eval, label_syn_eval, testloader, args, texture=args.texture)
+                    _, acc_train, acc_test, train_cf, test_cf = evaluate_synset(it, it_eval, net_eval, num_classes, image_syn_eval, label_syn_eval, dst_test, testloader, args, texture=args.texture)
+                    total_train_cf += train_cf
+                    total_test_cf += test_cf
                     accs_test.append(acc_test)
                     accs_train.append(acc_train)
+                
                 accs_test = np.array(accs_test)
                 accs_train = np.array(accs_train)
                 acc_test_mean = np.mean(accs_test)
@@ -242,6 +251,19 @@ def main(args):
                 wandb.log({'Std/{}'.format(model_eval): acc_test_std}, step=it)
                 wandb.log({'Max_Std/{}'.format(model_eval): best_std[model_eval]}, step=it)
 
+                for name, cf_matrix in [["test", total_test_cf]]:
+                    cf_matrix = cf_matrix.tolist()
+                    for r in cf_matrix:
+                        t = sum(r)
+                        for i in range(len(r)):
+                            r[i] = round(r[i] / t, 3)
+                    df_cm = pd.DataFrame(cf_matrix, index=[i for i in class_names], columns=[i for i in class_names])
+                    plt.figure(figsize=(12, 7))
+                    sn.heatmap(df_cm, annot=True, fmt='g')
+                    plt.title('Confusion Matrix Iteration{} {}'.format(it, name))
+                    plt.xlabel("Prediction")
+                    plt.ylabel("True Label")
+                    plt.savefig('./cf_matrix_distill/cf_iteration_{}_{}.png'.format(it, name))
 
         if it in eval_it_pool and (save_this_it or it % 1000 == 0):
             with torch.no_grad():

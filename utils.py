@@ -15,6 +15,10 @@ from scipy.ndimage.interpolation import rotate as scipyrotate
 from networks import MLP, ConvNet, LeNet, AlexNet, VGG11BN, VGG11, ResNet18, ResNet18BN_AP, ResNet18_AP
 from astropy.io import fits
 import cv2 as cv
+from sklearn.metrics import confusion_matrix
+
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning)
 
 class Config:
     imagenette = [0, 217, 482, 491, 497, 566, 569, 571, 574, 701]
@@ -558,7 +562,7 @@ def epoch(mode, dataloader, net, optimizer, criterion, args, aug, texture=False)
 
 
 
-def evaluate_synset(it_eval, net, images_train, labels_train, testloader, args, return_loss=False, texture=False):
+def evaluate_synset(it, it_eval, net, num_classes, images_train, labels_train, dst_test, testloader, args, return_loss=False, texture=False):
     net = net.to(args.device)
     images_train = images_train.to(args.device)
     labels_train = labels_train.to(args.device)
@@ -587,15 +591,46 @@ def evaluate_synset(it_eval, net, images_train, labels_train, testloader, args, 
             lr *= 0.1
             optimizer = torch.optim.SGD(net.parameters(), lr=lr, momentum=0.9, weight_decay=0.0005)
 
-
     time_train = time.time() - start
 
     print('%s Evaluate_%02d: epoch = %04d train time = %d s train loss = %.6f train acc = %.4f, test acc = %.4f' % (get_time(), it_eval, Epoch, int(time_train), loss_train, acc_train, acc_test))
+    
+    train_cf, test_cf = np.array([[0] * num_classes for _ in range(num_classes)]), np.array([[0] * num_classes for _ in range(num_classes)])
+    for dataset, name, count, cf_matrix in [[trainloader, "train", len(dst_train), train_cf],[testloader, "test", len(dst_test), test_cf]]:
+        # total_acc = torch.zeros(num_classes)
 
+        pred = []
+        true = []
+        for i_batch, datum in enumerate(dataset):
+            img = datum[0].float().to(args.device)
+            lab = datum[1].long().to(args.device)
+
+            output = net(img)
+            output = torch.argmax(output, 1)
+
+            pred += output.tolist()
+            true += lab.tolist()
+
+            # for i in range(lab.shape[0]):
+            #     if output[i] == lab[i]:
+            #         total_acc[lab[i]] += 1
+        
+        # print(name, "set ACC of each class", total_acc / count)
+
+        cf_matrix += confusion_matrix(true, pred)
+        # print(cf_matrix)
+        # df_cm = pd.DataFrame(cf_matrix, index = [i for i in class_names], 
+        #     columns = [i for i in class_names])
+        # plt.figure(figsize = (12,7))
+        # sn.heatmap(df_cm, annot=True, fmt='g')
+        # plt.title('Confusion Matrix Iteration{} Evaluation{} {}'.format(it, it_eval, name))
+        # plt.xlabel("Prediction")
+        # plt.ylabel("True Label")
+        # plt.savefig('./cf_matrix_distill/cf_iteration{}_evaluation{}_{}.png'.format(it, it_eval, name))
     if return_loss:
-        return net, acc_train_list, acc_test, loss_train_list, loss_test
+        return net, acc_train_list, acc_test, loss_train_list, loss_test, train_cf, test_cf
     else:
-        return net, acc_train_list, acc_test
+        return net, acc_train_list, acc_test, train_cf, test_cf
 
 
 def augment(images, dc_aug_param, device):

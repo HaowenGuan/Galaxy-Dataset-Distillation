@@ -145,7 +145,7 @@ def main(args):
             plt.title('Confusion Matrix Expert{} {}'.format(it,name))
             plt.xlabel("Prediction")
             plt.ylabel("True Label")
-            plt.savefig('cf_expert{}_{}.png'.format(it,name))
+            plt.savefig('./cf_matrix_buffer/cf_expert{}_{}.png'.format(it,name))
 
         trajectories.append(timestamps)
 
@@ -157,7 +157,7 @@ def main(args):
             torch.save(trajectories, os.path.join(save_dir, "replay_buffer_{}.pt".format(n)))
             trajectories = []
 
-        # print total confusion matrix across all experts
+    # print total confusion matrix across all experts
     for name, cf_matrix in [["train", total_train_cf],["test", total_test_cf]]:
         cf_matrix = cf_matrix.tolist()
         for r in cf_matrix:
@@ -170,7 +170,7 @@ def main(args):
         plt.title('Confusion Matrix total {}'.format(name))
         plt.xlabel("Prediction")
         plt.ylabel("True Label")
-        plt.savefig('cf_total_{}.png'.format(name))
+        plt.savefig('./cf_matrix_buffer/cf_total_{}.png'.format(name))
 
 
 if __name__ == '__main__':
