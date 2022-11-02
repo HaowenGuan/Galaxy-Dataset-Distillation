@@ -163,7 +163,7 @@ def main(args):
         for r in cf_matrix:
             t = sum(r)
             for i in range(len(r)):
-                r[i] /= t
+                r[i] = round(r[i] / t, 3)
         df_cm = pd.DataFrame(cf_matrix, index=[i for i in class_names], columns=[i for i in class_names])
         plt.figure(figsize=(12, 7))
         sn.heatmap(df_cm, annot=True, fmt='g')
@@ -171,6 +171,7 @@ def main(args):
         plt.xlabel("Prediction")
         plt.ylabel("True Label")
         plt.savefig('cf_total_{}.png'.format(name))
+
 
 if __name__ == '__main__':
     import argparse
