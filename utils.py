@@ -3,6 +3,7 @@
 
 import time
 import numpy as np
+import pandas as pd
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -14,6 +15,7 @@ from torchvision import datasets, transforms
 from scipy.ndimage.interpolation import rotate as scipyrotate
 from networks import MLP, ConvNet, LeNet, AlexNet, VGG11BN, VGG11, ResNet18, ResNet18BN_AP, ResNet18_AP
 from astropy.io import fits
+from astropy.table import Table
 import cv2 as cv
 from sklearn.metrics import confusion_matrix
 
@@ -97,23 +99,20 @@ def get_dataset(dataset, data_path, batch_size=1, subset="imagenette", args=None
         bar_edgeon_name = [str(i)+".jpg" for i in bar_edgeon]
         path = 'Galaxy-DR17-dataset/MaNGA/image'
         dst_total = []
-        count = 0
+        # count = 0
         for image in os.listdir(path):
             if ".jpg" not in image or image in bar_edgeon_name:
                 continue
             image_dir = os.path.join(path, image)
-            count += 1
-            if count > 20000:
-                break
+            # count += 1
+            # if count > 20000:
+            #     break
+
             id = int(image[:-4])
             img = cv.imread(image_dir)
-            # TODO
             img = cv.cvtColor(img, cv.COLOR_BGR2RGB)
-            #
             img = cv.resize(img, (128, 128), interpolation=cv.INTER_AREA) / 255
-            # TODO
-            #img = cv.cvtColor(np.float32(img), cv.COLOR_BGR2GRAY)
-            #
+            # img = cv.cvtColor(np.float32(img), cv.COLOR_BGR2GRAY)
             img = torch.from_numpy(img.T)
             img = transforms.Normalize(mean, std)(img)
 
@@ -123,7 +122,7 @@ def get_dataset(dataset, data_path, batch_size=1, subset="imagenette", args=None
         dst_train = dst_total[:int(0.8 * len(dst_total))]
         dst_test = dst_total[int(0.8 * len(dst_total)):]
 
-        class_names = ['E','S0','S1_bar','S1_edge_on', 'S1_none', 'S2_bar', 'S2_edge_on', 'S2_none']
+        class_names = ['E', 'S0', 'S1_bar', 'S1_edge_on', 'S1_none', 'S2_bar', 'S2_edge_on', 'S2_none']
         class_map = {x:x for x in range(num_classes)}
 
     elif dataset == 'dl-DR17-05':
@@ -166,20 +165,17 @@ def get_dataset(dataset, data_path, batch_size=1, subset="imagenette", args=None
 
         path = 'Galaxy-DR17-dataset/MaNGA/image'
         dst_total = []
-        count = 0
+        # count = 0
         for image in os.listdir(path):
             if ".jpg" not in image:
                 continue
             image_dir = os.path.join(path, image)
-            count += 1
+            # count += 1
 
             id = int(image[:-4])
             img = cv.imread(image_dir)
-            # TODO
             img = cv.cvtColor(img, cv.COLOR_BGR2RGB)
-            #
             img = cv.resize(img, (128, 128), interpolation=cv.INTER_AREA) / 255
-
             img = torch.from_numpy(img.T)
             img = transforms.Normalize(mean, std)(img)
 
@@ -189,7 +185,7 @@ def get_dataset(dataset, data_path, batch_size=1, subset="imagenette", args=None
         dst_train = dst_total[:int(0.8 * len(dst_total))]
         dst_test = dst_total[int(0.8 * len(dst_total)):]
 
-        class_names = ['E','S0','S1_bar','S1_edge_on', 'S1_bar_edge_on', 'S1_none', 'S2_bar', 'S2_edge_on', 'S2_bar_edge_on', 'S2_none']
+        class_names = ['E', 'S0', 'S1_bar', 'S1_edge_on', 'S1_bar_edge_on', 'S1_none', 'S2_bar', 'S2_edge_on', 'S2_bar_edge_on', 'S2_none']
         class_map = {x:x for x in range(num_classes)}
 
     elif dataset == 'dl-DR17-ttype':
@@ -209,12 +205,13 @@ def get_dataset(dataset, data_path, batch_size=1, subset="imagenette", args=None
 
         path = 'Galaxy-DR17-dataset/MaNGA/image'
         dst_total = []
-        i = 0
+        # count = 0
         for image in os.listdir(path):
             image_dir = os.path.join(path, image)
             if os.path.isdir(image_dir):
                 continue
-            i += 1
+            # count += 1
+
             id = int(image[:-4])
             img = cv.imread(image_dir)
             img = cv.cvtColor(img, cv.COLOR_BGR2RGB)
@@ -227,8 +224,73 @@ def get_dataset(dataset, data_path, batch_size=1, subset="imagenette", args=None
         dst_train = dst_total[:int(0.8 * len(dst_total))]
         dst_test = dst_total[int(0.8 * len(dst_total)):]
 
-        class_names = ['E','S0','S1_bar','S1_edge_on', 'S1_none', 'S2_bar', 'S2_edge_on', 'S2_none']
+        class_names = ['E', 'S0', 'S1_bar', 'S1_edge_on', 'S1_none', 'S2_bar', 'S2_edge_on', 'S2_none']
         class_map = {x:x for x in range(num_classes)}
+    
+    elif dataset == 'dl-DR17-Pipe3D':
+        channel = 3
+        im_size = (128, 128)
+        num_classes = 10
+
+        #0.0592 #
+        mean = [0.0695364302974106, 0.060510241696901314, 0.04756364403842208]
+        #0.1058 #
+        std = [0.123113038980545, 0.10351957804657039, 0.09070320107800815]
+
+        dl17 = fits.open(os.path.join('Galaxy-DR17-dataset/MaNGA', 'manga-morphology-dl-DR17.fits'))[1].data
+        dr17_DL = fits.open(os.path.join('Galaxy-DR17-dataset/MaNGA', 'manga-morphology-dl-DR17.fits'))[1].data
+        df_DL = Table(dr17_DL).to_pandas()
+        df_DL = df_DL[['INTID', 'MANGA_ID']]
+        df_DL['MANGA_ID'] = df_DL['MANGA_ID'].apply(lambda x : x.strip())
+        
+        dr17_Pipe3D = fits.open(os.path.join('Galaxy-DR17-dataset/MaNGA', 'SDSS17Pipe3D_v3_1_1.fits'))[1].data
+        df_Pipe3D = Table(dr17_Pipe3D).to_pandas()
+        df_Pipe3D['MANGA_ID'] = df_Pipe3D['mangaid']
+        df_Pipe3D['log_vel_sigma_Re'] = df_Pipe3D['vel_sigma_Re'].apply(lambda x : np.log(x))
+        df_Pipe3D['log_vel_disp_ssp_cen'] = df_Pipe3D['vel_disp_ssp_cen'].apply(lambda x : np.log(x))
+        df_Pipe3D = df_Pipe3D[['MANGA_ID', 'log_vel_sigma_Re', 'log_SFR_ssp', 'log_vel_disp_ssp_cen']]
+
+        df = pd.merge(df_DL, df_Pipe3D, how = 'inner', on = 'MANGA_ID')
+
+        classes = dict()
+        target = 'log_vel_sigma_Re'
+        # target = 'log_SFR_ssp'
+        # target = 'log_vel_disp_ssp_cen'
+        percentiles = np.nanpercentile(list(df[target]), np.linspace(0, num_classes, num_classes + 1))
+        for _, d in df.iterrows():
+            for i in range(num_classes):
+                if d[target] < percentiles[i + 1]:
+                    classes[d['INTID']] = i
+                    break
+        
+        path = 'Galaxy-DR17-dataset/MaNGA/image'
+        dst_total = []
+        # count = 0
+        for image in os.listdir(path):
+            if ".jpg" not in image:
+                continue
+            image_dir = os.path.join(path, image)
+            # count += 1
+            # if count > 20000:
+            #     break
+
+            id = int(image[:-4])
+            img = cv.imread(image_dir)
+            img = cv.cvtColor(img, cv.COLOR_BGR2RGB)
+            img = cv.resize(img, (128, 128), interpolation=cv.INTER_AREA) / 255
+            # img = cv.cvtColor(np.float32(img), cv.COLOR_BGR2GRAY)
+            img = torch.from_numpy(img.T)
+            img = transforms.Normalize(mean, std)(img)
+
+            dst_total.append((img, classes[id]))
+
+        np.random.shuffle(dst_total)
+        dst_train = dst_total[:int(0.8 * len(dst_total))]
+        dst_test = dst_total[int(0.8 * len(dst_total)):]
+
+        class_names = [str(i) for i in range(num_classes)]
+        class_map = {x:x for x in range(num_classes)}
+
     elif dataset == 'CIFAR10':
         channel = 3
         im_size = (32, 32)
