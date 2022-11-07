@@ -237,18 +237,19 @@ def get_dataset(dataset, data_path, batch_size=1, subset="imagenette", args=None
         #0.1058 #
         std = [0.123113038980545, 0.10351957804657039, 0.09070320107800815]
 
-        dl17 = fits.open(os.path.join('Galaxy-DR17-dataset/MaNGA', 'manga-morphology-dl-DR17.fits'))[1].data
         dr17_DL = fits.open(os.path.join('Galaxy-DR17-dataset/MaNGA', 'manga-morphology-dl-DR17.fits'))[1].data
         df_DL = Table(dr17_DL).to_pandas()
         df_DL = df_DL[['INTID', 'MANGA_ID']]
         df_DL['MANGA_ID'] = df_DL['MANGA_ID'].apply(lambda x : x.strip())
-        
+        df_DL = df_DL.drop_duplicates(subset=['MANGA_ID'])
+
         dr17_Pipe3D = fits.open(os.path.join('Galaxy-DR17-dataset/MaNGA', 'SDSS17Pipe3D_v3_1_1.fits'))[1].data
         df_Pipe3D = Table(dr17_Pipe3D).to_pandas()
         df_Pipe3D['MANGA_ID'] = df_Pipe3D['mangaid']
         df_Pipe3D['log_vel_sigma_Re'] = df_Pipe3D['vel_sigma_Re'].apply(lambda x : np.log(x))
         df_Pipe3D['log_vel_disp_ssp_cen'] = df_Pipe3D['vel_disp_ssp_cen'].apply(lambda x : np.log(x))
         df_Pipe3D = df_Pipe3D[['MANGA_ID', 'log_vel_sigma_Re', 'log_SFR_ssp', 'log_vel_disp_ssp_cen']]
+        df_Pipe3D = df_Pipe3D.drop_duplicates(subset=['MANGA_ID'])
 
         df = pd.merge(df_DL, df_Pipe3D, how = 'inner', on = 'MANGA_ID')
 
@@ -256,23 +257,19 @@ def get_dataset(dataset, data_path, batch_size=1, subset="imagenette", args=None
         target = 'log_vel_sigma_Re'
         # target = 'log_SFR_ssp'
         # target = 'log_vel_disp_ssp_cen'
-        percentiles = np.nanpercentile(list(df[target]), np.linspace(0, num_classes, num_classes + 1))
+        percentiles = np.nanpercentile(list(df[target]), np.linspace(0, 100, num_classes + 1))
         for _, d in df.iterrows():
             for i in range(num_classes):
-                if d[target] < percentiles[i + 1]:
+                if d[target] <= percentiles[i + 1]:
                     classes[d['INTID']] = i
                     break
-        
+
         path = 'Galaxy-DR17-dataset/MaNGA/image'
         dst_total = []
-        # count = 0
         for image in os.listdir(path):
-            if ".jpg" not in image:
+            if ".jpg" not in image or int(image[:-4]) not in classes:
                 continue
             image_dir = os.path.join(path, image)
-            # count += 1
-            # if count > 20000:
-            #     break
 
             id = int(image[:-4])
             img = cv.imread(image_dir)
