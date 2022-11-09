@@ -11,6 +11,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sn
 import matplotlib.pyplot as plt
+from MSECrossEntropyLoss import MSECrossEntropyLoss
 
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -68,6 +69,7 @@ def main(args):
     print('Add weight to loss function', loss_weight)
 
     criterion = nn.CrossEntropyLoss(weight=loss_weight).to(args.device)
+    criterion = MSECrossEntropyLoss(weight=loss_weight).to(args.device)
 
     trajectories = []
 
@@ -85,6 +87,7 @@ def main(args):
 
         ''' Train synthetic data '''
         teacher_net = get_network(args.model, channel, num_classes, im_size).to(args.device) # get a random model
+        print(teacher_net)
         teacher_net.train()
         lr = args.lr_teacher
         teacher_optim = torch.optim.SGD(teacher_net.parameters(), lr=lr, momentum=args.mom, weight_decay=args.l2)  # optimizer_img for synthetic data
@@ -104,7 +107,7 @@ def main(args):
             test_loss, test_acc = epoch("test", dataloader=testloader, net=teacher_net, optimizer=None,
                                         criterion=criterion, args=args, aug=False)
 
-            print("Itr: {}\tEpoch: {}\tTrain Acc: {}\tTest Acc: {}".format(it, e, train_acc, test_acc))
+            print("Itr: {}\tEpoch: {}\tTrain Acc: {}\tTest Acc: {}\tAVG Train loss: {}\tAVG Test loss: {}".format(it, e, train_acc, test_acc, train_loss, test_loss))
 
             timestamps.append([p.detach().cpu() for p in teacher_net.parameters()])
 

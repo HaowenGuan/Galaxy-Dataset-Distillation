@@ -7,6 +7,7 @@ import copy
 import argparse
 import time
 
+
 class GenerateNet(torch.nn.Module):
     def __init__(self, model, channel, num_classes, im_size):
         super().__init__()
@@ -16,7 +17,7 @@ class GenerateNet(torch.nn.Module):
     def forward(self, x):
         x = self.network(x)
         x = self.output(x)
-        return x.view(-1,)
+        return x.view(-1, )
 
 
 if __name__ == '__main__':
@@ -54,7 +55,7 @@ if __name__ == '__main__':
 
     for ch in range(channel):
         print('real images channel %d, mean = %.4f, std = %.4f' % (
-        ch, torch.mean(images_all[:, ch]), torch.std(images_all[:, ch])))
+            ch, torch.mean(images_all[:, ch]), torch.std(images_all[:, ch])))
 
     criterion = nn.MSELoss(reduction='sum').to(device)
 
@@ -93,5 +94,3 @@ if __name__ == '__main__':
 
             print(f"Training loss at epoch {i}: {losses / train_size}, test loss: {tests / test_size}")
             time.sleep(0.1)
-
-

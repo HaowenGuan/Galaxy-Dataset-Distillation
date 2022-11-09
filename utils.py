@@ -463,8 +463,8 @@ def get_network(model, channel, num_classes, im_size=(32, 32), dist=True):
             nn.Linear(128, 64),
             nn.Dropout(0.5),
 
-            nn.Linear(64, 13),
-            nn.Softmax(dim=1)
+            nn.Linear(64, 13)
+            # nn.Softmax(dim=1)
         )
     elif model == 'MLP':
         net = MLP(channel=channel, num_classes=num_classes)
