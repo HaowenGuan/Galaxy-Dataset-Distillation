@@ -121,11 +121,12 @@ def main(args):
     if args.texture:
         image_syn = torch.randn(size=(num_classes * args.ipc, channel, im_size[0]*args.canvas_size, im_size[1]*args.canvas_size), dtype=torch.float)
     else:
+        # image_syn = torch.load(os.path.join(".", "logged_files", args.dataset, 'fanciful-firefly-33', 'images_4000.pt'))
         image_syn = torch.zeros(size=(num_classes * args.ipc, channel, im_size[0], im_size[1]), dtype=torch.float)
         image_syn[:, :, im_size[0] // 4: (im_size[0] * 3) // 4, im_size[1] // 4: (im_size[1] * 3) // 4] = torch.randn(size=(num_classes * args.ipc, channel, im_size[0] // 2, im_size[1] // 2), dtype=torch.float)
         from torchvision import transforms
         blur = transforms.GaussianBlur(kernel_size=(3, 3), sigma=(0.2, 0.4))
-        for i in range(16):
+        for i in range(2000):
             image_syn = blur(image_syn)
 
 
@@ -197,12 +198,17 @@ def main(args):
     best_std = {m: 0 for m in model_eval_pool}
 
     from torchvision import transforms
-    blur = transforms.GaussianBlur(kernel_size=(3, 3), sigma=(0.2, 0.3))
+    blur = transforms.GaussianBlur(kernel_size=(3, 3), sigma=(0.2, 0.3)).to(args.device)
+
+    # stage match trajectory
+    start_epoch_cap = 1
+    reached_max = False
+    # ------------------------------
 
     for it in range(0, args.Iteration+1):
         image_syn = blur(image_syn)
         image_syn = image_syn.detach().to(args.device).requires_grad_(True)
-        optimizer_img = torch.optim.SGD([image_syn], lr=args.lr_img, momentum=0.5)
+        optimizer_img = torch.optim.SGD([image_syn], lr=args.lr_img / int(start_epoch_cap), momentum=0.5)
         save_this_it = False
 
         # writer.add_scalar('Progress', it, it)
@@ -245,6 +251,16 @@ def main(args):
                     best_acc[model_eval] = acc_test_mean
                     best_std[model_eval] = acc_test_std
                     save_this_it = True
+                    start_epoch_cap = int(start_epoch_cap)
+                    reached_max = True
+                else:
+                    # stage match trajectory
+                    if reached_max:
+                        start_epoch_cap += 0.5
+                        if start_epoch_cap % 1 == 0:
+                            reached_max = False
+                        optimizer_img = torch.optim.SGD([image_syn], lr=args.lr_img / int(start_epoch_cap), momentum=0.5)
+                    # ------------------------------
                 print('Evaluate %d random %s, mean = %.4f std = %.4f\n-------------------------'%(len(accs_test), model_eval, acc_test_mean, acc_test_std))
                 wandb.log({'Accuracy/{}'.format(model_eval): acc_test_mean}, step=it)
                 wandb.log({'Max_Accuracy/{}'.format(model_eval): best_acc[model_eval]}, step=it)
@@ -360,7 +376,12 @@ def main(args):
                     buffer = buffer[:args.max_experts]
                 random.shuffle(buffer)
 
-        start_epoch = np.random.randint(0, args.max_start_epoch)
+        # start_epoch = it % min(int(start_epoch_cap), args.max_start_epoch)
+
+        # stage match trajectory
+        start_epoch = int(start_epoch_cap) - 1
+        # ------------------------
+
         starting_params = expert_trajectory[start_epoch]
 
         target_params = expert_trajectory[start_epoch+args.expert_epochs]
