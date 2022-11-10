@@ -121,7 +121,7 @@ def main(args):
     if args.texture:
         image_syn = torch.randn(size=(num_classes * args.ipc, channel, im_size[0]*args.canvas_size, im_size[1]*args.canvas_size), dtype=torch.float)
     else:
-        # image_syn = torch.load(os.path.join(".", "logged_files", args.dataset, 'fanciful-firefly-33', 'images_4000.pt'))
+        # image_syn = torch.load(os.path.join(".", "logged_files", args.dataset, 'earnest-silence-55', 'images_best.pt'))
         image_syn = torch.zeros(size=(num_classes * args.ipc, channel, im_size[0], im_size[1]), dtype=torch.float)
         image_syn[:, :, im_size[0] // 4: (im_size[0] * 3) // 4, im_size[1] // 4: (im_size[1] * 3) // 4] = torch.randn(size=(num_classes * args.ipc, channel, im_size[0] // 2, im_size[1] // 2), dtype=torch.float)
         from torchvision import transforms
@@ -280,6 +280,7 @@ def main(args):
                     plt.xlabel("Prediction")
                     plt.ylabel("True Label")
                     plt.savefig('./cf_matrix_distill/cf_iteration_{}_{}.png'.format(it, name))
+                    wandb.log({"cf_iteration": wandb.Image(plt)}, step=it)
 
         if it in eval_it_pool and (save_this_it or it % 1000 == 0):
             with torch.no_grad():
