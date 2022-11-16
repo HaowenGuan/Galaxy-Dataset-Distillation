@@ -64,9 +64,9 @@ def get_dataset(dataset, data_path, batch_size=1, subset="imagenette", args=None
         num_classes = 14
 
         #0.0592 #
-        mean = [0.0695364302974106, 0.060510241696901314, 0.04756364403842208]
+        mean = [0.0376, 0.0331, 0.0248]
         #0.1058 #
-        std = [0.123113038980545, 0.10351957804657039, 0.09070320107800815]
+        std = [0.0754, 0.0617, 0.0547]
 
         gzoo = fits.open(os.path.join('Galaxy-DR17-dataset/MaNGA', 'zoo2MainSpecz_sizes.fit'))[1].data
         classes = dict()
@@ -88,15 +88,19 @@ def get_dataset(dataset, data_path, batch_size=1, subset="imagenette", args=None
             class_13 = d['t01_smooth_or_features_a02_features_or_disk_fraction'] * d['t02_edgeon_a05_no_fraction'] * d['t03_bar_a07_no_bar_fraction'] * d['t04_spiral_a09_no_spiral_fraction'] * d['t05_bulge_prominence_a10_no_bulge_fraction']
             class_14 = d['t01_smooth_or_features_a03_star_or_artifact_fraction']
 
-            classes_l.extend((class_1, class_2, class_3, class_4, class_5, class_6, class_7, class_8, class_9, class_10, class_11, class_12, class_13, class_14))
+            classes_l += [class_1, class_2, class_3, class_4, class_5, class_6, class_7, class_8, class_9, class_10, class_11, class_12, class_13, class_14]
             classes[d['dr7objid']] = classes_l
 
         path = 'Galaxy-DR17-dataset/MaNGA/gzoo2'
         dst_total = []
+        count = 0
         for image in os.listdir(path):
             if ".jpg" not in image:
                 continue
             image_dir = os.path.join(path, image)
+            count += 1
+            if count > 50000:
+                break
 
             id = int(image[:-4])
             img = cv.imread(image_dir)
@@ -119,7 +123,7 @@ def get_dataset(dataset, data_path, batch_size=1, subset="imagenette", args=None
         class_names = [str(i) for i in range(num_classes)]
         class_map = {x:x for x in range(num_classes)}
 
-    if dataset == 'dl-DR17':
+    elif dataset == 'dl-DR17':
         channel = 3
         im_size = (128, 128)
         num_classes = 8
