@@ -61,7 +61,7 @@ def get_dataset(dataset, data_path, batch_size=1, subset="imagenette", args=None
     if dataset == 'gzoo2':
         channel = 3
         im_size = (128, 128)
-        num_classes = 14
+        num_classes = 10
 
         #0.0592 #
         mean = [0.0376, 0.0331, 0.0248]
@@ -78,18 +78,14 @@ def get_dataset(dataset, data_path, batch_size=1, subset="imagenette", args=None
             class_3 = d['t01_smooth_or_features_a01_smooth_fraction'] * d['t07_rounded_a18_cigar_shaped_fraction']
             class_4 = d['t01_smooth_or_features_a02_features_or_disk_fraction'] * d['t02_edgeon_a04_yes_fraction'] * (d['t09_bulge_shape_a25_rounded_fraction'] + d['t09_bulge_shape_a26_boxy_fraction'])
             class_5 = d['t01_smooth_or_features_a02_features_or_disk_fraction'] * d['t02_edgeon_a04_yes_fraction'] * d['t09_bulge_shape_a27_no_bulge_fraction']
-            class_6 = d['t01_smooth_or_features_a02_features_or_disk_fraction'] * d['t02_edgeon_a05_no_fraction'] * d['t03_bar_a06_bar_fraction'] * d['t04_spiral_a08_spiral_fraction'] * (1-d['t05_bulge_prominence_a10_no_bulge_fraction'])
-            class_7 = d['t01_smooth_or_features_a02_features_or_disk_fraction'] * d['t02_edgeon_a05_no_fraction'] * d['t03_bar_a06_bar_fraction'] * d['t04_spiral_a08_spiral_fraction'] * d['t05_bulge_prominence_a10_no_bulge_fraction']
-            class_8 = d['t01_smooth_or_features_a02_features_or_disk_fraction'] * d['t02_edgeon_a05_no_fraction'] * d['t03_bar_a06_bar_fraction'] * d['t04_spiral_a09_no_spiral_fraction'] * (1-d['t05_bulge_prominence_a10_no_bulge_fraction'])
-            class_9 = d['t01_smooth_or_features_a02_features_or_disk_fraction'] * d['t02_edgeon_a05_no_fraction'] * d['t03_bar_a06_bar_fraction'] * d['t04_spiral_a09_no_spiral_fraction'] * d['t05_bulge_prominence_a10_no_bulge_fraction']
-            class_10 = d['t01_smooth_or_features_a02_features_or_disk_fraction'] * d['t02_edgeon_a05_no_fraction'] * d['t03_bar_a07_no_bar_fraction'] * d['t04_spiral_a08_spiral_fraction'] * (1-d['t05_bulge_prominence_a10_no_bulge_fraction'])
-            class_11 = d['t01_smooth_or_features_a02_features_or_disk_fraction'] * d['t02_edgeon_a05_no_fraction'] * d['t03_bar_a07_no_bar_fraction'] * d['t04_spiral_a08_spiral_fraction'] * d['t05_bulge_prominence_a10_no_bulge_fraction']
-            class_12 = d['t01_smooth_or_features_a02_features_or_disk_fraction'] * d['t02_edgeon_a05_no_fraction'] * d['t03_bar_a07_no_bar_fraction'] * d['t04_spiral_a09_no_spiral_fraction'] * (1-d['t05_bulge_prominence_a10_no_bulge_fraction'])
-            class_13 = d['t01_smooth_or_features_a02_features_or_disk_fraction'] * d['t02_edgeon_a05_no_fraction'] * d['t03_bar_a07_no_bar_fraction'] * d['t04_spiral_a09_no_spiral_fraction'] * d['t05_bulge_prominence_a10_no_bulge_fraction']
-            class_14 = d['t01_smooth_or_features_a03_star_or_artifact_fraction']
+            class_6 = d['t01_smooth_or_features_a02_features_or_disk_fraction'] * d['t02_edgeon_a05_no_fraction'] * d['t03_bar_a06_bar_fraction'] * d['t04_spiral_a08_spiral_fraction']
+            class_7 = d['t01_smooth_or_features_a02_features_or_disk_fraction'] * d['t02_edgeon_a05_no_fraction'] * d['t03_bar_a06_bar_fraction'] * d['t04_spiral_a09_no_spiral_fraction']
+            class_8 = d['t01_smooth_or_features_a02_features_or_disk_fraction'] * d['t02_edgeon_a05_no_fraction'] * d['t03_bar_a07_no_bar_fraction'] * d['t04_spiral_a08_spiral_fraction']
+            class_9 = d['t01_smooth_or_features_a02_features_or_disk_fraction'] * d['t02_edgeon_a05_no_fraction'] * d['t03_bar_a07_no_bar_fraction'] * d['t04_spiral_a09_no_spiral_fraction']
+            class_10 = d['t01_smooth_or_features_a03_star_or_artifact_fraction']
 
-            classes_l += [class_1, class_2, class_3, class_4, class_5, class_6, class_7, class_8, class_9, class_10, class_11, class_12, class_13, class_14]
-            classes[d['dr7objid']] = classes_l
+            classes_l += [class_1, class_2, class_3, class_4, class_5, class_6, class_7, class_8, class_9, class_10]
+            classes[d['dr7objid']] = np.argmax(np.array(classes_l))
 
         path = 'Galaxy-DR17-dataset/MaNGA/gzoo2'
         dst_total = []
