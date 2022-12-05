@@ -53,12 +53,11 @@ config = Config()
 np.random.seed(1)
 
 def get_dataset(dataset, data_path, batch_size=1, subset="imagenette", args=None):
-
     class_map = None
     loader_train_dict = None
     class_map_inv = None
 
-    if dataset == 'gzoo2':
+    if dataset == 'gzoo2_prob':
         channel = 3
         im_size = (128, 128)
         num_classes = 10
@@ -68,11 +67,13 @@ def get_dataset(dataset, data_path, batch_size=1, subset="imagenette", args=None
         #0.1058 #
         std = [0.0754, 0.0617, 0.0547]
 
-        gzoo = fits.open(os.path.join('Galaxy-DR17-dataset/MaNGA', 'zoo2MainSpecz_sizes.fit'))[1].data
-        classes = dict()
+        gzoo = fits.open(os.path.join('Galaxy-DR17-dataset/gzoo2', 'zoo2MainSpecz_sizes.fit'))[1].data
+        indexes = dict()
+        for i, id in enumerate(gzoo['dr7objid']):
+            indexes[id] = i
 
-        for d in gzoo:
-            classes_l = []
+        def get_classes(id):
+            d = gzoo[indexes[id]]
             class_1 = d['t01_smooth_or_features_a01_smooth_fraction'] * d['t07_rounded_a16_completely_round_fraction']
             class_2 = d['t01_smooth_or_features_a01_smooth_fraction'] * d['t07_rounded_a17_in_between_fraction']
             class_3 = d['t01_smooth_or_features_a01_smooth_fraction'] * d['t07_rounded_a18_cigar_shaped_fraction']
@@ -84,8 +85,68 @@ def get_dataset(dataset, data_path, batch_size=1, subset="imagenette", args=None
             class_9 = d['t01_smooth_or_features_a02_features_or_disk_fraction'] * d['t02_edgeon_a05_no_fraction'] * d['t03_bar_a07_no_bar_fraction'] * d['t04_spiral_a09_no_spiral_fraction']
             class_10 = d['t01_smooth_or_features_a03_star_or_artifact_fraction']
 
-            classes_l += [class_1, class_2, class_3, class_4, class_5, class_6, class_7, class_8, class_9, class_10]
-            classes[d['dr7objid']] = np.argmax(np.array(classes_l))
+            classes_l = [class_1, class_2, class_3, class_4, class_5, class_6, class_7, class_8, class_9, class_10]
+            # return np.array(classes_l)
+            return np.argmax(np.array(classes_l))
+
+        path = 'Galaxy-DR17-dataset/gzoo2/image'
+        dst_total = []
+        count = 0
+        for image in os.listdir(path):
+            if ".jpg" not in image:
+                continue
+            image_dir = os.path.join(path, image)
+            count += 1
+            if count % 1000 == 0: print(count)
+            if count > 10000:
+                break
+
+            id = int(image[:-4])
+            img = cv.imread(image_dir)
+            img = cv.cvtColor(img, cv.COLOR_BGR2RGB)
+            img = cv.resize(img, (128, 128), interpolation=cv.INTER_AREA) / 255
+            img = torch.from_numpy(img.T)
+            img = transforms.Normalize(mean, std)(img)
+
+            dst_total.append((img, get_classes(id)))
+
+        np.random.shuffle(dst_total)
+        dst_train = dst_total[:int(0.8 * len(dst_total))]
+        dst_test = dst_total[int(0.8 * len(dst_total)):]
+
+        class_names = [str(i) for i in range(num_classes)]
+        class_map = {x:x for x in range(num_classes)}
+
+    elif dataset == 'gzoo2':
+        channel = 3
+        im_size = (128, 128)
+        num_classes = 10
+
+        #0.0592 #
+        mean = [0.0376, 0.0331, 0.0248]
+        #0.1058 #
+        std = [0.0754, 0.0617, 0.0547]
+
+        gzoo = fits.open(os.path.join('Galaxy-DR17-dataset/MaNGA', 'zoo2MainSpecz_sizes.fit'))[1].data
+        indexes = dict()
+        for i, id in enumerate(gzoo['dr7objid']):
+            indexes[id] = i
+
+        def get_classes(id):
+            d = gzoo[indexes[id]]
+            class_1 = d['t01_smooth_or_features_a01_smooth_fraction'] * d['t07_rounded_a16_completely_round_fraction']
+            class_2 = d['t01_smooth_or_features_a01_smooth_fraction'] * d['t07_rounded_a17_in_between_fraction']
+            class_3 = d['t01_smooth_or_features_a01_smooth_fraction'] * d['t07_rounded_a18_cigar_shaped_fraction']
+            class_4 = d['t01_smooth_or_features_a02_features_or_disk_fraction'] * d['t02_edgeon_a04_yes_fraction'] * (d['t09_bulge_shape_a25_rounded_fraction'] + d['t09_bulge_shape_a26_boxy_fraction'])
+            class_5 = d['t01_smooth_or_features_a02_features_or_disk_fraction'] * d['t02_edgeon_a04_yes_fraction'] * d['t09_bulge_shape_a27_no_bulge_fraction']
+            class_6 = d['t01_smooth_or_features_a02_features_or_disk_fraction'] * d['t02_edgeon_a05_no_fraction'] * d['t03_bar_a06_bar_fraction'] * d['t04_spiral_a08_spiral_fraction']
+            class_7 = d['t01_smooth_or_features_a02_features_or_disk_fraction'] * d['t02_edgeon_a05_no_fraction'] * d['t03_bar_a06_bar_fraction'] * d['t04_spiral_a09_no_spiral_fraction']
+            class_8 = d['t01_smooth_or_features_a02_features_or_disk_fraction'] * d['t02_edgeon_a05_no_fraction'] * d['t03_bar_a07_no_bar_fraction'] * d['t04_spiral_a08_spiral_fraction']
+            class_9 = d['t01_smooth_or_features_a02_features_or_disk_fraction'] * d['t02_edgeon_a05_no_fraction'] * d['t03_bar_a07_no_bar_fraction'] * d['t04_spiral_a09_no_spiral_fraction']
+            class_10 = d['t01_smooth_or_features_a03_star_or_artifact_fraction']
+
+            classes_l = [class_1, class_2, class_3, class_4, class_5, class_6, class_7, class_8, class_9, class_10]
+            return np.argmax(np.array(classes_l))
 
         path = 'Galaxy-DR17-dataset/MaNGA/gzoo2'
         dst_total = []
@@ -100,17 +161,13 @@ def get_dataset(dataset, data_path, batch_size=1, subset="imagenette", args=None
 
             id = int(image[:-4])
             img = cv.imread(image_dir)
-            # TODO
             img = cv.cvtColor(img, cv.COLOR_BGR2RGB)
-            #
             img = cv.resize(img, (128, 128), interpolation=cv.INTER_AREA) / 255
-            # TODO
             #img = cv.cvtColor(np.float32(img), cv.COLOR_BGR2GRAY)
-            #
             img = torch.from_numpy(img.T)
             img = transforms.Normalize(mean, std)(img)
 
-            dst_total.append((img, classes[id]))
+            dst_total.append((img, get_classes(id)))
 
         np.random.shuffle(dst_total)
         dst_train = dst_total[:int(0.8 * len(dst_total))]
@@ -680,6 +737,49 @@ def epoch(mode, dataloader, net, optimizer, criterion, args, aug, texture=False)
 
     return loss_avg, acc_avg
 
+
+def epoch_regression(mode, dataloader, net, optimizer, criterion, args, aug, texture=False):
+    loss_avg, num_exp = 0, 0
+    net = net.to(args.device)
+    softmax = nn.Softmax(dim=1)
+
+    if mode == 'train':
+        net.train()
+    else:
+        net.eval()
+
+    for i_batch, datum in enumerate(dataloader):
+        img = datum[0].float().to(args.device)
+        lab = datum[1].float().to(args.device)
+
+        if mode == "train" and texture:
+            img = torch.cat([torch.stack([torch.roll(im, (torch.randint(args.im_size[0]*args.canvas_size, (1,)), torch.randint(args.im_size[0]*args.canvas_size, (1,))), (1,2))[:,:args.im_size[0],:args.im_size[1]] for im in img]) for _ in range(args.canvas_samples)])
+            lab = torch.cat([lab for _ in range(args.canvas_samples)])
+
+        if aug:
+            if args.dsa:
+                img = DiffAugment(img, args.dsa_strategy, param=args.dsa_param)
+            else:
+                img = augment(img, args.dc_aug_param, device=args.device)
+
+        n_b = lab.shape[0]
+
+        output = net(img)
+        output = softmax(output)
+
+        loss = criterion(output, lab)
+
+        loss_avg += loss.item()*n_b
+        num_exp += n_b
+        # print(output[0], lab[0])
+        if mode == 'train':
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+
+    loss_avg /= num_exp
+
+    return loss_avg
 
 
 def evaluate_synset(it, it_eval, net, num_classes, images_train, labels_train, dst_test, testloader, args, return_loss=False, texture=False):

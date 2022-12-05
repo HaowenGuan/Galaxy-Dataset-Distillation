@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 from tqdm import tqdm
 from utils import get_dataset, get_network, get_daparam,\
-    TensorDataset, epoch, ParamDiffAug
+    TensorDataset, epoch_regression, ParamDiffAug
 import copy
 from sklearn.metrics import confusion_matrix
 import numpy as np
@@ -40,37 +40,26 @@ def main(args):
     ''' organize the real dataset '''
     images_all = []
     labels_all = []
-    indices_class = [[] for c in range(num_classes)]
+    total_class = np.zeros(10)
     print("BUILDING DATASET")
     for i in tqdm(range(len(dst_train))):
         sample = dst_train[i]
         images_all.append(torch.unsqueeze(sample[0], dim=0))
-        labels_all.append(class_map[torch.tensor(sample[1]).item()])
+        labels_all.append(torch.from_numpy(sample[1])[None, :])
+        total_class += sample[1]
 
-    for i, lab in tqdm(enumerate(labels_all)):
-        indices_class[lab].append(i)
     images_all = torch.cat(images_all, dim=0).to("cpu")
-    labels_all = torch.tensor(labels_all, dtype=torch.long, device="cpu")
+    labels_all = torch.cat(labels_all, dim=0).to("cpu")
 
     for c in range(num_classes):
-        print('class c = %d: %d real images'%(c, len(indices_class[c])))
+        print('class c = %d: %f real images'%(c, round(total_class[c], 3)))
 
     for ch in range(channel):
         print('real images channel %d, mean = %.4f, std = %.4f'%(ch, torch.mean(images_all[:, ch]), torch.std(images_all[:, ch])))
 
-    # Calculate the weight for loss function:
-    class_count = torch.zeros(num_classes)
-    dataset_count = 0
-    for c in range(num_classes):
-        class_count[c] = len(indices_class[c])
-        dataset_count += len(indices_class[c])
-    loss_weight = dataset_count / class_count
-    loss_weight = loss_weight / torch.mean(loss_weight)
-    print('Add weight to loss function', loss_weight)
-    # --------------------------------------------------
 
-    criterion = nn.CrossEntropyLoss(weight=loss_weight).to(args.device)
-    # criterion = MSECrossEntropyLoss(weight=loss_weight).to(args.device)
+
+    criterion = nn.L1Loss().to(args.device)
 
     trajectories = []
 
@@ -102,13 +91,13 @@ def main(args):
 
         for e in range(args.train_epochs):
 
-            train_loss, train_acc = epoch("train", dataloader=trainloader, net=teacher_net, optimizer=teacher_optim,
-                                        criterion=criterion, args=args, aug=True)
+            train_loss = epoch_regression("train", dataloader=trainloader, net=teacher_net, optimizer=teacher_optim,
+                                          criterion=criterion, args=args, aug=True)
 
-            test_loss, test_acc = epoch("test", dataloader=testloader, net=teacher_net, optimizer=None,
+            test_loss = epoch_regression("test", dataloader=testloader, net=teacher_net, optimizer=None,
                                         criterion=criterion, args=args, aug=False)
 
-            print("Itr: {}\tEpoch: {}\tTrain Acc: {}\tTest Acc: {}\tAVG Train loss: {}\tAVG Test loss: {}".format(it, e, train_acc, test_acc, train_loss, test_loss))
+            print("Itr: {}\tEpoch: {}\tAVG Train loss: {}\tAVG Test loss: {}".format(it, e, train_loss, test_loss))
 
             timestamps.append([p.detach().cpu() for p in teacher_net.parameters()])
 
@@ -116,40 +105,6 @@ def main(args):
                 lr *= 0.1
                 teacher_optim = torch.optim.SGD(teacher_net.parameters(), lr=lr, momentum=args.mom, weight_decay=args.l2)
                 teacher_optim.zero_grad()
-
-
-        for dataset, name, count, total in [[trainloader, "train", len(dst_train), total_train_cf],[testloader, "test", len(dst_test), total_test_cf]]:
-            total_acc = torch.zeros(num_classes)
-
-            pred = []
-            true = []
-            for i_batch, datum in enumerate(dataset):
-                img = datum[0].float().to(args.device)
-                lab = datum[1].long().to(args.device)
-
-                output = teacher_net(img)
-                output = torch.argmax(output, 1)
-
-                pred += output.tolist()
-                true += lab.tolist()
-
-                for i in range(lab.shape[0]):
-                    if output[i] == lab[i]:
-                        total_acc[lab[i]] += 1
-
-            print(name, "set ACC of each class", total_acc / count)
-        
-            cf_matrix = confusion_matrix(true, pred)
-            total += np.array(cf_matrix)
-            print(cf_matrix)
-            df_cm = pd.DataFrame(cf_matrix, index = [i for i in class_names],
-                     columns = [i for i in class_names])
-            plt.figure(figsize = (12,7))
-            sn.heatmap(df_cm, annot=True, fmt='g')
-            plt.title('Confusion Matrix Expert{} {}'.format(it,name))
-            plt.xlabel("Prediction")
-            plt.ylabel("True Label")
-            plt.savefig('./cf_matrix_buffer/cf_expert{}_{}.png'.format(it,name))
 
         trajectories.append(timestamps)
 
@@ -161,21 +116,6 @@ def main(args):
             torch.save(trajectories, os.path.join(save_dir, "replay_buffer_{}.pt".format(n)))
             trajectories = []
 
-    # print total confusion matrix across all experts
-    for name, cf_matrix in [["train", total_train_cf],["test", total_test_cf]]:
-        cf_matrix = cf_matrix.tolist()
-        for r in cf_matrix:
-            t = sum(r)
-            for i in range(len(r)):
-                r[i] = round(r[i] / t, 3)
-        df_cm = pd.DataFrame(cf_matrix, index=[i for i in class_names], columns=[i for i in class_names])
-        plt.figure(figsize=(12, 7))
-        sn.heatmap(df_cm, annot=True, fmt='g')
-        plt.title('Confusion Matrix total {}'.format(name))
-        plt.xlabel("Prediction")
-        plt.ylabel("True Label")
-        plt.savefig('./cf_matrix_buffer/cf_total_{}.png'.format(name))
-
 
 if __name__ == '__main__':
     import argparse
@@ -184,7 +124,7 @@ if __name__ == '__main__':
     parser.add_argument('--subset', type=str, default='imagenette', help='subset')
     parser.add_argument('--model', type=str, default='ConvNet', help='model')
     parser.add_argument('--num_experts', type=int, default=100, help='training iterations')
-    parser.add_argument('--lr_teacher', type=float, default=0.01, help='learning rate for updating network parameters')
+    parser.add_argument('--lr_teacher', type=float, default=0.05, help='learning rate for updating network parameters')
     parser.add_argument('--batch_train', type=int, default=256, help='batch size for training networks')
     parser.add_argument('--batch_real', type=int, default=256, help='batch size for real loader')
     parser.add_argument('--dsa', type=str, default='True', choices=['True', 'False'],

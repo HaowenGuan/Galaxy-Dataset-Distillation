@@ -200,7 +200,7 @@ def main(args):
     from torchvision import transforms
     blur = transforms.GaussianBlur(kernel_size=(3, 3), sigma=(0.2, 0.3)).to(args.device)
 
-    # stage match trajectory
+    # stage match trajectory #1 init
     start_epoch_cap = 1
     reached_max = False
     # ------------------------------
@@ -254,12 +254,17 @@ def main(args):
                     start_epoch_cap = int(start_epoch_cap)
                     reached_max = True
                 else:
-                    # stage match trajectory
-                    if reached_max:
-                        start_epoch_cap += 0.5
-                        if start_epoch_cap % 1 == 0:
+                    # stage match trajectory #2
+                    if reached_max or int(start_epoch_cap + 0.2) > int(start_epoch_cap):
+                        if int(start_epoch_cap + 0.5) > int(start_epoch_cap):
+                            start_epoch_cap = int(start_epoch_cap + 0.5)
+                            start_epoch_cap = min(start_epoch_cap, args.max_start_epoch)
                             reached_max = False
-                        optimizer_img = torch.optim.SGD([image_syn], lr=args.lr_img / int(start_epoch_cap), momentum=0.5)
+                            optimizer_img = torch.optim.SGD([image_syn], lr=args.lr_img / int(start_epoch_cap), momentum=0.5)
+                        else:
+                            start_epoch_cap += 0.5
+                    else:
+                        start_epoch_cap += 0.2
                     # ------------------------------
                 print('Evaluate %d random %s, mean = %.4f std = %.4f\n-------------------------'%(len(accs_test), model_eval, acc_test_mean, acc_test_std))
                 wandb.log({'Accuracy/{}'.format(model_eval): acc_test_mean}, step=it)
@@ -379,8 +384,8 @@ def main(args):
 
         # start_epoch = it % min(int(start_epoch_cap), args.max_start_epoch)
 
-        # stage match trajectory
-        start_epoch = int(start_epoch_cap) - 1
+        # stage match trajectory #3
+        start_epoch = it % int(start_epoch_cap)
         # ------------------------
 
         starting_params = expert_trajectory[start_epoch]
