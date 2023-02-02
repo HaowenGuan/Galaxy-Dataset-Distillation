@@ -89,7 +89,7 @@ def get_dataset(dataset, data_path, batch_size=1, subset="imagenette", args=None
             # return np.array(classes_l)
             return np.argmax(np.array(classes_l))
 
-        path = 'Galaxy-DR17-dataset/gzoo2/image'
+        path = '/data/sbcaesar/image'
         dst_total = []
         count = 0
         for image in os.listdir(path):
@@ -127,7 +127,7 @@ def get_dataset(dataset, data_path, batch_size=1, subset="imagenette", args=None
         #0.1058 #
         std = [0.0754, 0.0617, 0.0547]
 
-        gzoo = fits.open(os.path.join('Galaxy-DR17-dataset/MaNGA', 'zoo2MainSpecz_sizes.fit'))[1].data
+        gzoo = fits.open(os.path.join('Galaxy-DR17-dataset/gzoo2', 'zoo2MainSpecz_sizes.fit'))[1].data
         indexes = dict()
         for i, id in enumerate(gzoo['dr7objid']):
             indexes[id] = i
@@ -148,7 +148,7 @@ def get_dataset(dataset, data_path, batch_size=1, subset="imagenette", args=None
             classes_l = [class_1, class_2, class_3, class_4, class_5, class_6, class_7, class_8, class_9, class_10]
             return np.argmax(np.array(classes_l))
 
-        path = 'Galaxy-DR17-dataset/MaNGA/gzoo2'
+        path = '/data/sbcaesar/classes/1000'
         dst_total = []
         count = 0
         for image in os.listdir(path):

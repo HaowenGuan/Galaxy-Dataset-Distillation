@@ -3,12 +3,12 @@ import os
 from urllib.request import urlopen
 
 import numpy as np
-import pylab as pl
-import numpy as numpy
-import pdb
-from matplotlib import image
+# import pylab as pl
+# import numpy as numpy
+# import pdb
+# from matplotlib import image
 from astropy.io import fits
-from astropy.table import Table
+# from astropy.table import Table
 from multiprocessing import Pool, cpu_count, get_context
 import argparse
 
@@ -83,7 +83,7 @@ if __name__ == '__main__':
             with Pool(max(cpu_count(), 8)) as pool:
                 args = []
 
-                for j in range(0, ID.shape[0]):
+                for j in range(50000, 100000):#ID.shape[0]
                     args.append(['gzoo2/image/' + str(ID[j]) + ".jpg", ra[j], dec[j], R_90[j] * 0.024])
 
                 results = pool.starmap(_fetch, args)

@@ -180,11 +180,11 @@ def main(args):
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(description='Parameter Processing')
-    parser.add_argument('--dataset', type=str, default='CIFAR10', help='dataset')
+    parser.add_argument('--dataset', type=str, default='gzoo2', help='dataset')
     parser.add_argument('--subset', type=str, default='imagenette', help='subset')
     parser.add_argument('--model', type=str, default='ConvNet', help='model')
-    parser.add_argument('--num_experts', type=int, default=100, help='training iterations')
-    parser.add_argument('--lr_teacher', type=float, default=0.01, help='learning rate for updating network parameters')
+    parser.add_argument('--num_experts', type=int, default=10, help='training iterations')
+    parser.add_argument('--lr_teacher', type=float, default=0.002, help='learning rate for updating network parameters')
     parser.add_argument('--batch_train', type=int, default=256, help='batch size for training networks')
     parser.add_argument('--batch_real', type=int, default=256, help='batch size for real loader')
     parser.add_argument('--dsa', type=str, default='True', choices=['True', 'False'],
