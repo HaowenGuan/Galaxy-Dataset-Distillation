@@ -184,7 +184,7 @@ if __name__ == '__main__':
     parser.add_argument('--subset', type=str, default='imagenette', help='subset')
     parser.add_argument('--model', type=str, default='ConvNet', help='model')
     parser.add_argument('--num_experts', type=int, default=10, help='training iterations')
-    parser.add_argument('--lr_teacher', type=float, default=0.002, help='learning rate for updating network parameters')
+    parser.add_argument('--lr_teacher', type=float, default=0.001, help='learning rate for updating network parameters')
     parser.add_argument('--batch_train', type=int, default=256, help='batch size for training networks')
     parser.add_argument('--batch_real', type=int, default=256, help='batch size for real loader')
     parser.add_argument('--dsa', type=str, default='True', choices=['True', 'False'],
@@ -192,7 +192,7 @@ if __name__ == '__main__':
     parser.add_argument('--dsa_strategy', type=str, default='color_crop_cutout_flip_scale_rotate',
                         help='differentiable Siamese augmentation strategy')
     parser.add_argument('--data_path', type=str, default='data', help='dataset path')
-    parser.add_argument('--buffer_path', type=str, default='./buffers', help='buffer path')
+    parser.add_argument('--buffer_path', type=str, default='/data/sbcaesar/galaxy_buffers', help='buffer path')
     parser.add_argument('--train_epochs', type=int, default=50)
     parser.add_argument('--zca', action='store_true')
     parser.add_argument('--decay', action='store_true')
