@@ -1,4 +1,311 @@
+# learning rate grid search
 
+
+
+#lr 0.0005
+```cmd
+ssh://sbcaesar@dais10.uwb.edu:22/data/sbcaesar/xuan_venv/bin/python3 -u /data/sbcaesar/mac_galaxy/buffer.py
+Hyper-parameters: 
+ {'dataset': 'gzoo2', 'subset': 'imagenette', 'model': 'ConvNet', 'num_experts': 10, 'lr_teacher': 0.0005, 'batch_train': 256, 'batch_real': 256, 'dsa': True, 'dsa_strategy': 'color_crop_cutout_flip_scale_rotate', 'data_path': 'data', 'buffer_path': '/data/sbcaesar/galaxy_buffers', 'train_epochs': 50, 'zca': False, 'decay': False, 'mom': 0, 'l2': 0, 'save_interval': 10, 'device': 'cuda', 'dsa_param': <utils.ParamDiffAug object at 0x7f49905928e0>}
+BUILDING DATASET
+100%|█████████████████████████████████████| 800/800 [00:00<00:00, 148221.72it/s]
+800it [00:00, 3966244.92it/s]
+class c = 0: 80 real images
+class c = 1: 80 real images
+class c = 2: 80 real images
+class c = 3: 80 real images
+class c = 4: 80 real images
+class c = 5: 80 real images
+class c = 6: 80 real images
+class c = 7: 80 real images
+class c = 8: 80 real images
+class c = 9: 80 real images
+real images channel 0, mean = 0.0003, std = 1.0003
+real images channel 1, mean = -0.0002, std = 1.0004
+real images channel 2, mean = 0.0006, std = 1.0005
+Add weight to loss function tensor([1., 1., 1., 1., 1., 1., 1., 1., 1., 1.])
+DC augmentation parameters: 
+ {'crop': 4, 'scale': 0.2, 'rotate': 45, 'noise': 0.001, 'strategy': 'crop_scale_rotate'}
+DataParallel(
+  (module): ConvNet(
+    (features): Sequential(
+      (0): Conv2d(3, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (1): GroupNorm(128, 128, eps=1e-05, affine=True)
+      (2): ReLU(inplace=True)
+      (3): AvgPool2d(kernel_size=2, stride=2, padding=0)
+      (4): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (5): GroupNorm(128, 128, eps=1e-05, affine=True)
+      (6): ReLU(inplace=True)
+      (7): AvgPool2d(kernel_size=2, stride=2, padding=0)
+      (8): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (9): GroupNorm(128, 128, eps=1e-05, affine=True)
+      (10): ReLU(inplace=True)
+      (11): AvgPool2d(kernel_size=2, stride=2, padding=0)
+    )
+    (classifier): Linear(in_features=32768, out_features=10, bias=True)
+  )
+)
+Itr: 0	Epoch: 0	Train Acc: 0.145	Test Acc: 0.115	AVG Train loss: 2.3067625331878663	AVG Test loss: 2.2322726440429688
+Itr: 0	Epoch: 1	Train Acc: 0.2175	Test Acc: 0.22	AVG Train loss: 2.187952880859375	AVG Test loss: 2.148333263397217
+Itr: 0	Epoch: 2	Train Acc: 0.2225	Test Acc: 0.225	AVG Train loss: 2.1462587547302245	AVG Test loss: 2.0654802894592286
+Itr: 0	Epoch: 3	Train Acc: 0.32	Test Acc: 0.36	AVG Train loss: 2.008964862823486	AVG Test loss: 1.9976913595199586
+Itr: 0	Epoch: 4	Train Acc: 0.28375	Test Acc: 0.305	AVG Train loss: 2.04028706073761	AVG Test loss: 1.9842070960998535
+Itr: 0	Epoch: 5	Train Acc: 0.30375	Test Acc: 0.395	AVG Train loss: 2.006683826446533	AVG Test loss: 1.9115438413619996
+Itr: 0	Epoch: 6	Train Acc: 0.41875	Test Acc: 0.425	AVG Train loss: 1.860275092124939	AVG Test loss: 1.8747785091400146
+Itr: 0	Epoch: 7	Train Acc: 0.38875	Test Acc: 0.43	AVG Train loss: 1.9102101993560792	AVG Test loss: 1.8584469413757325
+Itr: 0	Epoch: 8	Train Acc: 0.29125	Test Acc: 0.275	AVG Train loss: 1.97784273147583	AVG Test loss: 1.8725192594528197
+Itr: 0	Epoch: 9	Train Acc: 0.395	Test Acc: 0.42	AVG Train loss: 1.8469435834884644	AVG Test loss: 1.7995241832733155
+Itr: 0	Epoch: 10	Train Acc: 0.4925	Test Acc: 0.385	AVG Train loss: 1.736760277748108	AVG Test loss: 1.7852559614181518
+Itr: 0	Epoch: 11	Train Acc: 0.45125	Test Acc: 0.405	AVG Train loss: 1.746300563812256	AVG Test loss: 1.7510205936431884
+Itr: 0	Epoch: 12	Train Acc: 0.415	Test Acc: 0.475	AVG Train loss: 1.781727385520935	AVG Test loss: 1.7111017751693725
+Itr: 0	Epoch: 13	Train Acc: 0.485	Test Acc: 0.455	AVG Train loss: 1.732786021232605	AVG Test loss: 1.6968120622634888
+Itr: 0	Epoch: 14	Train Acc: 0.5625	Test Acc: 0.475	AVG Train loss: 1.5930939531326294	AVG Test loss: 1.6677053213119506
+Itr: 0	Epoch: 15	Train Acc: 0.435	Test Acc: 0.435	AVG Train loss: 1.734039535522461	AVG Test loss: 1.7086726570129394
+Itr: 0	Epoch: 16	Train Acc: 0.55875	Test Acc: 0.385	AVG Train loss: 1.5649606084823608	AVG Test loss: 1.6584150314331054
+Itr: 0	Epoch: 17	Train Acc: 0.44625	Test Acc: 0.475	AVG Train loss: 1.6884299182891847	AVG Test loss: 1.6108959245681762
+Itr: 0	Epoch: 18	Train Acc: 0.58125	Test Acc: 0.46	AVG Train loss: 1.5140653228759766	AVG Test loss: 1.6108984231948853
+Itr: 0	Epoch: 19	Train Acc: 0.43625	Test Acc: 0.475	AVG Train loss: 1.702781343460083	AVG Test loss: 1.59620099067688
+Itr: 0	Epoch: 20	Train Acc: 0.46125	Test Acc: 0.53	AVG Train loss: 1.6453984928131105	AVG Test loss: 1.5547723627090455
+Itr: 0	Epoch: 21	Train Acc: 0.46375	Test Acc: 0.54	AVG Train loss: 1.679402346611023	AVG Test loss: 1.5488883590698241
+Itr: 0	Epoch: 22	Train Acc: 0.53625	Test Acc: 0.565	AVG Train loss: 1.579036121368408	AVG Test loss: 1.5326893663406371
+Itr: 0	Epoch: 23	Train Acc: 0.59375	Test Acc: 0.53	AVG Train loss: 1.4367336130142212	AVG Test loss: 1.5163700437545777
+Itr: 0	Epoch: 24	Train Acc: 0.5625	Test Acc: 0.5	AVG Train loss: 1.4560015153884889	AVG Test loss: 1.506545262336731
+Itr: 0	Epoch: 25	Train Acc: 0.51125	Test Acc: 0.46	AVG Train loss: 1.5328360176086426	AVG Test loss: 1.505320987701416
+Itr: 0	Epoch: 26	Train Acc: 0.48875	Test Acc: 0.53	AVG Train loss: 1.5578248310089111	AVG Test loss: 1.4799683094024658
+Itr: 0	Epoch: 27	Train Acc: 0.54875	Test Acc: 0.6	AVG Train loss: 1.4172426748275757	AVG Test loss: 1.4518766975402833
+Itr: 0	Epoch: 28	Train Acc: 0.63125	Test Acc: 0.515	AVG Train loss: 1.340802674293518	AVG Test loss: 1.4870973205566407
+Itr: 0	Epoch: 29	Train Acc: 0.6125	Test Acc: 0.495	AVG Train loss: 1.3532556343078612	AVG Test loss: 1.4861954975128173
+Itr: 0	Epoch: 30	Train Acc: 0.4525	Test Acc: 0.525	AVG Train loss: 1.651924867630005	AVG Test loss: 1.4305964708328247
+Itr: 0	Epoch: 31	Train Acc: 0.5175	Test Acc: 0.58	AVG Train loss: 1.4795134782791137	AVG Test loss: 1.422661337852478
+Itr: 0	Epoch: 32	Train Acc: 0.60125	Test Acc: 0.6	AVG Train loss: 1.3471803855895996	AVG Test loss: 1.4074887752532959
+Itr: 0	Epoch: 33	Train Acc: 0.5775	Test Acc: 0.545	AVG Train loss: 1.4012739181518554	AVG Test loss: 1.410466694831848
+Itr: 0	Epoch: 34	Train Acc: 0.55125	Test Acc: 0.51	AVG Train loss: 1.4215741205215453	AVG Test loss: 1.4384574127197265
+Itr: 0	Epoch: 35	Train Acc: 0.5825	Test Acc: 0.605	AVG Train loss: 1.3816697549819947	AVG Test loss: 1.3692003107070922
+Itr: 0	Epoch: 36	Train Acc: 0.675	Test Acc: 0.57	AVG Train loss: 1.2441635847091674	AVG Test loss: 1.3851796579360962
+Itr: 0	Epoch: 37	Train Acc: 0.625	Test Acc: 0.61	AVG Train loss: 1.2913709306716918	AVG Test loss: 1.353986644744873
+Itr: 0	Epoch: 38	Train Acc: 0.63625	Test Acc: 0.6	AVG Train loss: 1.2785928392410277	AVG Test loss: 1.3507003784179688
+Itr: 0	Epoch: 39	Train Acc: 0.6275	Test Acc: 0.59	AVG Train loss: 1.2813894271850585	AVG Test loss: 1.3386732816696167
+Itr: 0	Epoch: 40	Train Acc: 0.655	Test Acc: 0.61	AVG Train loss: 1.2608263826370238	AVG Test loss: 1.3196128797531128
+Itr: 0	Epoch: 41	Train Acc: 0.57375	Test Acc: 0.595	AVG Train loss: 1.4115499401092528	AVG Test loss: 1.3369048357009887
+Itr: 0	Epoch: 42	Train Acc: 0.57625	Test Acc: 0.595	AVG Train loss: 1.3890915203094483	AVG Test loss: 1.3274127864837646
+Itr: 0	Epoch: 43	Train Acc: 0.65375	Test Acc: 0.57	AVG Train loss: 1.2001115942001344	AVG Test loss: 1.3161081075668335
+Itr: 0	Epoch: 44	Train Acc: 0.67875	Test Acc: 0.625	AVG Train loss: 1.1690080738067627	AVG Test loss: 1.2867148923873901
+Itr: 0	Epoch: 45	Train Acc: 0.5625	Test Acc: 0.6	AVG Train loss: 1.4343363809585572	AVG Test loss: 1.2992286443710328
+Itr: 0	Epoch: 46	Train Acc: 0.56375	Test Acc: 0.6	AVG Train loss: 1.3826202535629273	AVG Test loss: 1.2965045547485352
+Itr: 0	Epoch: 47	Train Acc: 0.64	Test Acc: 0.535	AVG Train loss: 1.2242115545272827	AVG Test loss: 1.31334566116333
+Itr: 0	Epoch: 48	Train Acc: 0.495	Test Acc: 0.59	AVG Train loss: 1.5246389245986938	AVG Test loss: 1.2821046829223632
+Itr: 0	Epoch: 49	Train Acc: 0.6775	Test Acc: 0.585	AVG Train loss: 1.1959943056106568	AVG Test loss: 1.299894700050354
+train set ACC of each class tensor([0.0538, 0.0600, 0.0938, 0.0587, 0.0913, 0.0413, 0.0862, 0.0925, 0.0188,
+        0.0913])
+[[43 16  1  4  0  0  8  8  0  0]
+ [13 48  0  0  0  0  3 16  0  0]
+ [ 0  2 75  1  0  0  1  1  0  0]
+ [ 3  2 13 47 13  0  2  0  0  0]
+ [ 0  0  4  2 73  0  0  0  0  1]
+ [ 1  2  1  0  0 33 10 32  1  0]
+ [ 0  3  0  0  0  3 69  5  0  0]
+ [ 0  1  1  0  0  0  4 74  0  0]
+ [ 4  8  3  1  0 10 22 17 15  0]
+ [ 0  1  0  0  2  1  2  1  0 73]]
+test set ACC of each class tensor([0.0550, 0.0700, 0.0800, 0.0500, 0.0650, 0.0200, 0.0700, 0.0900, 0.0050,
+        0.0800])
+[[11  2  0  1  0  0  2  4  0  0]
+ [ 0 14  0  0  0  0  0  6  0  0]
+ [ 0  2 16  1  1  0  0  0  0  0]
+ [ 0  1  6 10  1  0  1  1  0  0]
+ [ 0  0  5  2 13  0  0  0  0  0]
+ [ 0  0  1  0  0  4  3 12  0  0]
+ [ 0  1  0  0  0  3 14  2  0  0]
+ [ 0  0  0  0  0  0  2 18  0  0]
+ [ 2  1  0  0  1  4  4  7  1  0]
+ [ 0  1  0  2  0  0  0  1  0 16]]
+DataParallel(
+  (module): ConvNet(
+    (features): Sequential(
+      (0): Conv2d(3, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (1): GroupNorm(128, 128, eps=1e-05, affine=True)
+      (2): ReLU(inplace=True)
+      (3): AvgPool2d(kernel_size=2, stride=2, padding=0)
+      (4): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (5): GroupNorm(128, 128, eps=1e-05, affine=True)
+      (6): ReLU(inplace=True)
+      (7): AvgPool2d(kernel_size=2, stride=2, padding=0)
+      (8): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (9): GroupNorm(128, 128, eps=1e-05, affine=True)
+      (10): ReLU(inplace=True)
+      (11): AvgPool2d(kernel_size=2, stride=2, padding=0)
+    )
+    (classifier): Linear(in_features=32768, out_features=10, bias=True)
+  )
+)
+Itr: 1	Epoch: 0	Train Acc: 0.08625	Test Acc: 0.095	AVG Train loss: 2.3479908084869385	AVG Test loss: 2.2733480072021486
+Itr: 1	Epoch: 1	Train Acc: 0.165	Test Acc: 0.195	AVG Train loss: 2.213900213241577	AVG Test loss: 2.1945886611938477
+Itr: 1	Epoch: 2	Train Acc: 0.2275	Test Acc: 0.22	AVG Train loss: 2.1176199245452882	AVG Test loss: 2.099321947097778
+Itr: 1	Epoch: 3	Train Acc: 0.21875	Test Acc: 0.215	AVG Train loss: 2.1393855476379393	AVG Test loss: 2.0688271522521973
+Itr: 1	Epoch: 4	Train Acc: 0.25625	Test Acc: 0.26	AVG Train loss: 2.0542376804351807	AVG Test loss: 2.031967911720276
+Itr: 1	Epoch: 5	Train Acc: 0.24375	Test Acc: 0.28	AVG Train loss: 2.0636722469329833	AVG Test loss: 1.9738716888427734
+Itr: 1	Epoch: 6	Train Acc: 0.29875	Test Acc: 0.28	AVG Train loss: 1.9940311241149902	AVG Test loss: 1.9523000288009644
+Itr: 1	Epoch: 7	Train Acc: 0.3725	Test Acc: 0.33	AVG Train loss: 1.8817297554016112	AVG Test loss: 1.906642141342163
+Itr: 1	Epoch: 8	Train Acc: 0.3775	Test Acc: 0.39	AVG Train loss: 1.853724284172058	AVG Test loss: 1.8708895683288573
+Itr: 1	Epoch: 9	Train Acc: 0.33	Test Acc: 0.4	AVG Train loss: 1.9169266080856324	AVG Test loss: 1.8407311391830445
+Itr: 1	Epoch: 10	Train Acc: 0.45125	Test Acc: 0.38	AVG Train loss: 1.8015794277191162	AVG Test loss: 1.8265075588226318
+Itr: 1	Epoch: 11	Train Acc: 0.45375	Test Acc: 0.385	AVG Train loss: 1.7599758625030517	AVG Test loss: 1.8164270687103272
+Itr: 1	Epoch: 12	Train Acc: 0.47	Test Acc: 0.475	AVG Train loss: 1.7204223728179933	AVG Test loss: 1.7530835676193237
+Itr: 1	Epoch: 13	Train Acc: 0.39375	Test Acc: 0.475	AVG Train loss: 1.884305248260498	AVG Test loss: 1.748255090713501
+Itr: 1	Epoch: 14	Train Acc: 0.50375	Test Acc: 0.415	AVG Train loss: 1.6825613641738892	AVG Test loss: 1.735207486152649
+Itr: 1	Epoch: 15	Train Acc: 0.51375	Test Acc: 0.465	AVG Train loss: 1.6303679513931275	AVG Test loss: 1.6848648500442505
+Itr: 1	Epoch: 16	Train Acc: 0.4875	Test Acc: 0.38	AVG Train loss: 1.7021328353881835	AVG Test loss: 1.701719455718994
+Itr: 1	Epoch: 17	Train Acc: 0.515	Test Acc: 0.39	AVG Train loss: 1.5768102502822876	AVG Test loss: 1.6796562337875367
+Itr: 1	Epoch: 18	Train Acc: 0.5125	Test Acc: 0.515	AVG Train loss: 1.5492713975906371	AVG Test loss: 1.6158820438385009
+Itr: 1	Epoch: 19	Train Acc: 0.50375	Test Acc: 0.495	AVG Train loss: 1.5930728721618652	AVG Test loss: 1.6066245126724243
+Itr: 1	Epoch: 20	Train Acc: 0.50125	Test Acc: 0.48	AVG Train loss: 1.6436844778060913	AVG Test loss: 1.5952465677261352
+Itr: 1	Epoch: 21	Train Acc: 0.56125	Test Acc: 0.515	AVG Train loss: 1.4637218999862671	AVG Test loss: 1.585647029876709
+Itr: 1	Epoch: 22	Train Acc: 0.56	Test Acc: 0.485	AVG Train loss: 1.458977723121643	AVG Test loss: 1.572036919593811
+Itr: 1	Epoch: 23	Train Acc: 0.43375	Test Acc: 0.545	AVG Train loss: 1.7054744911193849	AVG Test loss: 1.5331673002243043
+Itr: 1	Epoch: 24	Train Acc: 0.565	Test Acc: 0.535	AVG Train loss: 1.5118868589401244	AVG Test loss: 1.5212325143814087
+Itr: 1	Epoch: 25	Train Acc: 0.55875	Test Acc: 0.525	AVG Train loss: 1.4958388996124268	AVG Test loss: 1.5163295698165893
+Itr: 1	Epoch: 26	Train Acc: 0.55375	Test Acc: 0.555	AVG Train loss: 1.4980615043640138	AVG Test loss: 1.4868508338928224
+Itr: 1	Epoch: 27	Train Acc: 0.58375	Test Acc: 0.505	AVG Train loss: 1.4408122158050538	AVG Test loss: 1.502132158279419
+Itr: 1	Epoch: 28	Train Acc: 0.46875	Test Acc: 0.49	AVG Train loss: 1.593664183616638	AVG Test loss: 1.4839700412750245
+Itr: 1	Epoch: 29	Train Acc: 0.62	Test Acc: 0.565	AVG Train loss: 1.3406284189224242	AVG Test loss: 1.4664157485961915
+Itr: 1	Epoch: 30	Train Acc: 0.445	Test Acc: 0.51	AVG Train loss: 1.6616811895370482	AVG Test loss: 1.4804932117462157
+Itr: 1	Epoch: 31	Train Acc: 0.59125	Test Acc: 0.58	AVG Train loss: 1.335598611831665	AVG Test loss: 1.432278299331665
+Itr: 1	Epoch: 32	Train Acc: 0.62625	Test Acc: 0.45	AVG Train loss: 1.3593921184539794	AVG Test loss: 1.476106333732605
+Itr: 1	Epoch: 33	Train Acc: 0.62875	Test Acc: 0.53	AVG Train loss: 1.288757176399231	AVG Test loss: 1.426010594367981
+Itr: 1	Epoch: 34	Train Acc: 0.56125	Test Acc: 0.495	AVG Train loss: 1.4390664625167846	AVG Test loss: 1.4423858070373534
+Itr: 1	Epoch: 35	Train Acc: 0.56875	Test Acc: 0.57	AVG Train loss: 1.427770767211914	AVG Test loss: 1.4118282413482666
+Itr: 1	Epoch: 36	Train Acc: 0.5225	Test Acc: 0.54	AVG Train loss: 1.5370787358283997	AVG Test loss: 1.4221837139129638
+Itr: 1	Epoch: 37	Train Acc: 0.6075	Test Acc: 0.58	AVG Train loss: 1.3322127962112427	AVG Test loss: 1.3866967582702636
+Itr: 1	Epoch: 38	Train Acc: 0.60125	Test Acc: 0.59	AVG Train loss: 1.3596088647842408	AVG Test loss: 1.380571928024292
+Itr: 1	Epoch: 39	Train Acc: 0.6325	Test Acc: 0.595	AVG Train loss: 1.2917342138290406	AVG Test loss: 1.3886677408218384
+Itr: 1	Epoch: 40	Train Acc: 0.57125	Test Acc: 0.605	AVG Train loss: 1.4034832429885864	AVG Test loss: 1.3620537900924683
+Itr: 1	Epoch: 41	Train Acc: 0.56625	Test Acc: 0.575	AVG Train loss: 1.4348611116409302	AVG Test loss: 1.383227038383484
+Itr: 1	Epoch: 42	Train Acc: 0.615	Test Acc: 0.59	AVG Train loss: 1.3311300468444824	AVG Test loss: 1.362409791946411
+Itr: 1	Epoch: 43	Train Acc: 0.54125	Test Acc: 0.575	AVG Train loss: 1.4240856456756592	AVG Test loss: 1.3384842491149902
+Itr: 1	Epoch: 44	Train Acc: 0.675	Test Acc: 0.6	AVG Train loss: 1.1773535013198853	AVG Test loss: 1.3327326011657714
+Itr: 1	Epoch: 45	Train Acc: 0.55375	Test Acc: 0.62	AVG Train loss: 1.435438404083252	AVG Test loss: 1.3175581645965577
+Itr: 1	Epoch: 46	Train Acc: 0.6675	Test Acc: 0.55	AVG Train loss: 1.2201159381866455	AVG Test loss: 1.3272561025619507
+Itr: 1	Epoch: 47	Train Acc: 0.6375	Test Acc: 0.61	AVG Train loss: 1.2289464855194092	AVG Test loss: 1.316793212890625
+Itr: 1	Epoch: 48	Train Acc: 0.65625	Test Acc: 0.585	AVG Train loss: 1.217692618370056	AVG Test loss: 1.2998676013946533
+Itr: 1	Epoch: 49	Train Acc: 0.645	Test Acc: 0.6	AVG Train loss: 1.2207725143432617	AVG Test loss: 1.287386417388916
+train set ACC of each class tensor([0.0475, 0.0750, 0.0688, 0.0862, 0.0800, 0.0512, 0.0763, 0.0875, 0.0562,
+        0.0913])
+[[38 26  1  8  0  0  2  4  1  0]
+ [10 60  0  1  0  0  0  9  0  0]
+ [ 1  8 55 13  3  0  0  0  0  0]
+ [ 1  2  4 69  4  0  0  0  0  0]
+ [ 0  0  1 14 64  0  0  0  0  1]
+ [ 1  4  1  0  0 41  6 19  8  0]
+ [ 3  6  0  2  0  3 61  3  2  0]
+ [ 0  3  1  0  0  1  1 70  4  0]
+ [ 5  7  0  5  0  4  7  7 45  0]
+ [ 0  2  0  0  2  1  1  1  0 73]]
+test set ACC of each class tensor([0.0450, 0.0750, 0.0500, 0.0800, 0.0800, 0.0250, 0.0500, 0.0800, 0.0350,
+        0.0800])
+[[ 9  6  0  1  0  0  1  2  1  0]
+ [ 2 15  0  0  0  0  0  3  0  0]
+ [ 0  0 10  7  3  0  0  0  0  0]
+ [ 0  1  0 16  1  0  1  0  1  0]
+ [ 0  0  0  4 16  0  0  0  0  0]
+ [ 1  1  0  1  0  5  2  9  1  0]
+ [ 3  0  0  0  0  3 10  1  3  0]
+ [ 0  0  0  0  0  2  0 16  2  0]
+ [ 2  5  0  2  1  2  0  1  7  0]
+ [ 0  2  0  0  2  0  0  0  0 16]]
+DataParallel(
+  (module): ConvNet(
+    (features): Sequential(
+      (0): Conv2d(3, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (1): GroupNorm(128, 128, eps=1e-05, affine=True)
+      (2): ReLU(inplace=True)
+      (3): AvgPool2d(kernel_size=2, stride=2, padding=0)
+      (4): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (5): GroupNorm(128, 128, eps=1e-05, affine=True)
+      (6): ReLU(inplace=True)
+      (7): AvgPool2d(kernel_size=2, stride=2, padding=0)
+      (8): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (9): GroupNorm(128, 128, eps=1e-05, affine=True)
+      (10): ReLU(inplace=True)
+      (11): AvgPool2d(kernel_size=2, stride=2, padding=0)
+    )
+    (classifier): Linear(in_features=32768, out_features=10, bias=True)
+  )
+)
+Itr: 2	Epoch: 0	Train Acc: 0.1425	Test Acc: 0.175	AVG Train loss: 2.30647988319397	AVG Test loss: 2.183804874420166
+Itr: 2	Epoch: 1	Train Acc: 0.175	Test Acc: 0.15	AVG Train loss: 2.194291706085205	AVG Test loss: 2.154018211364746
+Itr: 2	Epoch: 2	Train Acc: 0.22125	Test Acc: 0.225	AVG Train loss: 2.1196191787719725	AVG Test loss: 2.05136031627655
+Itr: 2	Epoch: 3	Train Acc: 0.26125	Test Acc: 0.235	AVG Train loss: 2.0636372804641723	AVG Test loss: 2.0106689596176146
+Itr: 2	Epoch: 4	Train Acc: 0.32875	Test Acc: 0.435	AVG Train loss: 1.9838133573532104	AVG Test loss: 1.9281005811691285
+Itr: 2	Epoch: 5	Train Acc: 0.33875	Test Acc: 0.41	AVG Train loss: 1.9995569276809693	AVG Test loss: 1.8925170040130614
+Itr: 2	Epoch: 6	Train Acc: 0.42625	Test Acc: 0.495	AVG Train loss: 1.8653933095932007	AVG Test loss: 1.8460627937316894
+Itr: 2	Epoch: 7	Train Acc: 0.39375	Test Acc: 0.38	AVG Train loss: 1.918879828453064	AVG Test loss: 1.8417582082748414
+Itr: 2	Epoch: 8	Train Acc: 0.35125	Test Acc: 0.49	AVG Train loss: 1.9182087898254394	AVG Test loss: 1.7930912971496582
+Itr: 2	Epoch: 9	Train Acc: 0.50125	Test Acc: 0.535	AVG Train loss: 1.7739547538757323	AVG Test loss: 1.7541469192504884
+Itr: 2	Epoch: 10	Train Acc: 0.47125	Test Acc: 0.505	AVG Train loss: 1.7748917484283446	AVG Test loss: 1.7441055393218994
+Itr: 2	Epoch: 11	Train Acc: 0.52	Test Acc: 0.45	AVG Train loss: 1.6992109394073487	AVG Test loss: 1.7330664539337157
+Itr: 2	Epoch: 12	Train Acc: 0.4	Test Acc: 0.42	AVG Train loss: 1.7956528711318969	AVG Test loss: 1.7149715614318848
+Itr: 2	Epoch: 13	Train Acc: 0.53	Test Acc: 0.36	AVG Train loss: 1.655856032371521	AVG Test loss: 1.7047652530670165
+Itr: 2	Epoch: 14	Train Acc: 0.5225	Test Acc: 0.555	AVG Train loss: 1.622834644317627	AVG Test loss: 1.6296546792984008
+Itr: 2	Epoch: 15	Train Acc: 0.4125	Test Acc: 0.535	AVG Train loss: 1.8194849586486816	AVG Test loss: 1.6213094568252564
+Itr: 2	Epoch: 16	Train Acc: 0.545	Test Acc: 0.475	AVG Train loss: 1.5991512489318849	AVG Test loss: 1.6171292018890382
+Itr: 2	Epoch: 17	Train Acc: 0.47375	Test Acc: 0.535	AVG Train loss: 1.6744897317886354	AVG Test loss: 1.5723347282409668
+Itr: 2	Epoch: 18	Train Acc: 0.53	Test Acc: 0.565	AVG Train loss: 1.561107783317566	AVG Test loss: 1.5487907075881957
+Itr: 2	Epoch: 19	Train Acc: 0.40875	Test Acc: 0.565	AVG Train loss: 1.7995988655090331	AVG Test loss: 1.546056113243103
+Itr: 2	Epoch: 20	Train Acc: 0.44	Test Acc: 0.495	AVG Train loss: 1.759698543548584	AVG Test loss: 1.5518512582778932
+Itr: 2	Epoch: 21	Train Acc: 0.5125	Test Acc: 0.56	AVG Train loss: 1.5904282188415528	AVG Test loss: 1.522378978729248
+Itr: 2	Epoch: 22	Train Acc: 0.49625	Test Acc: 0.545	AVG Train loss: 1.6274576997756958	AVG Test loss: 1.4992330598831176
+Itr: 2	Epoch: 23	Train Acc: 0.5425	Test Acc: 0.525	AVG Train loss: 1.5621286058425903	AVG Test loss: 1.4999219942092896
+Itr: 2	Epoch: 24	Train Acc: 0.62875	Test Acc: 0.52	AVG Train loss: 1.4099908685684204	AVG Test loss: 1.4848789978027344
+Itr: 2	Epoch: 25	Train Acc: 0.5625	Test Acc: 0.56	AVG Train loss: 1.5017197990417481	AVG Test loss: 1.4836263847351074
+Itr: 2	Epoch: 26	Train Acc: 0.55625	Test Acc: 0.605	AVG Train loss: 1.5192862749099731	AVG Test loss: 1.450109724998474
+Itr: 2	Epoch: 27	Train Acc: 0.5475	Test Acc: 0.625	AVG Train loss: 1.5180739784240722	AVG Test loss: 1.4415626478195191
+Itr: 2	Epoch: 28	Train Acc: 0.52	Test Acc: 0.57	AVG Train loss: 1.565787010192871	AVG Test loss: 1.43278911113739
+Itr: 2	Epoch: 29	Train Acc: 0.64375	Test Acc: 0.605	AVG Train loss: 1.3320880842208862	AVG Test loss: 1.4001639223098754
+Itr: 2	Epoch: 30	Train Acc: 0.655	Test Acc: 0.59	AVG Train loss: 1.3195133638381957	AVG Test loss: 1.3944116163253784
+Itr: 2	Epoch: 31	Train Acc: 0.62625	Test Acc: 0.57	AVG Train loss: 1.363520426750183	AVG Test loss: 1.3910564994812011
+Itr: 2	Epoch: 32	Train Acc: 0.56875	Test Acc: 0.585	AVG Train loss: 1.423933243751526	AVG Test loss: 1.3784200286865234
+Itr: 2	Epoch: 33	Train Acc: 0.495	Test Acc: 0.62	AVG Train loss: 1.5978353548049926	AVG Test loss: 1.3645986747741699
+Itr: 2	Epoch: 34	Train Acc: 0.6625	Test Acc: 0.595	AVG Train loss: 1.2524029636383056	AVG Test loss: 1.3553465270996095
+Itr: 2	Epoch: 35	Train Acc: 0.54875	Test Acc: 0.61	AVG Train loss: 1.49074143409729	AVG Test loss: 1.3405978059768677
+Itr: 2	Epoch: 36	Train Acc: 0.60875	Test Acc: 0.575	AVG Train loss: 1.3980667638778685	AVG Test loss: 1.349124822616577
+Itr: 2	Epoch: 37	Train Acc: 0.6225	Test Acc: 0.585	AVG Train loss: 1.2915437173843385	AVG Test loss: 1.3407387733459473
+Itr: 2	Epoch: 38	Train Acc: 0.42375	Test Acc: 0.64	AVG Train loss: 1.6585175132751464	AVG Test loss: 1.3317228984832763
+Itr: 2	Epoch: 39	Train Acc: 0.6625	Test Acc: 0.575	AVG Train loss: 1.2303158378601073	AVG Test loss: 1.3428718090057372
+Itr: 2	Epoch: 40	Train Acc: 0.6475	Test Acc: 0.6	AVG Train loss: 1.2362165927886963	AVG Test loss: 1.315520691871643
+Itr: 2	Epoch: 41	Train Acc: 0.67125	Test Acc: 0.635	AVG Train loss: 1.2654771375656129	AVG Test loss: 1.3060382604599
+Itr: 2	Epoch: 42	Train Acc: 0.65	Test Acc: 0.63	AVG Train loss: 1.271003293991089	AVG Test loss: 1.2768511724472047
+Itr: 2	Epoch: 43	Train Acc: 0.5825	Test Acc: 0.665	AVG Train loss: 1.3810356044769287	AVG Test loss: 1.268907780647278
+Itr: 2	Epoch: 44	Train Acc: 0.6875	Test Acc: 0.64	AVG Train loss: 1.1495939683914185	AVG Test loss: 1.2790801477432252
+Itr: 2	Epoch: 45	Train Acc: 0.6275	Test Acc: 0.61	AVG Train loss: 1.321203384399414	AVG Test loss: 1.2690819358825685
+Itr: 2	Epoch: 46	Train Acc: 0.7025	Test Acc: 0.615	AVG Train loss: 1.1234026336669922	AVG Test loss: 1.2710805559158325
+Itr: 2	Epoch: 47	Train Acc: 0.63625	Test Acc: 0.635	AVG Train loss: 1.2317872047424316	AVG Test loss: 1.2402882480621338
+Itr: 2	Epoch: 48	Train Acc: 0.57375	Test Acc: 0.605	AVG Train loss: 1.4091714572906495	AVG Test loss: 1.2606951713562011
+Itr: 2	Epoch: 49	Train Acc: 0.6825	Test Acc: 0.61	AVG Train loss: 1.1466686153411865	AVG Test loss: 1.263698935508728
+train set ACC of each class tensor([0.0675, 0.0538, 0.0812, 0.0812, 0.0862, 0.0637, 0.0662, 0.0900, 0.0450,
+        0.0900])
+[[54  5  1  6  0  0  3 10  1  0]
+ [16 43  0  0  0  0  1 20  0  0]
+ [ 1  1 65 11  0  0  0  2  0  0]
+ [ 5  0  3 65  7  0  0  0  0  0]
+ [ 0  0  1  8 69  0  0  0  0  2]
+ [ 2  1  1  0  0 51  3 19  3  0]
+ [ 9  0  0  0  0 10 53  4  4  0]
+ [ 1  1  1  0  0  3  0 72  2  0]
+ [ 8  3  1  2  0 11  6 13 36  0]
+ [ 0  1  0  1  2  2  0  2  0 72]]
+test set ACC of each class tensor([0.0600, 0.0350, 0.0600, 0.0800, 0.0750, 0.0600, 0.0500, 0.0900, 0.0250,
+        0.0750])
+[[12  1  0  1  0  1  1  3  1  0]
+ [ 5  7  0  0  0  1  0  7  0  0]
+ [ 0  0 12  6  2  0  0  0  0  0]
+ [ 1  1  1 16  0  0  0  1  0  0]
+ [ 0  0  1  4 15  0  0  0  0  0]
+ [ 0  0  1  0  0 12  1  6  0  0]
+ [ 1  0  0  0  0  6 10  1  2  0]
+ [ 0  0  0  0  0  1  0 18  1  0]
+ [ 3  1  1  2  0  6  0  2  5  0]
+ [ 0  1  0  1  1  0  0  0  2 15]]
+```
 
 # lr 0.001
 ```cmd

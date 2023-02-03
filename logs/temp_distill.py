@@ -16,15 +16,17 @@ import matplotlib.pyplot as plt
 from reparam_module import ReparamModule
 
 import warnings
+
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
-def main(args):
 
+def main(args):
     if args.zca and args.texture:
         raise AssertionError("Cannot use zca and texture together")
 
     if args.texture and args.pix_init == "real":
-        print("WARNING: Using texture with real initialization will take a very long time to smooth out the boundaries between images.")
+        print(
+            "WARNING: Using texture with real initialization will take a very long time to smooth out the boundaries between images.")
 
     if args.max_experts is not None and args.max_files is not None:
         args.total_experts = args.max_experts * args.max_files
@@ -35,14 +37,15 @@ def main(args):
     args.device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
     eval_it_pool = np.arange(0, args.Iteration + 1, args.eval_it).tolist()
-    channel, im_size, num_classes, class_names, mean, std, dst_train, dst_test, testloader, loader_train_dict, class_map, class_map_inv = get_dataset(args.dataset, args.data_path, args.batch_real, args.subset, args=args)
+    channel, im_size, num_classes, class_names, mean, std, dst_train, dst_test, testloader, loader_train_dict, class_map, class_map_inv = get_dataset(
+        args.dataset, args.data_path, args.batch_real, args.subset, args=args)
     model_eval_pool = get_eval_pool(args.eval_mode, args.model, args.model)
 
     im_res = im_size[0]
 
     args.im_size = im_size
 
-    accs_all_exps = dict() # record performances of all experiments
+    accs_all_exps = dict()  # record performances of all experiments
     for key in model_eval_pool:
         accs_all_exps[key] = []
 
@@ -80,7 +83,6 @@ def main(args):
     args.distributed = torch.cuda.device_count() > 1
     args.distributed = False
 
-
     print('Hyper-parameters: \n', args.__dict__)
     print('Evaluation model pool: ', model_eval_pool)
 
@@ -101,35 +103,37 @@ def main(args):
 
     class_weights = []
     for c in range(num_classes):
-        class_weights.append(1-len(indices_class[c])/len(labels_all))
-        print('class c = %d: %d real images'%(c, len(indices_class[c])))
+        class_weights.append(1 - len(indices_class[c]) / len(labels_all))
+        print('class c = %d: %d real images' % (c, len(indices_class[c])))
 
     print("Class Weights:", class_weights)
     class_weights = torch.tensor(class_weights).to(args.device)
 
     for ch in range(channel):
-        print('real images channel %d, mean = %.4f, std = %.4f'%(ch, torch.mean(images_all[:, ch]), torch.std(images_all[:, ch])))
-
+        print('real images channel %d, mean = %.4f, std = %.4f' % (
+        ch, torch.mean(images_all[:, ch]), torch.std(images_all[:, ch])))
 
     def get_images(c, n):  # get random n images from class c
         idx_shuffle = np.random.permutation(indices_class[c])[:n]
         return images_all[idx_shuffle]
 
-
     ''' initialize the synthetic data '''
-    label_syn = torch.tensor([np.ones(args.ipc)*i for i in range(num_classes)], dtype=torch.long, requires_grad=False, device=args.device).view(-1) # [0,0,0, 1,1,1, ..., 9,9,9]
+    label_syn = torch.tensor([np.ones(args.ipc) * i for i in range(num_classes)], dtype=torch.long, requires_grad=False,
+                             device=args.device).view(-1)  # [0,0,0, 1,1,1, ..., 9,9,9]
 
     if args.texture:
-        image_syn = torch.randn(size=(num_classes * args.ipc, channel, im_size[0]*args.canvas_size, im_size[1]*args.canvas_size), dtype=torch.float)
+        image_syn = torch.randn(
+            size=(num_classes * args.ipc, channel, im_size[0] * args.canvas_size, im_size[1] * args.canvas_size),
+            dtype=torch.float)
     else:
-        # image_syn = torch.load(os.path.join(".", "logged_files", args.dataset, 'earnest-silence-55', 'images_best.pt'))
+        # image_syn = torch.load(os.path.join(".", "logged_files", args.dataset, 'glowing-dragon-94', 'images_2000.pt'))
         image_syn = torch.zeros(size=(num_classes * args.ipc, channel, im_size[0], im_size[1]), dtype=torch.float)
-        image_syn[:, :, im_size[0] // 4: (im_size[0] * 3) // 4, im_size[1] // 4: (im_size[1] * 3) // 4] = torch.randn(size=(num_classes * args.ipc, channel, im_size[0] // 2, im_size[1] // 2), dtype=torch.float)
+        image_syn[:, :, im_size[0] // 4: (im_size[0] * 3) // 4, im_size[1] // 4: (im_size[1] * 3) // 4] = torch.randn(
+            size=(num_classes * args.ipc, channel, im_size[0] // 2, im_size[1] // 2), dtype=torch.float)
         from torchvision import transforms
         blur = transforms.GaussianBlur(kernel_size=(3, 3), sigma=(0.3, 0.3))
         for i in range(2000):
             image_syn = blur(image_syn)
-
 
     syn_lr = torch.tensor(args.lr_teacher).to(args.device)
 
@@ -147,16 +151,16 @@ def main(args):
     else:
         print('initialize synthetic data from random noise')
 
-
     ''' training '''
     image_syn = image_syn.detach().to(args.device).requires_grad_(True)
     syn_lr = syn_lr.detach().to(args.device).requires_grad_(True)
     optimizer_img = torch.optim.SGD([image_syn], lr=args.lr_img, momentum=0.5)
+    # optimizer_img = torch.optim.Adam([image_syn], lr=args.lr_img)
     optimizer_lr = torch.optim.SGD([syn_lr], lr=args.lr_lr, momentum=0.5)
     optimizer_img.zero_grad()
 
     criterion = nn.CrossEntropyLoss().to(args.device)
-    print('%s training begins'%get_time())
+    print('%s training begins' % get_time())
 
     expert_dir = os.path.join(args.buffer_path, args.dataset)
     if args.dataset == "ImageNet":
@@ -206,11 +210,11 @@ def main(args):
     reached_max = False
     # ------------------------------
 
-    for it in range(0, args.Iteration+1):
-        if it % start_epoch_cap == 0:
-            image_syn = blur(image_syn)
-            image_syn = image_syn.detach().to(args.device).requires_grad_(True)
-        optimizer_img = torch.optim.SGD([image_syn], lr=args.lr_img, momentum=0.5)
+    for it in range(0, args.Iteration + 1):
+        # if it % start_epoch_cap == 0:
+        image_syn = blur(image_syn)
+        image_syn = image_syn.detach().to(args.device).requires_grad_(True)
+        # optimizer_img = torch.optim.SGD([image_syn], lr=args.lr_img / int(start_epoch_cap), momentum=0.5)
         save_this_it = False
 
         # writer.add_scalar('Progress', it, it)
@@ -218,7 +222,8 @@ def main(args):
         ''' Evaluate synthetic data '''
         if it in eval_it_pool:
             for model_eval in model_eval_pool:
-                print('-------------------------\nEvaluation\nmodel_train = %s, model_eval = %s, iteration = %d'%(args.model, model_eval, it))
+                print('-------------------------\nEvaluation\nmodel_train = %s, model_eval = %s, iteration = %d' % (
+                args.model, model_eval, it))
                 if args.dsa:
                     print('DSA augmentation strategy: \n', args.dsa_strategy)
                     print('DSA augmentation parameters: \n', args.dsa_param.__dict__)
@@ -227,24 +232,30 @@ def main(args):
 
                 accs_test = []
                 accs_train = []
-                
-                total_train_cf, total_test_cf = np.array([[0] * num_classes for _ in range(num_classes)]), np.array([[0] * num_classes for _ in range(num_classes)])
-                
+
+                total_train_cf, total_test_cf = np.array([[0] * num_classes for _ in range(num_classes)]), np.array(
+                    [[0] * num_classes for _ in range(num_classes)])
+
                 for it_eval in range(args.num_eval):
-                    net_eval = get_network(model_eval, channel, num_classes, im_size).to(args.device) # get a random model
+                    net_eval = get_network(model_eval, channel, num_classes, im_size).to(
+                        args.device)  # get a random model
 
                     eval_labs = label_syn
                     with torch.no_grad():
                         image_save = image_syn
-                    image_syn_eval, label_syn_eval = copy.deepcopy(image_save.detach()), copy.deepcopy(eval_labs.detach()) # avoid any unaware modification
+                    image_syn_eval, label_syn_eval = copy.deepcopy(image_save.detach()), copy.deepcopy(
+                        eval_labs.detach())  # avoid any unaware modification
 
                     args.lr_net = syn_lr.item()
-                    _, acc_train, acc_test, train_cf, test_cf = evaluate_synset(it, it_eval, net_eval, num_classes, image_syn_eval, label_syn_eval, dst_test, testloader, args, texture=args.texture)
+                    _, acc_train, acc_test, train_cf, test_cf = evaluate_synset(it, it_eval, net_eval, num_classes,
+                                                                                image_syn_eval, label_syn_eval,
+                                                                                dst_test, testloader, args,
+                                                                                texture=args.texture)
                     total_train_cf += train_cf
                     total_test_cf += test_cf
                     accs_test.append(acc_test)
                     accs_train.append(acc_train)
-                
+
                 accs_test = np.array(accs_test)
                 accs_train = np.array(accs_train)
                 acc_test_mean = np.mean(accs_test)
@@ -262,13 +273,14 @@ def main(args):
                             start_epoch_cap = int(start_epoch_cap + 0.5)
                             start_epoch_cap = min(start_epoch_cap, args.max_start_epoch)
                             reached_max = False
-                            optimizer_img = torch.optim.SGD([image_syn], lr=args.lr_img, momentum=0.5)
+                            # optimizer_img = torch.optim.SGD([image_syn], lr=args.lr_img / int(start_epoch_cap), momentum=0.5)
                         else:
                             start_epoch_cap += 0.5
                     else:
                         start_epoch_cap += 0.25
                     # ------------------------------
-                print('Evaluate %d random %s, mean = %.4f std = %.4f\n-------------------------'%(len(accs_test), model_eval, acc_test_mean, acc_test_std))
+                print('Evaluate %d random %s, mean = %.4f std = %.4f\n-------------------------' % (
+                len(accs_test), model_eval, acc_test_mean, acc_test_std))
                 wandb.log({'Accuracy/{}'.format(model_eval): acc_test_mean}, step=it)
                 wandb.log({'Max_Accuracy/{}'.format(model_eval): best_acc[model_eval]}, step=it)
                 wandb.log({'Std/{}'.format(model_eval): acc_test_std}, step=it)
@@ -314,17 +326,19 @@ def main(args):
                         upsampled = torch.repeat_interleave(upsampled, repeats=4, dim=3)
                     grid = torchvision.utils.make_grid(upsampled, nrow=10, normalize=True, scale_each=True)
                     wandb.log({"Synthetic_Images": wandb.Image(torch.nan_to_num(grid.detach().cpu()))}, step=it)
-                    wandb.log({'Synthetic_Pixels': wandb.Histogram(torch.nan_to_num(image_save.detach().cpu()))}, step=it)
+                    wandb.log({'Synthetic_Pixels': wandb.Histogram(torch.nan_to_num(image_save.detach().cpu()))},
+                              step=it)
 
                     for clip_val in [2.5]:
                         std = torch.std(image_save)
                         mean = torch.mean(image_save)
-                        upsampled = torch.clip(image_save, min=mean-clip_val*std, max=mean+clip_val*std)
+                        upsampled = torch.clip(image_save, min=mean - clip_val * std, max=mean + clip_val * std)
                         if args.dataset != "ImageNet":
                             upsampled = torch.repeat_interleave(upsampled, repeats=4, dim=2)
                             upsampled = torch.repeat_interleave(upsampled, repeats=4, dim=3)
                         grid = torchvision.utils.make_grid(upsampled, nrow=10, normalize=True, scale_each=True)
-                        wandb.log({"Clipped_Synthetic_Images/std_{}".format(clip_val): wandb.Image(torch.nan_to_num(grid.detach().cpu()))}, step=it)
+                        wandb.log({"Clipped_Synthetic_Images/std_{}".format(clip_val): wandb.Image(
+                            torch.nan_to_num(grid.detach().cpu()))}, step=it)
 
                     if args.zca:
                         image_save = image_save.to(args.device)
@@ -339,7 +353,9 @@ def main(args):
                             upsampled = torch.repeat_interleave(upsampled, repeats=4, dim=3)
                         grid = torchvision.utils.make_grid(upsampled, nrow=10, normalize=True, scale_each=True)
                         wandb.log({"Reconstructed_Images": wandb.Image(torch.nan_to_num(grid.detach().cpu()))}, step=it)
-                        wandb.log({'Reconstructed_Pixels': wandb.Histogram(torch.nan_to_num(image_save.detach().cpu()))}, step=it)
+                        wandb.log(
+                            {'Reconstructed_Pixels': wandb.Histogram(torch.nan_to_num(image_save.detach().cpu()))},
+                            step=it)
 
                         for clip_val in [2.5]:
                             std = torch.std(image_save)
@@ -354,7 +370,8 @@ def main(args):
 
         wandb.log({"Synthetic_LR": syn_lr.detach().cpu()}, step=it)
 
-        student_net = get_network(args.model, channel, num_classes, im_size, dist=False).to(args.device)  # get a random model
+        student_net = get_network(args.model, channel, num_classes, im_size, dist=False).to(
+            args.device)  # get a random model
 
         student_net = ReparamModule(student_net)
 
@@ -392,10 +409,11 @@ def main(args):
 
         starting_params = expert_trajectory[start_epoch]
 
-        target_params = expert_trajectory[start_epoch+args.expert_epochs]
+        target_params = expert_trajectory[start_epoch + args.expert_epochs]
         target_params = torch.cat([p.data.to(args.device).reshape(-1) for p in target_params], 0)
 
-        student_params = [torch.cat([p.data.to(args.device).reshape(-1) for p in starting_params], 0).requires_grad_(True)]
+        student_params = [
+            torch.cat([p.data.to(args.device).reshape(-1) for p in starting_params], 0).requires_grad_(True)]
 
         starting_params = torch.cat([p.data.to(args.device).reshape(-1) for p in starting_params], 0)
 
@@ -415,12 +433,14 @@ def main(args):
 
             these_indices = indices_chunks.pop()
 
-
             x = syn_images[these_indices]
             this_y = y_hat[these_indices]
 
             if args.texture:
-                x = torch.cat([torch.stack([torch.roll(im, (torch.randint(im_size[0]*args.canvas_size, (1,)), torch.randint(im_size[1]*args.canvas_size, (1,))), (1,2))[:,:im_size[0],:im_size[1]] for im in x]) for _ in range(args.canvas_samples)])
+                x = torch.cat([torch.stack([torch.roll(im, (
+                torch.randint(im_size[0] * args.canvas_size, (1,)), torch.randint(im_size[1] * args.canvas_size, (1,))),
+                                                       (1, 2))[:, :im_size[0], :im_size[1]] for im in x]) for _ in
+                               range(args.canvas_samples)])
                 this_y = torch.cat([this_y for _ in range(args.canvas_samples)])
 
             if args.dsa and (not args.no_aug):
@@ -437,7 +457,6 @@ def main(args):
 
             student_params.append(student_params[-1] - syn_lr * grad)
 
-
         param_loss = torch.tensor(0.0).to(args.device)
         param_dist = torch.tensor(0.0).to(args.device)
 
@@ -446,7 +465,6 @@ def main(args):
 
         param_loss_list.append(param_loss)
         param_dist_list.append(param_dist)
-
 
         param_loss /= num_params
         param_dist /= num_params
@@ -469,7 +487,7 @@ def main(args):
         for _ in student_params:
             del _
 
-        if it%10 == 0:
+        if it % 10 == 0:
             print('%s iter = %04d, loss = %.4f' % (get_time(), it, grand_loss.item()))
 
     wandb.finish()
@@ -480,7 +498,8 @@ if __name__ == '__main__':
 
     parser.add_argument('--dataset', type=str, default='CIFAR10', help='dataset')
 
-    parser.add_argument('--subset', type=str, default='imagenette', help='ImageNet subset. This only does anything when --dataset=ImageNet')
+    parser.add_argument('--subset', type=str, default='imagenette',
+                        help='ImageNet subset. This only does anything when --dataset=ImageNet')
 
     parser.add_argument('--model', type=str, default='ConvNet', help='model')
 
@@ -493,7 +512,8 @@ if __name__ == '__main__':
 
     parser.add_argument('--eval_it', type=int, default=100, help='how often to evaluate')
 
-    parser.add_argument('--epoch_eval_train', type=int, default=1000, help='epochs to train a model with synthetic data')
+    parser.add_argument('--epoch_eval_train', type=int, default=1000,
+                        help='epochs to train a model with synthetic data')
     parser.add_argument('--Iteration', type=int, default=4000, help='how many distillation steps to perform')
 
     parser.add_argument('--lr_img', type=float, default=1000, help='learning rate for updating synthetic images')
@@ -524,7 +544,8 @@ if __name__ == '__main__':
 
     parser.add_argument('--zca', action='store_true', help="do ZCA whitening")
 
-    parser.add_argument('--load_all', action='store_true', help="only use if you can fit all expert trajectories into RAM")
+    parser.add_argument('--load_all', action='store_true',
+                        help="only use if you can fit all expert trajectories into RAM")
 
     parser.add_argument('--no_aug', type=bool, default=False, help='this turns off diff aug during distillation')
 
@@ -532,9 +553,10 @@ if __name__ == '__main__':
     parser.add_argument('--canvas_size', type=int, default=2, help='size of synthetic canvas')
     parser.add_argument('--canvas_samples', type=int, default=1, help='number of canvas samples per iteration')
 
-
-    parser.add_argument('--max_files', type=int, default=None, help='number of expert files to read (leave as None unless doing ablations)')
-    parser.add_argument('--max_experts', type=int, default=None, help='number of experts to read per file (leave as None unless doing ablations)')
+    parser.add_argument('--max_files', type=int, default=None,
+                        help='number of expert files to read (leave as None unless doing ablations)')
+    parser.add_argument('--max_experts', type=int, default=None,
+                        help='number of experts to read per file (leave as None unless doing ablations)')
 
     parser.add_argument('--force_save', action='store_true', help='this will save images for 50ipc')
 
