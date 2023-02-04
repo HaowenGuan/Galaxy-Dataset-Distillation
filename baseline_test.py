@@ -4,13 +4,13 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torchvision.utils
 from tqdm import tqdm
 from utils import get_dataset, get_network, get_eval_pool, evaluate_synset, get_time, DiffAugment, ParamDiffAug
 import wandb
 import copy
 import random
 from reparam_module import ReparamModule
+from torchvision.utils import save_image
 
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -24,10 +24,10 @@ def main(args):
     args.dsa_param = ParamDiffAug()
 
     channel, im_size, num_classes, class_names, mean, std, dst_train, dst_test, testloader, loader_train_dict, class_map, class_map_inv = get_dataset(args.dataset, args.data_path, args.batch_real, args.subset, args=args)
-
     images_all = []
     labels_all = []
     indices_class = [[] for c in range(num_classes)]
+
     print("BUILDING DATASET")
     for i in tqdm(range(len(dst_train))):
         sample = dst_train[i]
@@ -42,6 +42,11 @@ def main(args):
     def get_images(c, n):  # get random n images from class c
         idx_shuffle = np.random.permutation(indices_class[c])[:n]
         return images_all[idx_shuffle]
+
+    def get_images_average(c,n):
+        avg_pic = torch.mean(images_all[indices_class[c]],0)
+        save_image(avg_pic, 'logs/average_images/class_'+str(c)+"_average.png")
+        return avg_pic
     
     mean_acc_all = []
     for image_set in range(10):
@@ -50,9 +55,10 @@ def main(args):
         image_syn = torch.randn(size=(num_classes * args.ipc, channel, im_size[0], im_size[1]), dtype=torch.float)
 
         for c in range(num_classes):
-            image_syn.data[c * args.ipc:(c + 1) * args.ipc] = get_images(c, args.ipc).detach().data
+            image_syn.data[c * args.ipc:(c + 1) * args.ipc] = get_images_average(c, args.ipc).detach().data
+            # image_syn.data[c * args.ipc:(c + 1) * args.ipc] = get_images(c, args.ipc).detach().data
 
-        # eval_it_pool = np.arange(0, args.Iteration + 1, args.eval_it).tolist()
+        eval_it_pool = np.arange(0, args.Iteration + 1, args.eval_it).tolist()
         model_eval_pool = get_eval_pool(args.eval_mode, args.model, args.model)
         syn_lr = torch.tensor(args.lr_teacher).to(args.device)
 
@@ -70,7 +76,9 @@ def main(args):
                 image_syn_eval, label_syn_eval = copy.deepcopy(image_save.detach()), copy.deepcopy(eval_labs.detach()) # avoid any unaware modification
 
                 args.lr_net = syn_lr.item()
-                _, acc_train, acc_test = evaluate_synset(it_eval, net_eval, image_syn_eval, label_syn_eval, testloader, args, texture=args.texture)
+                _, acc_train, acc_test, train_cf, test_cf = evaluate_synset(1, it_eval, net_eval, num_classes,
+                                                                            image_syn_eval, label_syn_eval, dst_test,
+                                                                            testloader, args, texture=args.texture)
                 accs_test.append(acc_test)
                 accs_train.append(acc_train)
             accs_test = np.array(accs_test)
@@ -87,7 +95,7 @@ def main(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Parameter Processing')
 
-    parser.add_argument('--dataset', type=str, default='CIFAR10', help='dataset')
+    parser.add_argument('--dataset', type=str, default='gzoo2', help='dataset')
 
     parser.add_argument('--subset', type=str, default='imagenette', help='ImageNet subset. This only does anything when --dataset=ImageNet')
 
