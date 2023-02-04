@@ -6,7 +6,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 from tqdm import tqdm
 from utils import get_dataset, get_network, get_eval_pool, evaluate_synset, get_time, DiffAugment, ParamDiffAug
-import wandb
 import copy
 import random
 from reparam_module import ReparamModule
