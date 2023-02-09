@@ -34,7 +34,7 @@ def main(args):
     args.dsa = True if args.dsa == 'True' else False
     args.device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-    eval_it_pool = np.arange(0, args.Iteration + 1, args.eval_it).tolist()
+    eval_it_pool = np.arange(200, args.Iteration + 1, args.eval_it).tolist()
     channel, im_size, num_classes, class_names, mean, std, dst_train, dst_test, testloader, loader_train_dict, class_map, class_map_inv = get_dataset(args.dataset, args.data_path, args.batch_real, args.subset, args=args)
     model_eval_pool = get_eval_pool(args.eval_mode, args.model, args.model)
 
@@ -117,16 +117,17 @@ def main(args):
 
 
     ''' initialize the synthetic data '''
-    label_syn = torch.tensor([np.ones(args.ipc)*i for i in range(num_classes)], dtype=torch.long, requires_grad=False, device=args.device).view(-1) # [0,0,0, 1,1,1, ..., 9,9,9]
-
+    # label_syn = torch.tensor([np.ones(args.ipc)*i for i in range(num_classes)], dtype=torch.long, requires_grad=False, device=args.device).view(-1) # [0,0,0, 1,1,1, ..., 9,9,9]
+    label_syn = torch.tensor([np.ones(args.ipc, dtype=np.int_) * i for i in range(num_classes)], dtype=torch.long,
+                             requires_grad=False, device=args.device).view(-1)
     if args.texture:
         image_syn = torch.randn(size=(num_classes * args.ipc, channel, im_size[0]*args.canvas_size, im_size[1]*args.canvas_size), dtype=torch.float)
     else:
-        # image_syn = torch.load(os.path.join(".", "logged_files", args.dataset, 'earnest-silence-55', 'images_best.pt'))
+        # image_syn = torch.load(os.path.join(".", "logged_files", args.dataset, 'flashing-rocket-112', 'images_20000.pt'))
         image_syn = torch.zeros(size=(num_classes * args.ipc, channel, im_size[0], im_size[1]), dtype=torch.float)
         image_syn[:, :, im_size[0] // 4: (im_size[0] * 3) // 4, im_size[1] // 4: (im_size[1] * 3) // 4] = torch.randn(size=(num_classes * args.ipc, channel, im_size[0] // 2, im_size[1] // 2), dtype=torch.float)
         from torchvision import transforms
-        blur = transforms.GaussianBlur(kernel_size=(3, 3), sigma=(0.3, 0.3))
+        blur = transforms.GaussianBlur(kernel_size=(3, 3), sigma=(0.2, 0.2))
         for i in range(2000):
             image_syn = blur(image_syn)
 
@@ -150,7 +151,7 @@ def main(args):
 
     ''' training '''
     image_syn = image_syn.detach().to(args.device).requires_grad_(True)
-    syn_lr = syn_lr.detach().to(args.device).requires_grad_(True)
+    syn_lr = torch.log(syn_lr).detach().to(args.device).requires_grad_(True)
     optimizer_img = torch.optim.SGD([image_syn], lr=args.lr_img, momentum=0.5)
     optimizer_lr = torch.optim.SGD([syn_lr], lr=args.lr_lr, momentum=0.5)
     optimizer_img.zero_grad()
@@ -210,7 +211,10 @@ def main(args):
         if it % start_epoch_cap == 0:
             image_syn = blur(image_syn)
             image_syn = image_syn.detach().to(args.device).requires_grad_(True)
-        optimizer_img = torch.optim.SGD([image_syn], lr=args.lr_img, momentum=0.5)
+            optimizer_img = torch.optim.SGD([image_syn], lr=args.lr_img, momentum=0.5)
+        print(syn_lr, torch.exp(syn_lr))
+        if it > 10:
+            exit(-1)
         save_this_it = False
 
         # writer.add_scalar('Progress', it, it)
@@ -345,7 +349,7 @@ def main(args):
                             std = torch.std(image_save)
                             mean = torch.mean(image_save)
                             upsampled = torch.clip(image_save, min=mean - clip_val * std, max=mean + clip_val * std)
-                            if args.dataset != "ImageNet":
+                            if args.dataset != "Imalr_teachergeNet":
                                 upsampled = torch.repeat_interleave(upsampled, repeats=4, dim=2)
                                 upsampled = torch.repeat_interleave(upsampled, repeats=4, dim=3)
                             grid = torchvision.utils.make_grid(upsampled, nrow=10, normalize=True, scale_each=True)
@@ -435,7 +439,7 @@ def main(args):
 
             grad = torch.autograd.grad(ce_loss, student_params[-1], create_graph=True)[0]
 
-            student_params.append(student_params[-1] - syn_lr * grad)
+            student_params.append(student_params[-1] - torch.exp(syn_lr) * grad)
 
 
         param_loss = torch.tensor(0.0).to(args.device)
@@ -456,12 +460,12 @@ def main(args):
         grand_loss = param_loss
 
         optimizer_img.zero_grad()
-        # optimizer_lr.zero_grad()
-
+        optimizer_lr.zero_grad()
+        print(syn_lr.grad)
         grand_loss.backward()
-
+        print(syn_lr.grad)
         optimizer_img.step()
-        # optimizer_lr.step()
+        optimizer_lr.step()
 
         wandb.log({"Grand_Loss": grand_loss.detach().cpu(),
                    "Start_Epoch": start_epoch})
@@ -469,7 +473,7 @@ def main(args):
         for _ in student_params:
             del _
 
-        if it%10 == 0:
+        if it%1 == 0:
             print('%s iter = %04d, loss = %.4f' % (get_time(), it, grand_loss.item()))
 
     wandb.finish()
@@ -539,6 +543,8 @@ if __name__ == '__main__':
     parser.add_argument('--force_save', action='store_true', help='this will save images for 50ipc')
 
     args = parser.parse_args()
+
+    print(args)
 
     main(args)
 
