@@ -179,6 +179,7 @@ def main(args):
 
 if __name__ == '__main__':
     import argparse
+    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
     parser = argparse.ArgumentParser(description='Parameter Processing')
     parser.add_argument('--dataset', type=str, default='gzoo2', help='dataset')
     parser.add_argument('--subset', type=str, default='imagenette', help='subset')

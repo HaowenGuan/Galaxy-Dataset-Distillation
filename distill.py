@@ -32,7 +32,7 @@ def main(args):
     print("CUDNN STATUS: {}".format(torch.backends.cudnn.enabled))
 
     args.dsa = True if args.dsa == 'True' else False
-    args.device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    args.device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 
     eval_it_pool = np.arange(200, args.Iteration + 1, args.eval_it).tolist()
     channel, im_size, num_classes, class_names, mean, std, dst_train, dst_test, testloader, loader_train_dict, class_map, class_map_inv = get_dataset(args.dataset, args.data_path, args.batch_real, args.subset, args=args)
@@ -123,7 +123,7 @@ def main(args):
     if args.texture:
         image_syn = torch.randn(size=(num_classes * args.ipc, channel, im_size[0]*args.canvas_size, im_size[1]*args.canvas_size), dtype=torch.float)
     else:
-        # image_syn = torch.load(os.path.join(".", "logged_files", args.dataset, 'flashing-rocket-112', 'images_20000.pt'))
+        # image_syn = torch.load(os.path.join(".", "logged_files", args.dataset, 'royal-shape-146', 'images_10000.pt'))
         image_syn = torch.zeros(size=(num_classes * args.ipc, channel, im_size[0], im_size[1]), dtype=torch.float)
         image_syn[:, :, im_size[0] // 4: (im_size[0] * 3) // 4, im_size[1] // 4: (im_size[1] * 3) // 4] = torch.randn(size=(num_classes * args.ipc, channel, im_size[0] // 2, im_size[1] // 2), dtype=torch.float)
         from torchvision import transforms
@@ -151,9 +151,9 @@ def main(args):
 
     ''' training '''
     image_syn = image_syn.detach().to(args.device).requires_grad_(True)
-    syn_lr = torch.log(syn_lr).detach().to(args.device).requires_grad_(True)
+    log_syn_lr = torch.log(syn_lr).detach().to(args.device).requires_grad_(True)
     optimizer_img = torch.optim.SGD([image_syn], lr=args.lr_img, momentum=0.5)
-    optimizer_lr = torch.optim.SGD([syn_lr], lr=args.lr_lr, momentum=0.5)
+    optimizer_lr = torch.optim.SGD([log_syn_lr], lr=args.lr_lr, momentum=0.5)
     optimizer_img.zero_grad()
 
     criterion = nn.CrossEntropyLoss().to(args.device)
@@ -203,18 +203,16 @@ def main(args):
     blur = transforms.GaussianBlur(kernel_size=(3, 3), sigma=(0.3, 0.3)).to(args.device)
 
     # stage match trajectory #1 init
-    start_epoch_cap = 1
+    start_epoch_cap = 29
     reached_max = False
     # ------------------------------
 
     for it in range(0, args.Iteration+1):
-        if it % start_epoch_cap == 0:
-            image_syn = blur(image_syn)
-            image_syn = image_syn.detach().to(args.device).requires_grad_(True)
-            optimizer_img = torch.optim.SGD([image_syn], lr=args.lr_img, momentum=0.5)
-        print(syn_lr, torch.exp(syn_lr))
-        if it > 10:
-            exit(-1)
+        # if it % start_epoch_cap == 0:
+        #     image_syn = blur(image_syn)
+        #     image_syn = image_syn.detach().to(args.device).requires_grad_(True)
+        #     optimizer_img = torch.optim.SGD([image_syn], lr=args.lr_img, momentum=0.5)
+        syn_lr = torch.exp(log_syn_lr)
         save_this_it = False
 
         # writer.add_scalar('Progress', it, it)
@@ -266,7 +264,7 @@ def main(args):
                             start_epoch_cap = int(start_epoch_cap + 0.5)
                             start_epoch_cap = min(start_epoch_cap, args.max_start_epoch)
                             reached_max = False
-                            optimizer_img = torch.optim.SGD([image_syn], lr=args.lr_img, momentum=0.5)
+                            # optimizer_img = torch.optim.SGD([image_syn], lr=args.lr_img, momentum=0.5)
                         else:
                             start_epoch_cap += 0.5
                     else:
@@ -439,7 +437,7 @@ def main(args):
 
             grad = torch.autograd.grad(ce_loss, student_params[-1], create_graph=True)[0]
 
-            student_params.append(student_params[-1] - torch.exp(syn_lr) * grad)
+            student_params.append(student_params[-1] - syn_lr * grad)
 
 
         param_loss = torch.tensor(0.0).to(args.device)
@@ -461,9 +459,9 @@ def main(args):
 
         optimizer_img.zero_grad()
         optimizer_lr.zero_grad()
-        print(syn_lr.grad)
+
         grand_loss.backward()
-        print(syn_lr.grad)
+
         optimizer_img.step()
         optimizer_lr.step()
 
@@ -473,7 +471,7 @@ def main(args):
         for _ in student_params:
             del _
 
-        if it%1 == 0:
+        if it%10 == 0:
             print('%s iter = %04d, loss = %.4f' % (get_time(), it, grand_loss.item()))
 
     wandb.finish()
