@@ -18,12 +18,12 @@ We sort the confidence of galaxies in descending order and pick the top 100 conf
 
 #### Baseline Image and ACC
 
-To study this sub dataset, we averaged the 100 images of each class and form the picture below. Training a ConvNetD3 using the **one per class AVG images**, the ACC is $19.39\%$. This serves as the **baseline** of our approach.
+To study this sub dataset, we averaged the 100 images of each class and form the picture below. Training a ConvNetD3 using the **one per class AVG images**, the ACC is $19.39$%. This serves as the **baseline** of our approach.
 
 ![100 avg](docs/gzoo2-1-per-class-AVG-of-100-dataset-0-9.png)
 
 #### Distillation and ACC
 
-Below is distilled **one per class synthetic images**, the ACC is $46\%$.
+Below is our current best distilled **one per class synthetic images**. The ACC is as high as $46$%. (Full Dataset is $65$%).
 
 ![100 distill](docs/distill_100_per_class_0.46_ACC.png)
