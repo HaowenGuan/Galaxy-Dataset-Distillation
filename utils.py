@@ -17,6 +17,7 @@ from networks import MLP, ConvNet, LeNet, AlexNet, VGG11BN, VGG11, ResNet18, Res
 from astropy.io import fits
 from astropy.table import Table
 import cv2 as cv
+from PIL import Image
 from sklearn.metrics import confusion_matrix
 
 import warnings
@@ -160,15 +161,18 @@ def get_dataset(dataset, data_path, batch_size=1, subset="imagenette", args=None
                 image_dir = os.path.join(class_path, image)
 
                 id = int(image[:-4])
-                img = cv.imread(image_dir)
-                img = cv.cvtColor(img, cv.COLOR_BGR2RGB)
-                img = img[img.shape[0] // 4: (img.shape[0] * 3) // 4,img.shape[1] // 4: (img.shape[1] * 3) // 4]
-                img = cv.resize(img, (128, 128), interpolation=cv.INTER_AREA) / 255
-                #img = cv.cvtColor(np.float32(img), cv.COLOR_BGR2GRAY)
-                img = torch.from_numpy(img.T)
-                img = transforms.Normalize(mean, std)(img)
+                # img = cv.imread(image_dir)
+                im = Image.open(image_dir)
+                for i in range(20):
+                    img = im.rotate(18 * i)
+                    img = np.array(img)
+                    img = cv.cvtColor(img, cv.COLOR_BGR2RGB)
+                    img = img[img.shape[0] // 4: (img.shape[0] * 3) // 4, img.shape[1] // 4: (img.shape[1] * 3) // 4]
+                    img = cv.resize(img, (128, 128), interpolation=cv.INTER_AREA) / 255
+                    img = torch.from_numpy(img.T)
+                    img = transforms.Normalize(mean, std)(img)
+                    class_total.append((img, get_classes(id)))
 
-                class_total.append((img, get_classes(id)))
             np.random.shuffle(class_total)
             dst_train += class_total[:int(0.8 * len(class_total))]
             dst_test += class_total[int(0.8 * len(class_total)):]
@@ -554,11 +558,11 @@ def get_network(model, channel, num_classes, im_size=(32, 32), dist=True):
 
     if model == 'galaxy':
         net = nn.Sequential(
-            nn.Conv2d(3, 32, (6, 6), padding="same"),
+            nn.Conv2d(3, 32, (8, 8)),
             nn.ReLU(),
             nn.Dropout(0.5),
 
-            nn.Conv2d(32, 64, (5, 5), padding="same"),
+            nn.Conv2d(32, 64, (4, 4), padding="same"),
             nn.ReLU(),
             nn.MaxPool2d((2, 2)),
             nn.Dropout(0.25),
@@ -581,7 +585,7 @@ def get_network(model, channel, num_classes, im_size=(32, 32), dist=True):
             nn.Linear(128, 64),
             nn.Dropout(0.5),
 
-            nn.Linear(64, 13)
+            nn.Linear(64, 10)
             # nn.Softmax(dim=1)
         )
     elif model == 'MLP':

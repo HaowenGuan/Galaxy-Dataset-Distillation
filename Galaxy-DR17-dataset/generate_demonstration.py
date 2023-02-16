@@ -10,3 +10,20 @@ for i in range(10):
 cv2.imwrite('/Users/data/class9/gzoo2-1-per-class-demonstration-0-9.jpg', output)
 
 
+
+#%%
+print('wtf')
+#%%
+from PIL import Image
+im = Image.open("/Users/data/class9/demonstrate_of_each_class/5.png")
+im.rotate(18).show()
+
+#%%
+import cv2
+src = cv2.imread("/Users/data/class9/demonstrate_of_each_class/5.png")
+image = cv2.rotate(src, 45)
+print(image)
+cv2.imshow('Image', image)
+#%%
+
+#%%
