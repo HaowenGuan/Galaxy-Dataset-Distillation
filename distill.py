@@ -202,10 +202,9 @@ def main(args):
     from torchvision import transforms
     blur = transforms.GaussianBlur(kernel_size=(3, 3), sigma=(0.3, 0.3)).to(args.device)
 
-    # stage match trajectory #1 init
-    start_epoch_cap = 29
-    reached_max = False
-    # ------------------------------
+    # stage match trajectory #1 --------------------
+    start_epoch_cap = 1
+    # ----------------------------------------------
 
     for it in range(0, args.Iteration+1):
         # if it % start_epoch_cap == 0:
@@ -251,25 +250,18 @@ def main(args):
                 accs_train = np.array(accs_train)
                 acc_test_mean = np.mean(accs_test)
                 acc_test_std = np.std(accs_test)
+                # stage match trajectory #2 --------------------
                 if acc_test_mean > best_acc[model_eval]:
                     best_acc[model_eval] = acc_test_mean
                     best_std[model_eval] = acc_test_std
                     save_this_it = True
-                    start_epoch_cap = int(start_epoch_cap)
-                    reached_max = True
+                    start_epoch_cap = int(start_epoch_cap) # 重置stage累计
                 else:
-                    # stage match trajectory #2
-                    if reached_max or int(start_epoch_cap + 0.25) > int(start_epoch_cap):
-                        if int(start_epoch_cap + 0.5) > int(start_epoch_cap):
-                            start_epoch_cap = int(start_epoch_cap + 0.5)
-                            start_epoch_cap = min(start_epoch_cap, args.max_start_epoch)
-                            reached_max = False
-                            # optimizer_img = torch.optim.SGD([image_syn], lr=args.lr_img, momentum=0.5)
-                        else:
-                            start_epoch_cap += 0.5
-                    else:
-                        start_epoch_cap += 0.25
-                    # ------------------------------
+
+                    if it > 1000:
+                        start_epoch_cap += 0.5
+                        start_epoch_cap = min(start_epoch_cap, args.max_start_epoch)
+                # ----------------------------------------------
                 print('Evaluate %d random %s, mean = %.4f std = %.4f\n-------------------------'%(len(accs_test), model_eval, acc_test_mean, acc_test_std))
                 wandb.log({'Accuracy/{}'.format(model_eval): acc_test_mean}, step=it)
                 wandb.log({'Max_Accuracy/{}'.format(model_eval): best_acc[model_eval]}, step=it)
@@ -388,9 +380,9 @@ def main(args):
 
         # start_epoch = it % min(int(start_epoch_cap), args.max_start_epoch)
 
-        # stage match trajectory #3
+        # stage match trajectory #3 --------------------
         start_epoch = it % int(start_epoch_cap)
-        # ------------------------
+        # ----------------------------------------------
 
         starting_params = expert_trajectory[start_epoch]
 
@@ -521,8 +513,8 @@ if __name__ == '__main__':
     parser.add_argument('--buffer_path', type=str, default='./buffers', help='buffer path')
 
     parser.add_argument('--expert_epochs', type=int, default=3, help='how many expert epochs the target params are')
-    parser.add_argument('--syn_steps', type=int, default=20, help='how many steps to take on synthetic data')
-    parser.add_argument('--max_start_epoch', type=int, default=25, help='max epoch we can start at')
+    parser.add_argument('--syn_steps', type=int, default=20, help='how many steps to take on synthetic data.')
+    parser.add_argument('--max_start_epoch', type=int, default=29, help='max epoch we can start at. It must be smaller than buffer epoch.')
 
     parser.add_argument('--zca', action='store_true', help="do ZCA whitening")
 
@@ -543,7 +535,4 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     print(args)
-
     main(args)
-
-
