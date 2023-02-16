@@ -10,10 +10,74 @@ import copy
 import random
 from reparam_module import ReparamModule
 from torchvision.utils import save_image
+from astropy.io import fits
+import cv2 as cv
+from torchvision import datasets, transforms
 
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
+
+def get_classes(gzoo, indexes, id):
+
+    d = gzoo[indexes[id]]
+    class_1 = d['t01_smooth_or_features_a01_smooth_fraction'] * d['t07_rounded_a16_completely_round_fraction']
+    class_2 = d['t01_smooth_or_features_a01_smooth_fraction'] * d['t07_rounded_a17_in_between_fraction']
+    class_3 = d['t01_smooth_or_features_a01_smooth_fraction'] * d['t07_rounded_a18_cigar_shaped_fraction']
+    class_4 = d['t01_smooth_or_features_a02_features_or_disk_fraction'] * d['t02_edgeon_a04_yes_fraction'] * (
+                d['t09_bulge_shape_a25_rounded_fraction'] + d['t09_bulge_shape_a26_boxy_fraction'])
+    class_5 = d['t01_smooth_or_features_a02_features_or_disk_fraction'] * d['t02_edgeon_a04_yes_fraction'] * d[
+        't09_bulge_shape_a27_no_bulge_fraction']
+    class_6 = d['t01_smooth_or_features_a02_features_or_disk_fraction'] * d['t02_edgeon_a05_no_fraction'] * d[
+        't03_bar_a06_bar_fraction'] * d['t04_spiral_a08_spiral_fraction']
+    class_7 = d['t01_smooth_or_features_a02_features_or_disk_fraction'] * d['t02_edgeon_a05_no_fraction'] * d[
+        't03_bar_a06_bar_fraction'] * d['t04_spiral_a09_no_spiral_fraction']
+    class_8 = d['t01_smooth_or_features_a02_features_or_disk_fraction'] * d['t02_edgeon_a05_no_fraction'] * d[
+        't03_bar_a07_no_bar_fraction'] * d['t04_spiral_a08_spiral_fraction']
+    class_9 = d['t01_smooth_or_features_a02_features_or_disk_fraction'] * d['t02_edgeon_a05_no_fraction'] * d[
+        't03_bar_a07_no_bar_fraction'] * d['t04_spiral_a09_no_spiral_fraction']
+    class_10 = d['t01_smooth_or_features_a03_star_or_artifact_fraction']
+
+    classes_l = [class_1, class_2, class_3, class_4, class_5, class_6, class_7, class_8, class_9, class_10]
+    return np.argmax(np.array(classes_l))
+
+def ds_test_on_original():
+    # 0.0592 #
+    mean = [0.0676, 0.0570, 0.0456]
+    # 0.1058 #
+    std = [0.1230, 0.0990, 0.0887]
+
+    gzoo = fits.open(os.path.join('Galaxy-DR17-dataset/gzoo2', 'zoo2MainSpecz_sizes.fit'))[1].data
+    indexes = dict()
+    for i, id in enumerate(gzoo['dr7objid']):
+        indexes[id] = i
+
+    # path = '/data/sbcaesar/xuan_galaxy/Galaxy-DR17-dataset/gzoo2/image'
+    path = '/data/sbcaesar/classes/1000'
+
+    dst_test = []
+    count = 0
+    for image in os.listdir(path):
+        if ".jpg" not in image:
+            continue
+        image_dir = os.path.join(path, image)
+
+        count += 1
+        if count > 1000: break
+
+        id = int(image[:-4])
+        img = cv.imread(image_dir)
+        img = cv.cvtColor(img, cv.COLOR_BGR2RGB)
+        img = img[img.shape[0] // 4: (img.shape[0] * 3) // 4, img.shape[1] // 4: (img.shape[1] * 3) // 4]
+        img = cv.resize(img, (128, 128), interpolation=cv.INTER_AREA) / 255
+        # img = cv.cvtColor(np.float32(img), cv.COLOR_BGR2GRAY)
+        img = torch.from_numpy(img.T)
+        img = transforms.Normalize(mean, std)(img)
+
+        dst_test.append((img, get_classes(gzoo, indexes, id)))
+    np.random.shuffle(dst_test)
+    testloader = torch.utils.data.DataLoader(dst_test, batch_size=128, shuffle=False, num_workers=2)
+    return dst_test, testloader
 
 
 
@@ -21,6 +85,9 @@ def main(args):
 
     args.device = 'cuda' if torch.cuda.is_available() else 'cpu'
     args.dsa_param = ParamDiffAug()
+    channel = 3
+    im_size = (128, 128)
+    num_classes = 10
 
     channel, im_size, num_classes, class_names, mean, std, dst_train, dst_test, testloader, loader_train_dict, class_map, class_map_inv = get_dataset(args.dataset, args.data_path, args.batch_real, args.subset, args=args)
     images_all = []
@@ -37,24 +104,29 @@ def main(args):
         indices_class[lab].append(i)
     images_all = torch.cat(images_all, dim=0).to("cpu")
     labels_all = torch.tensor(labels_all, dtype=torch.long, device="cpu")
+    #
+    # def get_images(c, n):  # get random n images from class c
+    #     idx_shuffle = np.random.permutation(indices_class[c])[:n]
+    #     return images_all[idx_shuffle]
 
-    def get_images(c, n):  # get random n images from class c
-        idx_shuffle = np.random.permutation(indices_class[c])[:n]
-        return images_all[idx_shuffle]
+    # def get_images_average(c,n):
+    #     avg_pic = torch.mean(images_all[indices_class[c]],0)
+    #     save_image(avg_pic, 'logs/average_images/class_'+str(c)+"_average.png")
+    #     return avg_pic
 
-    def get_images_average(c,n):
-        avg_pic = torch.mean(images_all[indices_class[c]],0)
-        save_image(avg_pic, 'logs/average_images/class_'+str(c)+"_average.png")
-        return avg_pic
-    
+    print("Loading test:")
+
+    # dst_test, testloader = ds_test_on_original()
+    print("Load test!")
     mean_acc_all = []
     for image_set in range(10):
 
         label_syn = torch.tensor([np.ones(args.ipc)*i for i in range(num_classes)], dtype=torch.long, requires_grad=False, device=args.device).view(-1)
-        image_syn = torch.randn(size=(num_classes * args.ipc, channel, im_size[0], im_size[1]), dtype=torch.float)
+        # image_syn = torch.randn(size=(num_classes * args.ipc, channel, im_size[0], im_size[1]), dtype=torch.float)
+        image_syn = torch.load("/data/sbcaesar/mac_galaxy/logged_files/gzoo2/snowy-wave-154/images_7000.pt")
 
-        for c in range(num_classes):
-            image_syn.data[c * args.ipc:(c + 1) * args.ipc] = get_images_average(c, args.ipc).detach().data
+        # for c in range(num_classes):
+        #     image_syn.data[c * args.ipc:(c + 1) * args.ipc] = get_images_average(c, args.ipc).detach().data
             # image_syn.data[c * args.ipc:(c + 1) * args.ipc] = get_images(c, args.ipc).detach().data
 
         eval_it_pool = np.arange(0, args.Iteration + 1, args.eval_it).tolist()
@@ -114,7 +186,7 @@ if __name__ == '__main__':
 
     parser.add_argument('--lr_img', type=float, default=1000, help='learning rate for updating synthetic images')
     parser.add_argument('--lr_lr', type=float, default=1e-05, help='learning rate for updating... learning rate')
-    parser.add_argument('--lr_teacher', type=float, default=0.01, help='initialization for synthetic learning rate')
+    parser.add_argument('--lr_teacher', type=float, default=0.0007626, help='initialization for synthetic learning rate')
 
     parser.add_argument('--lr_init', type=float, default=0.01, help='how to init lr (alpha)')
 

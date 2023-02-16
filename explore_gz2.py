@@ -1,4 +1,5 @@
 import collections
+import random
 
 from astropy.io import fits
 import numpy as np
@@ -32,6 +33,9 @@ def get_classes(gzoo, indexes, id):
     classes_l = [class_1, class_2, class_3, class_4, class_5, class_6, class_7, class_8, class_9, class_10]
     classes_l = np.array(classes_l)
     index = np.argmax(classes_l)
+
+    if np.max(classes_l) <= 0.5:
+        return 10, classes_l[index]
     return index, classes_l[index]
 
 
@@ -58,12 +62,14 @@ if __name__ == '__main__':
         #     shutil.copyfile(os.path.join(path, image), os.path.join('/data/sbcaesar/class9', image))
 
     for key in classes_count:
-        # cur = '/data/sbcaesar/classes/' + str(key)
-        cur = '/data/sbcaesar/classes/1000/'
-        classes_p[key].sort()
+        cur = '/data/sbcaesar/classes/350_per_class/' + str(key)
+        # cur = '/data/sbcaesar/classes/3000/'
+        # classes_p[key].sort()
+        random.shuffle(classes_p[key])
         # if os.path.exists(cur):
         #     os.path.mkdir(cur)
-        for p, image in classes_p[key][-100:]:
+        # for p, image in classes_p[key][-300:]:
+        for p, image in classes_p[key][:350]:
             # print(image)
             shutil.copyfile(os.path.join(path, image), os.path.join(cur, image))
         print(key, classes_count[key])
