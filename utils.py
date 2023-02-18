@@ -147,7 +147,7 @@ def get_dataset(dataset, data_path, batch_size=1, subset="imagenette", args=None
             classes_l = [class_1, class_2, class_3, class_4, class_5, class_6, class_7, class_8, class_9, class_10]
             return np.argmax(np.array(classes_l))
 
-        path = '/data/sbcaesar/classes/3000'
+        path = '/data/sbcaesar/classes'
         dst_train = []
         dst_test = []
         np.random.seed(2)
@@ -174,7 +174,7 @@ def get_dataset(dataset, data_path, batch_size=1, subset="imagenette", args=None
                     img = torch.from_numpy(img.T)
                     img = transforms.Normalize(mean, std)(img)
                     dst_train.append((img, get_classes(id)))
-            # Prepare Test Set with rotation Augmentation
+            # Prepare Test Set
             for image in class_image_list[int(0.8 * len(class_image_list)):]:
                 if ".jpg" not in image:
                     continue
@@ -188,7 +188,7 @@ def get_dataset(dataset, data_path, batch_size=1, subset="imagenette", args=None
                 img = transforms.Normalize(mean, std)(img)
                 dst_test.append((img, get_classes(id)))
         print("Generated Augmented Train Set of", len(dst_train), "images.")
-        print("Processed Test Set of", len(dst_train), "images.")
+        print("Processed Test Set of", len(dst_test), "images.")
         class_names = [str(i) for i in range(num_classes)]
         class_map = {x:x for x in range(num_classes)}
 
