@@ -194,7 +194,7 @@ if __name__ == '__main__':
                         help='differentiable Siamese augmentation strategy')
     parser.add_argument('--data_path', type=str, default='data', help='dataset path')
     parser.add_argument('--buffer_path', type=str, default='/data/sbcaesar/galaxy_buffers', help='buffer path')
-    parser.add_argument('--train_epochs', type=int, default=20)
+    parser.add_argument('--train_epochs', type=int, default=30)
     parser.add_argument('--zca', action='store_true')
     parser.add_argument('--decay', action='store_true')
     parser.add_argument('--mom', type=float, default=0, help='momentum')
