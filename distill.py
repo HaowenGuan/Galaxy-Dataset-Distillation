@@ -32,9 +32,9 @@ def main(args):
     print("CUDNN STATUS: {}".format(torch.backends.cudnn.enabled))
 
     args.dsa = True if args.dsa == 'True' else False
-    args.device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
+    args.device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-    eval_it_pool = np.arange(200, args.Iteration + 1, args.eval_it).tolist()
+    eval_it_pool = np.arange(args.eval_it, args.Iteration + 1, args.eval_it).tolist()
     channel, im_size, num_classes, class_names, mean, std, dst_train, dst_test, testloader, loader_train_dict, class_map, class_map_inv = get_dataset(args.dataset, args.data_path, args.batch_real, args.subset, args=args)
     model_eval_pool = get_eval_pool(args.eval_mode, args.model, args.model)
 
@@ -77,8 +77,9 @@ def main(args):
     if args.batch_syn is None:
         args.batch_syn = num_classes * args.ipc
 
-    args.distributed = torch.cuda.device_count() > 1
-    args.distributed = False
+    args.distributed = torch.cuda.device_count() > 1 and args.ipc != 1
+    # args.distributed = False
+    print("--------------------------------------------------------------", args.distributed)
 
 
     print('Hyper-parameters: \n', args.__dict__)
@@ -123,13 +124,8 @@ def main(args):
     if args.texture:
         image_syn = torch.randn(size=(num_classes * args.ipc, channel, im_size[0]*args.canvas_size, im_size[1]*args.canvas_size), dtype=torch.float)
     else:
-        # image_syn = torch.load(os.path.join(".", "logged_files", args.dataset, 'royal-shape-146', 'images_10000.pt'))
-        image_syn = torch.zeros(size=(num_classes * args.ipc, channel, im_size[0], im_size[1]), dtype=torch.float)
-        image_syn[:, :, im_size[0] // 4: (im_size[0] * 3) // 4, im_size[1] // 4: (im_size[1] * 3) // 4] = torch.randn(size=(num_classes * args.ipc, channel, im_size[0] // 2, im_size[1] // 2), dtype=torch.float)
-        from torchvision import transforms
-        blur = transforms.GaussianBlur(kernel_size=(3, 3), sigma=(0.2, 0.2))
-        for i in range(2000):
-            image_syn = blur(image_syn)
+        # image_syn = torch.load(os.path.join(".", "logged_files", args.dataset, 'stoic-disco-217', 'images_1400.pt'))
+        image_syn = torch.randn(size=(num_classes * args.ipc, channel, im_size[0], im_size[1]), dtype=torch.float)
 
 
     syn_lr = torch.tensor(args.lr_teacher).to(args.device)
@@ -203,14 +199,12 @@ def main(args):
     blur = transforms.GaussianBlur(kernel_size=(3, 3), sigma=(0.3, 0.3)).to(args.device)
 
     # stage match trajectory #1 --------------------
-    start_epoch_cap = 1
+    start_epoch_cap = args.init_epoch
+    test_loss = []
+    trending = False
     # ----------------------------------------------
 
     for it in range(0, args.Iteration+1):
-        # if it % start_epoch_cap == 0:
-        #     image_syn = blur(image_syn)
-        #     image_syn = image_syn.detach().to(args.device).requires_grad_(True)
-        #     optimizer_img = torch.optim.SGD([image_syn], lr=args.lr_img, momentum=0.5)
         syn_lr = torch.exp(log_syn_lr)
         save_this_it = False
 
@@ -240,6 +234,10 @@ def main(args):
                     image_syn_eval, label_syn_eval = copy.deepcopy(image_save.detach()), copy.deepcopy(eval_labs.detach()) # avoid any unaware modification
 
                     args.lr_net = syn_lr.item()
+
+                    # [Auto Adjust evaluation training epochs]
+                    # args.epoch_eval_train = start_epoch_cap * (args.syn_steps // args.expert_epochs) + args.expert_epochs
+
                     _, acc_train, acc_test, train_cf, test_cf = evaluate_synset(it, it_eval, net_eval, num_classes, image_syn_eval, label_syn_eval, dst_test, testloader, args, texture=args.texture)
                     total_train_cf += train_cf
                     total_test_cf += test_cf
@@ -255,12 +253,11 @@ def main(args):
                     best_acc[model_eval] = acc_test_mean
                     best_std[model_eval] = acc_test_std
                     save_this_it = True
-                    start_epoch_cap = int(start_epoch_cap) # 重置stage累计
-                else:
-
-                    if it > 1000:
-                        start_epoch_cap += 0.5
-                        start_epoch_cap = min(start_epoch_cap, args.max_start_epoch)
+                #     start_epoch_cap = int(start_epoch_cap) # 重置stage累计
+                # else:
+                #     if it > 1000:
+                #         start_epoch_cap += 0.5
+                #         start_epoch_cap = min(start_epoch_cap, args.max_start_epoch)
                 # ----------------------------------------------
                 print('Evaluate %d random %s, mean = %.4f std = %.4f\n-------------------------'%(len(accs_test), model_eval, acc_test_mean, acc_test_std))
                 wandb.log({'Accuracy/{}'.format(model_eval): acc_test_mean}, step=it)
@@ -378,11 +375,66 @@ def main(args):
                     buffer = buffer[:args.max_experts]
                 random.shuffle(buffer)
 
-        # start_epoch = it % min(int(start_epoch_cap), args.max_start_epoch)
-
         # stage match trajectory #3 --------------------
         start_epoch = it % int(start_epoch_cap)
         # ----------------------------------------------
+
+        # Using Next Epoch as Test Set------------------
+        starting_params = expert_trajectory[start_epoch_cap + 1]
+        target_params = expert_trajectory[start_epoch_cap+args.expert_epochs + 1]
+        target_params = torch.cat([p.data.to(args.device).reshape(-1) for p in target_params], 0)
+        student_params = torch.cat([p.data.to(args.device).reshape(-1) for p in starting_params], 0).requires_grad_(True)
+        starting_params = torch.cat([p.data.to(args.device).reshape(-1) for p in starting_params], 0)
+
+        syn_images = image_syn
+        y_hat = label_syn.to(args.device)
+        indices_chunks = []
+
+        for step in range(args.syn_steps):
+
+            if not indices_chunks:
+                indices = torch.randperm(len(syn_images))
+                indices_chunks = list(torch.split(indices, args.batch_syn))
+
+            these_indices = indices_chunks.pop()
+
+            x = syn_images[these_indices]
+            this_y = y_hat[these_indices]
+
+            if args.texture:
+                x = torch.cat([torch.stack([torch.roll(im, (torch.randint(im_size[0]*args.canvas_size, (1,)), torch.randint(im_size[1]*args.canvas_size, (1,))), (1,2))[:,:im_size[0],:im_size[1]] for im in x]) for _ in range(args.canvas_samples)])
+                this_y = torch.cat([this_y for _ in range(args.canvas_samples)])
+
+            if args.dsa and (not args.no_aug):
+                x = DiffAugment(x, args.dsa_strategy, param=args.dsa_param)
+
+            if args.distributed:
+                forward_params = student_params.unsqueeze(0).expand(torch.cuda.device_count(), -1)
+            else:
+                forward_params = student_params
+            x = student_net(x, flat_param=forward_params)
+            ce_loss = criterion(x, this_y)
+
+            grad = torch.autograd.grad(ce_loss, student_params, create_graph=True)[0]
+
+            student_params = student_params - syn_lr * grad
+
+        param_loss = torch.tensor(0.0).to(args.device)
+        param_dist = torch.tensor(0.0).to(args.device)
+
+        param_loss += torch.nn.functional.mse_loss(student_params, target_params, reduction="sum")
+        param_dist += torch.nn.functional.mse_loss(starting_params, target_params, reduction="sum")
+
+        param_loss /= num_params
+        param_dist /= num_params
+
+        param_loss /= param_dist
+
+        test_grand_loss = param_loss
+        test_loss.append(float(test_grand_loss.detach().cpu()))
+        wandb.log({"Next_Epoch_Test_Loss": test_grand_loss.detach().cpu()}, step=it)
+        del param_loss, param_dist, test_grand_loss
+        #-----------------------------------------------
 
         starting_params = expert_trajectory[start_epoch]
 
@@ -455,10 +507,32 @@ def main(args):
         grand_loss.backward()
 
         optimizer_img.step()
-        optimizer_lr.step()
+        if not args.fix_lr_teacher:
+            optimizer_lr.step()
 
-        wandb.log({"Grand_Loss": grand_loss.detach().cpu(),
-                   "Start_Epoch": start_epoch})
+        wandb.log({"Grand_Loss_epoch_" + str(start_epoch): grand_loss.detach().cpu(),
+                   "Start_Epoch": start_epoch}, step=it)
+
+        # Calculate half test loss moving average, if the test loss is greater than it, level up!
+        # half = len(test_loss) // 2
+        if len(test_loss) >= 200:
+            if not trending:
+                interval = len(test_loss) // 2
+                trending = min(test_loss[:interval]) > float(np.mean(test_loss[-interval:]))
+                if trending:
+                    print('-------------------', it, min(test_loss[:interval]), float(np.mean(test_loss[-interval:])))
+                if not trending:
+                    syn_lr = torch.exp(log_syn_lr)
+                    temp = 4* 32768 * syn_lr.data * syn_lr
+                    optimizer_lr.zero_grad()
+                    temp.backward()
+                    optimizer_lr.step()
+            if trending:
+                # if test_loss[-1] > max(test_loss[-half:-1]): # reset
+                if np.mean(test_loss[-(2 * interval):-interval]) <= np.mean(test_loss[-interval:]):  # reset
+                    start_epoch_cap = min(start_epoch_cap + 1, args.max_start_epoch)
+                    test_loss = []
+                    trending = False
 
         for _ in student_params:
             del _
@@ -531,6 +605,9 @@ if __name__ == '__main__':
     parser.add_argument('--max_experts', type=int, default=None, help='number of experts to read per file (leave as None unless doing ablations)')
 
     parser.add_argument('--force_save', action='store_true', help='this will save images for 50ipc')
+
+    parser.add_argument('--init_epoch', type=int, default=1, help="starting point of stage wise distillation")
+    parser.add_argument('--fix_lr_teacher', action='store_true', help="Fix the lr_teach if you are confident")
 
     args = parser.parse_args()
 

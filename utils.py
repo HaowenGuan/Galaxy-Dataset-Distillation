@@ -147,12 +147,11 @@ def get_dataset(dataset, data_path, batch_size=1, subset="imagenette", args=None
             classes_l = [class_1, class_2, class_3, class_4, class_5, class_6, class_7, class_8, class_9, class_10]
             return np.argmax(np.array(classes_l))
 
-        path = '/data/sbcaesar/classes'
+        path = '/data/sbcaesar/classes/3000'
         dst_train = []
         dst_test = []
         np.random.seed(2)
         for c in range(10):
-            class_total = []
             class_path = os.path.join(path, str(c))
             class_image_list = os.listdir(class_path)
             np.random.shuffle(class_image_list)
@@ -162,13 +161,11 @@ def get_dataset(dataset, data_path, batch_size=1, subset="imagenette", args=None
                     continue
                 image_dir = os.path.join(class_path, image)
                 id = int(image[:-4])
-                # img = cv.imread(image_dir)
                 im = Image.open(image_dir)
-                aug = 20
+                aug = 1
                 for i in range(aug):
                     img = im.rotate((360 // aug) * i)
                     img = np.array(img)[:, :, :3]
-                    # img = cv.cvtColor(img, cv.COLOR_BGR2RGB) # Only use when open with cv2
                     img = img[img.shape[0]//4:(img.shape[0]*3)//4, img.shape[1]//4:(img.shape[1]*3)//4]
                     img = cv.resize(img, (128, 128), interpolation=cv.INTER_AREA) / 255
                     img = torch.from_numpy(img.T)
@@ -238,9 +235,6 @@ def get_dataset(dataset, data_path, batch_size=1, subset="imagenette", args=None
             if ".jpg" not in image or image in bar_edgeon_name:
                 continue
             image_dir = os.path.join(path, image)
-            # count += 1
-            # if count > 20000:
-            #     break
 
             id = int(image[:-4])
             img = cv.imread(image_dir)

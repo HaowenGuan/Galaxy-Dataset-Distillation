@@ -32,3 +32,17 @@ s = list(range(10))
 np.random.shuffle(s)
 print(s)
 #%%
+a = 0
+prime = [2, 3, 5, 7, 11, 13, 17, 19]
+for i in prime:
+    a += 1 << i
+print(a, bin(a), len(bin(a)))
+#%%
+import torch
+log_syn_lr = torch.tensor(10.0).requires_grad_(True)
+optimizer_lr = torch.optim.SGD([log_syn_lr], lr=lr_lr, momentum=0)
+temp = torch.tensor(0.001) * log_syn_lr.data * log_syn_lr
+temp.backward()
+optimizer_lr.step()
+optimizer_lr.zero_grad()
+#%%
