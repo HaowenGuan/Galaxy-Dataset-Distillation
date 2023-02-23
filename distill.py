@@ -60,11 +60,19 @@ def main(args):
     else:
         zca_trans = None
 
-    wandb.init(sync_tensorboard=False,
-               project="DatasetDistillation",
-               job_type="CleanRepo",
-               config=args,
-               )
+    if args.wandb_name:
+        wandb.init(sync_tensorboard=False,
+                   project="DatasetDistillation",
+                   job_type="CleanRepo",
+                   name=args.wandb_name,
+                   config=args,
+                   )
+    else:
+        wandb.init(sync_tensorboard=False,
+                   project="DatasetDistillation",
+                   job_type="CleanRepo",
+                   config=args,
+                   )
 
     args = type('', (), {})()
 
@@ -124,8 +132,10 @@ def main(args):
     if args.texture:
         image_syn = torch.randn(size=(num_classes * args.ipc, channel, im_size[0]*args.canvas_size, im_size[1]*args.canvas_size), dtype=torch.float)
     else:
-        # image_syn = torch.load(os.path.join(".", "logged_files", args.dataset, 'stoic-disco-217', 'images_1400.pt'))
-        image_syn = torch.randn(size=(num_classes * args.ipc, channel, im_size[0], im_size[1]), dtype=torch.float)
+        if args.load_syn_image:
+            image_syn = torch.load(os.path.join(".", "logged_files", args.dataset, '1ipc-300', 'images_3000.pt'))
+        else:
+            image_syn = torch.randn(size=(num_classes * args.ipc, channel, im_size[0], im_size[1]), dtype=torch.float)
 
 
     syn_lr = torch.tensor(args.lr_teacher).to(args.device)
@@ -147,9 +157,9 @@ def main(args):
 
     ''' training '''
     image_syn = image_syn.detach().to(args.device).requires_grad_(True)
-    log_syn_lr = torch.log(syn_lr).detach().to(args.device).requires_grad_(True)
+    # log_syn_lr = torch.log(syn_lr).detach().to(args.device).requires_grad_(True)
     optimizer_img = torch.optim.SGD([image_syn], lr=args.lr_img, momentum=0.5)
-    optimizer_lr = torch.optim.SGD([log_syn_lr], lr=args.lr_lr, momentum=0.5)
+    # optimizer_lr = torch.optim.SGD([log_syn_lr], lr=args.lr_lr, momentum=0.5)
     optimizer_img.zero_grad()
 
     criterion = nn.CrossEntropyLoss().to(args.device)
@@ -201,15 +211,29 @@ def main(args):
     # stage match trajectory #1 --------------------
     start_epoch_cap = args.init_epoch
     test_loss = []
+    min_test = float('inf')
+    min_test_idx = 0
     trending = False
+    print(wandb.run.name)
+    log_syn_lr_list = []
+    optimizer_lr_list = []
+    for _ in range(start_epoch_cap):
+        log_syn_lr = torch.log(syn_lr).detach().to(args.device).requires_grad_(True)
+        optimizer_lr = torch.optim.SGD([log_syn_lr], lr=args.lr_lr, momentum=0.5)
+        log_syn_lr_list.append(log_syn_lr)
+        optimizer_lr_list.append(optimizer_lr)
     # ----------------------------------------------
 
-    for it in range(0, args.Iteration+1):
-        syn_lr = torch.exp(log_syn_lr)
+    for it in range(args.prev_iter, args.Iteration+1):
+        # stage match trajectory #0 --------------------
+        start_epoch = it % int(start_epoch_cap)
+        syn_lr = torch.exp(log_syn_lr_list[start_epoch])
+        test_syn_lr = torch.exp(log_syn_lr_list[-1])
+        # ----------------------------------------------
         save_this_it = False
 
         # writer.add_scalar('Progress', it, it)
-        wandb.log({"Progress": it}, step=it)
+        # wandb.log({"Progress": it}, step=it)
         ''' Evaluate synthetic data '''
         if it in eval_it_pool:
             for model_eval in model_eval_pool:
@@ -233,10 +257,13 @@ def main(args):
                         image_save = image_syn
                     image_syn_eval, label_syn_eval = copy.deepcopy(image_save.detach()), copy.deepcopy(eval_labs.detach()) # avoid any unaware modification
 
-                    args.lr_net = syn_lr.item()
+                    # [Using the last epoch's lr to do evaluation]
+                    # args.lr_net = torch.exp(log_syn_lr_list[-1]).item() * 5
 
-                    # [Auto Adjust evaluation training epochs]
-                    # args.epoch_eval_train = start_epoch_cap * (args.syn_steps // args.expert_epochs) + args.expert_epochs
+                    # [Using the a list of lr to do evaluation]
+                    args.lr_net = []
+                    for i in log_syn_lr_list:
+                        args.lr_net.append(torch.exp(i).item())
 
                     _, acc_train, acc_test, train_cf, test_cf = evaluate_synset(it, it_eval, net_eval, num_classes, image_syn_eval, label_syn_eval, dst_test, testloader, args, texture=args.texture)
                     total_train_cf += train_cf
@@ -296,7 +323,7 @@ def main(args):
                     torch.save(image_save.cpu(), os.path.join(save_dir, "images_best.pt".format(it)))
                     torch.save(label_syn.cpu(), os.path.join(save_dir, "labels_best.pt".format(it)))
 
-                wandb.log({"Pixels": wandb.Histogram(torch.nan_to_num(image_syn.detach().cpu()))}, step=it)
+                # wandb.log({"Pixels": wandb.Histogram(torch.nan_to_num(image_syn.detach().cpu()))}, step=it)
 
                 if args.ipc < 50 or args.force_save:
                     upsampled = image_save
@@ -305,7 +332,7 @@ def main(args):
                         upsampled = torch.repeat_interleave(upsampled, repeats=4, dim=3)
                     grid = torchvision.utils.make_grid(upsampled, nrow=10, normalize=True, scale_each=True)
                     wandb.log({"Synthetic_Images": wandb.Image(torch.nan_to_num(grid.detach().cpu()))}, step=it)
-                    wandb.log({'Synthetic_Pixels': wandb.Histogram(torch.nan_to_num(image_save.detach().cpu()))}, step=it)
+                    # wandb.log({'Synthetic_Pixels': wandb.Histogram(torch.nan_to_num(image_save.detach().cpu()))}, step=it)
 
                     for clip_val in [2.5]:
                         std = torch.std(image_save)
@@ -343,7 +370,7 @@ def main(args):
                             wandb.log({"Clipped_Reconstructed_Images/std_{}".format(clip_val): wandb.Image(
                                 torch.nan_to_num(grid.detach().cpu()))}, step=it)
 
-        wandb.log({"Synthetic_LR": syn_lr.detach().cpu()}, step=it)
+        wandb.log({"Synthetic_LR_" + str(start_epoch): syn_lr.detach().cpu()}, step=it)
 
         student_net = get_network(args.model, channel, num_classes, im_size, dist=False).to(args.device)  # get a random model
 
@@ -375,13 +402,9 @@ def main(args):
                     buffer = buffer[:args.max_experts]
                 random.shuffle(buffer)
 
-        # stage match trajectory #3 --------------------
-        start_epoch = it % int(start_epoch_cap)
-        # ----------------------------------------------
-
         # Using Next Epoch as Test Set------------------
-        starting_params = expert_trajectory[start_epoch_cap + 1]
-        target_params = expert_trajectory[start_epoch_cap+args.expert_epochs + 1]
+        starting_params = expert_trajectory[start_epoch_cap]
+        target_params = expert_trajectory[start_epoch_cap + args.expert_epochs]
         target_params = torch.cat([p.data.to(args.device).reshape(-1) for p in target_params], 0)
         student_params = torch.cat([p.data.to(args.device).reshape(-1) for p in starting_params], 0).requires_grad_(True)
         starting_params = torch.cat([p.data.to(args.device).reshape(-1) for p in starting_params], 0)
@@ -417,7 +440,7 @@ def main(args):
 
             grad = torch.autograd.grad(ce_loss, student_params, create_graph=True)[0]
 
-            student_params = student_params - syn_lr * grad
+            student_params = student_params - test_syn_lr * grad
 
         param_loss = torch.tensor(0.0).to(args.device)
         param_dist = torch.tensor(0.0).to(args.device)
@@ -430,15 +453,17 @@ def main(args):
 
         param_loss /= param_dist
 
-        test_grand_loss = param_loss
-        test_loss.append(float(test_grand_loss.detach().cpu()))
-        wandb.log({"Next_Epoch_Test_Loss": test_grand_loss.detach().cpu()}, step=it)
+        test_grand_loss = float(param_loss.detach().cpu())
+        test_loss.append(test_grand_loss)
+        if test_loss[-1] < min_test:
+            min_test = test_loss[-1]
+            min_test_idx = it
+        wandb.log({"Next_Epoch_Test_Loss": test_loss[-1]}, step=it)
         del param_loss, param_dist, test_grand_loss
         #-----------------------------------------------
 
         starting_params = expert_trajectory[start_epoch]
-
-        target_params = expert_trajectory[start_epoch+args.expert_epochs]
+        target_params = expert_trajectory[start_epoch + args.expert_epochs]
         target_params = torch.cat([p.data.to(args.device).reshape(-1) for p in target_params], 0)
 
         student_params = [torch.cat([p.data.to(args.device).reshape(-1) for p in starting_params], 0).requires_grad_(True)]
@@ -502,37 +527,48 @@ def main(args):
         grand_loss = param_loss
 
         optimizer_img.zero_grad()
-        optimizer_lr.zero_grad()
+        optimizer_lr_list[start_epoch].zero_grad()
 
         grand_loss.backward()
 
         optimizer_img.step()
         if not args.fix_lr_teacher:
-            optimizer_lr.step()
+            optimizer_lr_list[start_epoch].step()
 
         wandb.log({"Grand_Loss_epoch_" + str(start_epoch): grand_loss.detach().cpu(),
                    "Start_Epoch": start_epoch}, step=it)
 
-        # Calculate half test loss moving average, if the test loss is greater than it, level up!
-        # half = len(test_loss) // 2
-        if len(test_loss) >= 200:
+        # Detect overfitting and level up!
+        if len(test_loss) >= 400:
+            correlation = np.corrcoef(test_loss, list(range(len(test_loss))))[0, 1]
             if not trending:
                 interval = len(test_loss) // 2
-                trending = min(test_loss[:interval]) > float(np.mean(test_loss[-interval:]))
+                trending = correlation < -0.4
                 if trending:
-                    print('-------------------', it, min(test_loss[:interval]), float(np.mean(test_loss[-interval:])))
-                if not trending:
-                    syn_lr = torch.exp(log_syn_lr)
-                    temp = 4* 32768 * syn_lr.data * syn_lr
-                    optimizer_lr.zero_grad()
-                    temp.backward()
-                    optimizer_lr.step()
-            if trending:
-                # if test_loss[-1] > max(test_loss[-half:-1]): # reset
-                if np.mean(test_loss[-(2 * interval):-interval]) <= np.mean(test_loss[-interval:]):  # reset
-                    start_epoch_cap = min(start_epoch_cap + 1, args.max_start_epoch)
-                    test_loss = []
-                    trending = False
+                    print('trending------------', it, correlation)
+                if it % 100 == 0:
+                    print("trending?????", np.corrcoef(test_loss, list(range(len(test_loss)))))
+                # if not trending and interval < it - min_test_idx:
+                #     # If model didn't produce a global minimum on right half of test data, increment syn_steps
+                #     args.syn_steps = min(args.syn_steps + 1, 50)
+                #     min_test_idx = it
+                #     wandb.log({"Synthetic_Step": args.syn_steps}, step=it)
+                if not trending and len(test_loss) % 200 == 0:
+                    # If model didn't produce a global minimum on right half of test data, decrease lr_img
+                    args.lr_img *= 0.9
+                    optimizer_img = torch.optim.SGD([image_syn], lr=args.lr_img, momentum=0.5)
+                    wandb.log({"Image Learning Rate": args.lr_img}, step=it)
+            if trending and np.mean(test_loss[-(2 * interval):-interval]) <= np.mean(test_loss[-interval:]) or \
+                    correlation > 0.2:
+                # reset
+                start_epoch_cap = min(start_epoch_cap + 1, args.max_start_epoch)
+                test_loss = []
+                min_test = float('inf')
+                trending = False
+                log_syn_lr = log_syn_lr_list[-1].detach().to(args.device).requires_grad_(True)
+                optimizer_lr = torch.optim.SGD([log_syn_lr], lr=args.lr_lr, momentum=0.5)
+                log_syn_lr_list.append(log_syn_lr)
+                optimizer_lr_list.append(optimizer_lr)
 
         for _ in student_params:
             del _
@@ -608,6 +644,9 @@ if __name__ == '__main__':
 
     parser.add_argument('--init_epoch', type=int, default=1, help="starting point of stage wise distillation")
     parser.add_argument('--fix_lr_teacher', action='store_true', help="Fix the lr_teach if you are confident")
+    parser.add_argument('--prev_iter', type=int, default=1, help="Resume training start from previous iter")
+    parser.add_argument('--wandb_name', type=str, default=None, help="Custom WanDB name")
+    parser.add_argument('--load_syn_image', type=str, default=None, help="previous syn image")
 
     args = parser.parse_args()
 

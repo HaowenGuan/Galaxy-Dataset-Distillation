@@ -796,10 +796,20 @@ def evaluate_synset(it, it_eval, net, num_classes, images_train, labels_train, d
     net = net.to(args.device)
     images_train = images_train.to(args.device)
     labels_train = labels_train.to(args.device)
-    lr = float(args.lr_net)
-    Epoch = int(args.epoch_eval_train)
-    lr_schedule = [Epoch//2+1]
-    optimizer = torch.optim.SGD(net.parameters(), lr=lr, momentum=0.9, weight_decay=0.0005)
+    if isinstance(args.lr_net, list):
+        # [Auto Adjust evaluation training epochs]
+        epoch_per_lr = max(args.syn_steps, 500 // len(args.lr_net))
+        args.epoch_eval_train = Epoch = epoch_per_lr * len(args.lr_net) + 500
+        lr_schedule = [[epoch_per_lr * len(args.lr_net)+1, float(args.lr_net[-1]) * 0.1]]
+        for i, lr in reversed(list(enumerate(args.lr_net[1:], 1))):
+            lr_schedule.append([epoch_per_lr * i, float(lr)])
+        # First LR
+        optimizer = torch.optim.SGD(net.parameters(), lr=float(args.lr_net[0]), momentum=0.9, weight_decay=0.0005)
+    else:
+        lr = float(args.lr_net)
+        Epoch = int(args.epoch_eval_train)
+        lr_schedule = [[Epoch//2+1, lr * 0.1]]
+        optimizer = torch.optim.SGD(net.parameters(), lr=lr, momentum=0.9, weight_decay=0.0005)
 
     criterion = nn.CrossEntropyLoss().to(args.device)
 
@@ -817,9 +827,9 @@ def evaluate_synset(it, it_eval, net, num_classes, images_train, labels_train, d
         if ep == Epoch:
             with torch.no_grad():
                 loss_test, acc_test = epoch('test', testloader, net, optimizer, criterion, args, aug=False)
-        if ep in lr_schedule:
-            lr *= 0.1
-            optimizer = torch.optim.SGD(net.parameters(), lr=lr, momentum=0.9, weight_decay=0.0005)
+        if len(lr_schedule) > 0 and ep == lr_schedule[-1][0]:
+            cur = lr_schedule.pop()
+            optimizer = torch.optim.SGD(net.parameters(), lr=cur[1], momentum=0.9, weight_decay=0.0005)
 
     time_train = time.time() - start
 

@@ -1,6 +1,9 @@
 import cv2
 import numpy as np
 import os
+import matplotlib.pyplot as plt
+import matplotlib as mpl
+# mpl.use('TkAgg')
 #%%
 
 dir = '/Users/data/class9/demonstrate_of_each_class'
@@ -45,4 +48,30 @@ temp = torch.tensor(0.001) * log_syn_lr.data * log_syn_lr
 temp.backward()
 optimizer_lr.step()
 optimizer_lr.zero_grad()
+#%%
+x = np.array(range(200))
+y = np.random.normal(size=200)
+corr = np.correlate(x,y)
+#%%
+import torch
+x = torch.randn(2, 3, 10, 10)
+orig_shape = x.size()
+#%%
+# Reshape and calculate positions of top 10%
+x = x.view(x.size(0), x.size(1), -1)
+#%%
+nb_pixels = x.size(2)
+ret = torch.topk(x, k=int(0.1*nb_pixels), dim=2)
+ret.indices.shape
+#%%
+# Scatter to zero'd tensor
+res = torch.zeros_like(x)
+res.scatter_(2, ret.indices, ret.values)
+res = res.view(*orig_shape)
+#%%
+
+#%%
+
+#%%
+
 #%%
