@@ -12,6 +12,7 @@ from reparam_module import ReparamModule
 from torchvision.utils import save_image
 from astropy.io import fits
 import cv2 as cv
+from PIL import Image
 from torchvision import datasets, transforms
 
 import warnings
@@ -52,8 +53,8 @@ def ds_test_on_original():
     for i, id in enumerate(gzoo['dr7objid']):
         indexes[id] = i
 
-    # path = '/data/sbcaesar/xuan_galaxy/Galaxy-DR17-dataset/gzoo2/image'
-    path = '/data/sbcaesar/classes/1000'
+    path = '/data/sbcaesar/xuan_galaxy/Galaxy-DR17-dataset/gzoo2/image'
+    # path = '/data/sbcaesar/classes/1000'
 
     dst_test = []
     count = 0
@@ -63,33 +64,25 @@ def ds_test_on_original():
         image_dir = os.path.join(path, image)
 
         count += 1
-        if count > 1000: break
+        if count > 10000: break
 
         id = int(image[:-4])
-        img = cv.imread(image_dir)
-        img = cv.cvtColor(img, cv.COLOR_BGR2RGB)
-        img = img[img.shape[0] // 4: (img.shape[0] * 3) // 4, img.shape[1] // 4: (img.shape[1] * 3) // 4]
-        img = cv.resize(img, (128, 128), interpolation=cv.INTER_AREA) / 255
-        # img = cv.cvtColor(np.float32(img), cv.COLOR_BGR2GRAY)
-        img = torch.from_numpy(img.T)
-        img = transforms.Normalize(mean, std)(img)
+        im = Image.open(image_dir)
+        aug = 1
+        for i in range(aug):
+            img = im.rotate((360 // aug) * i)
+            img = np.array(img)[:, :, :3]
+            img = img[img.shape[0] // 4:(img.shape[0] * 3) // 4, img.shape[1] // 4:(img.shape[1] * 3) // 4]
+            img = cv.resize(img, (128, 128), interpolation=cv.INTER_AREA) / 255
+            img = torch.from_numpy(img.T)
+            img = transforms.Normalize(mean, std)(img)
+            dst_test.append((img, get_classes(gzoo, indexes, id)))
 
-        dst_test.append((img, get_classes(gzoo, indexes, id)))
     np.random.shuffle(dst_test)
     testloader = torch.utils.data.DataLoader(dst_test, batch_size=128, shuffle=False, num_workers=2)
     return dst_test, testloader
 
-
-
-def main(args):
-
-    args.device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    args.dsa_param = ParamDiffAug()
-    channel = 3
-    im_size = (128, 128)
-    num_classes = 10
-
-    channel, im_size, num_classes, class_names, mean, std, dst_train, dst_test, testloader, loader_train_dict, class_map, class_map_inv = get_dataset(args.dataset, args.data_path, args.batch_real, args.subset, args=args)
+def build_full_dataset(num_classes, dst_train, class_map):
     images_all = []
     labels_all = []
     indices_class = [[] for c in range(num_classes)]
@@ -104,62 +97,94 @@ def main(args):
         indices_class[lab].append(i)
     images_all = torch.cat(images_all, dim=0).to("cpu")
     labels_all = torch.tensor(labels_all, dtype=torch.long, device="cpu")
-    #
-    # def get_images(c, n):  # get random n images from class c
-    #     idx_shuffle = np.random.permutation(indices_class[c])[:n]
-    #     return images_all[idx_shuffle]
+    return images_all, indices_class
 
-    # def get_images_average(c,n):
-    #     avg_pic = torch.mean(images_all[indices_class[c]],0)
-    #     save_image(avg_pic, 'logs/average_images/class_'+str(c)+"_average.png")
-    #     return avg_pic
+def get_images(c, n, images_all, indices_class):  # get random n images from class c
+    idx_shuffle = np.random.permutation(indices_class[c])[:n]
+
+    return images_all[idx_shuffle]
+
+def get_images_average(c, images_all, indices_class):
+     avg_pic = torch.mean(images_all[indices_class[c]],0)
+     save_image(avg_pic, 'logs/average_images/class_'+str(c)+"_average.png")
+     return avg_pic
+
+
+def main(args):
+
+    args.device = 'cuda:1' if torch.cuda.is_available() else 'cpu'
+    args.dsa_param = ParamDiffAug()
 
     print("Loading test:")
+    if not args.ds_test_on_original:
+        channel, im_size, num_classes, class_names, mean, std, dst_train, dst_test, testloader, loader_train_dict, class_map, class_map_inv = get_dataset(args.dataset, args.data_path, args.batch_real, args.subset, args=args)
+    else:
+        channel = 3
+        im_size = (128, 128)
+        num_classes = 10
+        dst_test, testloader = ds_test_on_original()
+    print("Length of Test set:", len(dst_test))
 
-    # dst_test, testloader = ds_test_on_original()
-    print("Load test!")
     mean_acc_all = []
     for image_set in range(10):
 
         label_syn = torch.tensor([np.ones(args.ipc)*i for i in range(num_classes)], dtype=torch.long, requires_grad=False, device=args.device).view(-1)
-        # image_syn = torch.randn(size=(num_classes * args.ipc, channel, im_size[0], im_size[1]), dtype=torch.float)
-        image_syn = torch.load("/data/sbcaesar/mac_galaxy/logged_files/gzoo2/snowy-wave-154/images_7000.pt")
+        if args.baseline_type == 'syn_image':
+            image_syn = torch.load("/data/sbcaesar/mac_galaxy/logged_files/gzoo2/1ipc-300-fine-tuning/images_17000.pt")
 
-        # for c in range(num_classes):
-        #     image_syn.data[c * args.ipc:(c + 1) * args.ipc] = get_images_average(c, args.ipc).detach().data
-            # image_syn.data[c * args.ipc:(c + 1) * args.ipc] = get_images(c, args.ipc).detach().data
+        elif args.baseline_type == 'average':
+            images_all, indices_class = build_full_dataset(num_classes, dst_train, class_map)
+            image_syn = torch.randn(size=(num_classes * args.ipc, channel, im_size[0], im_size[1]), dtype=torch.float)
+            for c in range(num_classes):
+                image_syn.data[c * args.ipc:(c + 1) * args.ipc] = get_images_average(c, images_all, indices_class).detach().data
 
-        eval_it_pool = np.arange(0, args.Iteration + 1, args.eval_it).tolist()
+        elif args.baseline_type == 'random':
+            images_all, indices_class = build_full_dataset(num_classes, dst_train, class_map)
+            image_syn = torch.randn(size=(num_classes * args.ipc, channel, im_size[0], im_size[1]), dtype=torch.float)
+            for c in range(num_classes):
+                image_syn.data[c * args.ipc:(c + 1) * args.ipc] = get_images(c, args.ipc, images_all, indices_class).detach().data
+
         model_eval_pool = get_eval_pool(args.eval_mode, args.model, args.model)
+
         syn_lr = torch.tensor(args.lr_teacher).to(args.device)
+        args.lr_net = syn_lr.item()
+        # args.lr_net = [0.0001] * 10 + [0.00001] * 10
+        n = 1
+        if args.test_lr: n = 10
+
+        for x in range(n):
+            if args.test_lr:
+                args.lr_net = [0.0001] * x + [0.00001] * 10
+                print("lr_net:[0.0001]*{} + [0.00001]*10".format(x))
+
+            for model_eval in model_eval_pool:
+
+                accs_test = []
+                accs_train = []
+                for it_eval in range(args.num_eval):
+                    net_eval = get_network(model_eval, channel, num_classes, im_size).to(args.device) # get a random model
+
+                    eval_labs = label_syn
+                    with torch.no_grad():
+                        image_save = image_syn
+                    image_syn_eval, label_syn_eval = copy.deepcopy(image_save.detach()), copy.deepcopy(eval_labs.detach()) # avoid any unaware modification
 
 
-        for model_eval in model_eval_pool:
+                    _, acc_train, acc_test, train_cf, test_cf = evaluate_synset(1, it_eval, net_eval, num_classes,
+                                                                                image_syn_eval, label_syn_eval, dst_test,
+                                                                                testloader, args, texture=args.texture)
+                    # print(test_cf)
 
-            accs_test = []
-            accs_train = []
-            for it_eval in range(args.num_eval):
-                net_eval = get_network(model_eval, channel, num_classes, im_size).to(args.device) # get a random model
-
-                eval_labs = label_syn
-                with torch.no_grad():
-                    image_save = image_syn
-                image_syn_eval, label_syn_eval = copy.deepcopy(image_save.detach()), copy.deepcopy(eval_labs.detach()) # avoid any unaware modification
-
-                args.lr_net = syn_lr.item()
-                _, acc_train, acc_test, train_cf, test_cf = evaluate_synset(1, it_eval, net_eval, num_classes,
-                                                                            image_syn_eval, label_syn_eval, dst_test,
-                                                                            testloader, args, texture=args.texture)
-                accs_test.append(acc_test)
-                accs_train.append(acc_train)
-            accs_test = np.array(accs_test)
-            accs_train = np.array(accs_train)
-            acc_test_mean = np.mean(accs_test)
-            acc_test_std = np.std(accs_test)
-            mean_acc_all.append(acc_test_mean)
-            print('Random Image set %d Evaluate %d random %s, test acc mean = %.4f std = %.4f\n-------------------------'%(image_set, len(accs_test), model_eval, acc_test_mean, acc_test_std))
-    print(mean_acc_all)
-    print("Mean test accuracy of 10 ramdom sets:", sum(mean_acc_all)/len(mean_acc_all))
+                    accs_test.append(acc_test)
+                    accs_train.append(acc_train)
+                accs_test = np.array(accs_test)
+                accs_train = np.array(accs_train)
+                acc_test_mean = np.mean(accs_test)
+                acc_test_std = np.std(accs_test)
+                mean_acc_all.append(acc_test_mean)
+                print('Random Image set %d Evaluate %d random %s, test acc mean = %.4f std = %.4f\n-------------------------'%(image_set, len(accs_test), model_eval, acc_test_mean, acc_test_std))
+        print(mean_acc_all)
+        print("Mean test accuracy of 10 ramdom sets:", sum(mean_acc_all)/len(mean_acc_all))
 
 
 
@@ -167,6 +192,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Parameter Processing')
 
     parser.add_argument('--dataset', type=str, default='gzoo2', help='dataset')
+    parser.add_argument('--baseline_type', type=str, default='syn_image', help='Give the type of baseline that you want to test. Should be one of: syn_image, average, random')
+    parser.add_argument('--ds_test_on_original', type=bool, default=False, help='Whether the test set is drawn from the original dataset')
+    parser.add_argument('--test_lr', type=bool, default=False, help='Whether to test the learning rate influence')
 
     parser.add_argument('--subset', type=str, default='imagenette', help='ImageNet subset. This only does anything when --dataset=ImageNet')
 
@@ -186,7 +214,7 @@ if __name__ == '__main__':
 
     parser.add_argument('--lr_img', type=float, default=1000, help='learning rate for updating synthetic images')
     parser.add_argument('--lr_lr', type=float, default=1e-05, help='learning rate for updating... learning rate')
-    parser.add_argument('--lr_teacher', type=float, default=0.0007626, help='initialization for synthetic learning rate')
+    parser.add_argument('--lr_teacher', type=float, default=0.0001, help='initialization for synthetic learning rate')
 
     parser.add_argument('--lr_init', type=float, default=0.01, help='how to init lr (alpha)')
 
@@ -207,7 +235,7 @@ if __name__ == '__main__':
     parser.add_argument('--buffer_path', type=str, default='./buffers', help='buffer path')
 
     parser.add_argument('--expert_epochs', type=int, default=3, help='how many expert epochs the target params are')
-    parser.add_argument('--syn_steps', type=int, default=20, help='how many steps to take on synthetic data')
+    parser.add_argument('--syn_steps', type=int, default=50, help='how many steps to take on synthetic data')
     parser.add_argument('--max_start_epoch', type=int, default=25, help='max epoch we can start at')
 
     parser.add_argument('--zca', action='store_true', help="do ZCA whitening")

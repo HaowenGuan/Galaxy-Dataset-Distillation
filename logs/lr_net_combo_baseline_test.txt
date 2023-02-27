@@ -1,0 +1,578 @@
+/data/sbcaesar/xuan_venv/bin/python3 /data/sbcaesar/xuan_galaxy/baseline_test.py
+Get Dataset...
+Generated Augmented Train Set of 2400 images.
+Processed Test Set of 600 images.
+600
+Load test!
+lr_net:[0.0001]*0 + [0.00001]*10
+100%|██████████| 1001/1001 [00:08<00:00, 123.81it/s]
+[2023-02-23 20:58:51] Evaluate_00: epoch = 1000 train time = 8 s train loss = 0.565754 train acc = 1.0000, test acc = 0.5350
+100%|██████████| 1001/1001 [00:06<00:00, 147.16it/s]
+[2023-02-23 20:58:59] Evaluate_01: epoch = 1000 train time = 6 s train loss = 0.947560 train acc = 0.9000, test acc = 0.4950
+100%|██████████| 1001/1001 [00:06<00:00, 146.80it/s]
+[2023-02-23 20:59:06] Evaluate_02: epoch = 1000 train time = 6 s train loss = 1.493725 train acc = 0.8000, test acc = 0.4683
+100%|██████████| 1001/1001 [00:07<00:00, 140.80it/s]
+[2023-02-23 20:59:13] Evaluate_03: epoch = 1000 train time = 7 s train loss = 0.540283 train acc = 1.0000, test acc = 0.4917
+100%|██████████| 1001/1001 [00:06<00:00, 147.03it/s]
+[2023-02-23 20:59:21] Evaluate_04: epoch = 1000 train time = 6 s train loss = 1.018484 train acc = 0.8000, test acc = 0.4700
+100%|██████████| 1001/1001 [00:06<00:00, 146.46it/s]
+[2023-02-23 20:59:28] Evaluate_05: epoch = 1000 train time = 6 s train loss = 0.705195 train acc = 1.0000, test acc = 0.5567
+100%|██████████| 1001/1001 [00:06<00:00, 146.67it/s]
+[2023-02-23 20:59:35] Evaluate_06: epoch = 1000 train time = 6 s train loss = 0.572378 train acc = 1.0000, test acc = 0.5183
+100%|██████████| 1001/1001 [00:06<00:00, 146.92it/s]
+[2023-02-23 20:59:42] Evaluate_07: epoch = 1000 train time = 6 s train loss = 0.473478 train acc = 1.0000, test acc = 0.4883
+100%|██████████| 1001/1001 [00:06<00:00, 146.67it/s]
+[2023-02-23 20:59:50] Evaluate_08: epoch = 1000 train time = 6 s train loss = 0.639591 train acc = 1.0000, test acc = 0.5517
+100%|██████████| 1001/1001 [00:06<00:00, 146.53it/s]
+[2023-02-23 20:59:57] Evaluate_09: epoch = 1000 train time = 6 s train loss = 0.655215 train acc = 1.0000, test acc = 0.4933
+Random Image set 0 Evaluate 10 random ConvNet, test acc mean = 0.5068 std = 0.0303
+-------------------------
+lr_net:[0.0001]*1 + [0.00001]*10
+100%|██████████| 1051/1051 [00:07<00:00, 147.19it/s]
+[2023-02-23 21:00:05] Evaluate_00: epoch = 1050 train time = 7 s train loss = 0.700139 train acc = 0.8000, test acc = 0.5600
+100%|██████████| 1051/1051 [00:07<00:00, 147.10it/s]
+[2023-02-23 21:00:12] Evaluate_01: epoch = 1050 train time = 7 s train loss = 0.346435 train acc = 1.0000, test acc = 0.5617
+100%|██████████| 1051/1051 [00:07<00:00, 147.02it/s]
+[2023-02-23 21:00:20] Evaluate_02: epoch = 1050 train time = 7 s train loss = 0.357033 train acc = 1.0000, test acc = 0.5583
+100%|██████████| 1051/1051 [00:07<00:00, 147.02it/s]
+[2023-02-23 21:00:27] Evaluate_03: epoch = 1050 train time = 7 s train loss = 0.391208 train acc = 1.0000, test acc = 0.6000
+100%|██████████| 1051/1051 [00:07<00:00, 147.18it/s]
+[2023-02-23 21:00:35] Evaluate_04: epoch = 1050 train time = 7 s train loss = 0.701562 train acc = 0.9000, test acc = 0.5317
+100%|██████████| 1051/1051 [00:07<00:00, 146.95it/s]
+[2023-02-23 21:00:43] Evaluate_05: epoch = 1050 train time = 7 s train loss = 0.222330 train acc = 1.0000, test acc = 0.5633
+100%|██████████| 1051/1051 [00:07<00:00, 140.24it/s]
+[2023-02-23 21:00:51] Evaluate_06: epoch = 1050 train time = 7 s train loss = 0.235383 train acc = 1.0000, test acc = 0.5317
+100%|██████████| 1051/1051 [00:07<00:00, 147.19it/s]
+[2023-02-23 21:00:58] Evaluate_07: epoch = 1050 train time = 7 s train loss = 0.359113 train acc = 1.0000, test acc = 0.5450
+100%|██████████| 1051/1051 [00:07<00:00, 146.77it/s]
+[2023-02-23 21:01:06] Evaluate_08: epoch = 1050 train time = 7 s train loss = 1.394807 train acc = 0.5000, test acc = 0.5400
+100%|██████████| 1051/1051 [00:07<00:00, 143.20it/s]
+[2023-02-23 21:01:14] Evaluate_09: epoch = 1050 train time = 7 s train loss = 0.199434 train acc = 1.0000, test acc = 0.5017
+  0%|          | 0/1101 [00:00<?, ?it/s]Random Image set 0 Evaluate 10 random ConvNet, test acc mean = 0.5493 std = 0.0247
+-------------------------
+lr_net:[0.0001]*2 + [0.00001]*10
+100%|██████████| 1101/1101 [00:07<00:00, 147.88it/s]
+[2023-02-23 21:01:22] Evaluate_00: epoch = 1100 train time = 7 s train loss = 0.067320 train acc = 1.0000, test acc = 0.5667
+100%|██████████| 1101/1101 [00:07<00:00, 147.71it/s]
+[2023-02-23 21:01:30] Evaluate_01: epoch = 1100 train time = 7 s train loss = 1.284131 train acc = 0.9000, test acc = 0.5617
+100%|██████████| 1101/1101 [00:07<00:00, 147.61it/s]
+[2023-02-23 21:01:37] Evaluate_02: epoch = 1100 train time = 7 s train loss = 0.186628 train acc = 1.0000, test acc = 0.5567
+100%|██████████| 1101/1101 [00:07<00:00, 148.20it/s]
+[2023-02-23 21:01:45] Evaluate_03: epoch = 1100 train time = 7 s train loss = 0.260239 train acc = 1.0000, test acc = 0.5567
+100%|██████████| 1101/1101 [00:07<00:00, 147.38it/s]
+[2023-02-23 21:01:53] Evaluate_04: epoch = 1100 train time = 7 s train loss = 1.174558 train acc = 0.9000, test acc = 0.5750
+100%|██████████| 1101/1101 [00:07<00:00, 147.31it/s]
+[2023-02-23 21:02:01] Evaluate_05: epoch = 1100 train time = 7 s train loss = 0.235272 train acc = 1.0000, test acc = 0.5650
+100%|██████████| 1101/1101 [00:07<00:00, 147.08it/s]
+[2023-02-23 21:02:09] Evaluate_06: epoch = 1100 train time = 7 s train loss = 0.226217 train acc = 1.0000, test acc = 0.5750
+100%|██████████| 1101/1101 [00:07<00:00, 147.58it/s]
+[2023-02-23 21:02:17] Evaluate_07: epoch = 1100 train time = 7 s train loss = 0.192772 train acc = 1.0000, test acc = 0.5217
+100%|██████████| 1101/1101 [00:07<00:00, 147.36it/s]
+[2023-02-23 21:02:25] Evaluate_08: epoch = 1100 train time = 7 s train loss = 0.178274 train acc = 1.0000, test acc = 0.5683
+100%|██████████| 1101/1101 [00:07<00:00, 147.12it/s]
+[2023-02-23 21:02:33] Evaluate_09: epoch = 1100 train time = 7 s train loss = 0.254390 train acc = 1.0000, test acc = 0.5600
+Random Image set 0 Evaluate 10 random ConvNet, test acc mean = 0.5607 std = 0.0144
+-------------------------
+lr_net:[0.0001]*3 + [0.00001]*10
+100%|██████████| 1151/1151 [00:07<00:00, 147.54it/s]
+[2023-02-23 21:02:41] Evaluate_00: epoch = 1150 train time = 7 s train loss = 0.178049 train acc = 1.0000, test acc = 0.6083
+100%|██████████| 1151/1151 [00:07<00:00, 147.34it/s]
+[2023-02-23 21:02:49] Evaluate_01: epoch = 1150 train time = 7 s train loss = 1.104111 train acc = 0.8000, test acc = 0.5850
+100%|██████████| 1151/1151 [00:07<00:00, 147.84it/s]
+[2023-02-23 21:02:58] Evaluate_02: epoch = 1150 train time = 7 s train loss = 0.054514 train acc = 1.0000, test acc = 0.5467
+100%|██████████| 1151/1151 [00:07<00:00, 147.43it/s]
+[2023-02-23 21:03:06] Evaluate_03: epoch = 1150 train time = 7 s train loss = 0.161066 train acc = 1.0000, test acc = 0.5767
+100%|██████████| 1151/1151 [00:07<00:00, 148.09it/s]
+[2023-02-23 21:03:14] Evaluate_04: epoch = 1150 train time = 7 s train loss = 0.442229 train acc = 0.9000, test acc = 0.5883
+100%|██████████| 1151/1151 [00:07<00:00, 147.97it/s]
+[2023-02-23 21:03:22] Evaluate_05: epoch = 1150 train time = 7 s train loss = 0.168174 train acc = 1.0000, test acc = 0.5850
+100%|██████████| 1151/1151 [00:07<00:00, 147.89it/s]
+[2023-02-23 21:03:31] Evaluate_06: epoch = 1150 train time = 7 s train loss = 1.124433 train acc = 0.8000, test acc = 0.5917
+100%|██████████| 1151/1151 [00:07<00:00, 147.47it/s]
+[2023-02-23 21:03:39] Evaluate_07: epoch = 1150 train time = 7 s train loss = 0.164102 train acc = 1.0000, test acc = 0.5917
+100%|██████████| 1151/1151 [00:07<00:00, 147.72it/s]
+[2023-02-23 21:03:47] Evaluate_08: epoch = 1150 train time = 7 s train loss = 0.054175 train acc = 1.0000, test acc = 0.5500
+100%|██████████| 1151/1151 [00:07<00:00, 147.20it/s]
+[2023-02-23 21:03:55] Evaluate_09: epoch = 1150 train time = 7 s train loss = 0.235393 train acc = 1.0000, test acc = 0.5617
+Random Image set 0 Evaluate 10 random ConvNet, test acc mean = 0.5785 std = 0.0188
+-------------------------
+lr_net:[0.0001]*4 + [0.00001]*10
+100%|██████████| 1201/1201 [00:09<00:00, 128.57it/s]
+[2023-02-23 20:23:32] Evaluate_00: epoch = 1200 train time = 9 s train loss = 0.094976 train acc = 1.0000, test acc = 0.5650
+100%|██████████| 1201/1201 [00:08<00:00, 148.58it/s]
+[2023-02-23 20:23:41] Evaluate_01: epoch = 1200 train time = 8 s train loss = 0.922387 train acc = 0.9000, test acc = 0.5050
+100%|██████████| 1201/1201 [00:08<00:00, 148.47it/s]
+[2023-02-23 20:23:49] Evaluate_02: epoch = 1200 train time = 8 s train loss = 0.443865 train acc = 0.9000, test acc = 0.5633
+100%|██████████| 1201/1201 [00:08<00:00, 148.53it/s]
+[2023-02-23 20:23:58] Evaluate_03: epoch = 1200 train time = 8 s train loss = 0.133704 train acc = 1.0000, test acc = 0.5983
+100%|██████████| 1201/1201 [00:08<00:00, 148.06it/s]
+[2023-02-23 20:24:06] Evaluate_04: epoch = 1200 train time = 8 s train loss = 0.066457 train acc = 1.0000, test acc = 0.5300
+100%|██████████| 1201/1201 [00:08<00:00, 148.37it/s]
+[2023-02-23 20:24:15] Evaluate_05: epoch = 1200 train time = 8 s train loss = 0.044746 train acc = 1.0000, test acc = 0.5950
+100%|██████████| 1201/1201 [00:08<00:00, 148.49it/s]
+[2023-02-23 20:24:23] Evaluate_06: epoch = 1200 train time = 8 s train loss = 0.968740 train acc = 1.0000, test acc = 0.5700
+100%|██████████| 1201/1201 [00:08<00:00, 148.07it/s]
+[2023-02-23 20:24:32] Evaluate_07: epoch = 1200 train time = 8 s train loss = 0.096083 train acc = 1.0000, test acc = 0.5617
+100%|██████████| 1201/1201 [00:08<00:00, 148.13it/s]
+[2023-02-23 20:24:41] Evaluate_08: epoch = 1200 train time = 8 s train loss = 1.006598 train acc = 0.7000, test acc = 0.5867
+100%|██████████| 1201/1201 [00:08<00:00, 143.73it/s]
+[2023-02-23 20:24:49] Evaluate_09: epoch = 1200 train time = 8 s train loss = 0.200873 train acc = 1.0000, test acc = 0.5567
+Random Image set 0 Evaluate 10 random ConvNet, test acc mean = 0.5632 std = 0.0272
+-------------------------
+lr_net:[0.0001]*5 + [0.00001]*10
+100%|██████████| 1251/1251 [00:08<00:00, 148.16it/s]
+[2023-02-23 20:24:58] Evaluate_00: epoch = 1250 train time = 8 s train loss = 0.096619 train acc = 1.0000, test acc = 0.5750
+100%|██████████| 1251/1251 [00:08<00:00, 147.89it/s]
+[2023-02-23 20:25:07] Evaluate_01: epoch = 1250 train time = 8 s train loss = 0.022881 train acc = 1.0000, test acc = 0.6000
+100%|██████████| 1251/1251 [00:08<00:00, 142.17it/s]
+[2023-02-23 20:25:16] Evaluate_02: epoch = 1250 train time = 8 s train loss = 0.093377 train acc = 1.0000, test acc = 0.5567
+100%|██████████| 1251/1251 [00:08<00:00, 148.14it/s]
+[2023-02-23 20:25:25] Evaluate_03: epoch = 1250 train time = 8 s train loss = 0.168423 train acc = 1.0000, test acc = 0.5583
+100%|██████████| 1251/1251 [00:08<00:00, 143.07it/s]
+[2023-02-23 20:25:35] Evaluate_04: epoch = 1250 train time = 8 s train loss = 1.016936 train acc = 0.8000, test acc = 0.5533
+100%|██████████| 1251/1251 [00:08<00:00, 143.39it/s]
+[2023-02-23 20:25:44] Evaluate_05: epoch = 1250 train time = 8 s train loss = 0.079609 train acc = 1.0000, test acc = 0.5700
+100%|██████████| 1251/1251 [00:08<00:00, 148.02it/s]
+[2023-02-23 20:25:53] Evaluate_06: epoch = 1250 train time = 8 s train loss = 0.120927 train acc = 1.0000, test acc = 0.6017
+100%|██████████| 1251/1251 [00:08<00:00, 147.86it/s]
+[2023-02-23 20:26:01] Evaluate_07: epoch = 1250 train time = 8 s train loss = 0.086208 train acc = 1.0000, test acc = 0.5500
+100%|██████████| 1251/1251 [00:08<00:00, 141.47it/s]
+[2023-02-23 20:26:11] Evaluate_08: epoch = 1250 train time = 8 s train loss = 0.076000 train acc = 1.0000, test acc = 0.5867
+100%|██████████| 1251/1251 [00:08<00:00, 146.91it/s]
+[2023-02-23 20:26:20] Evaluate_09: epoch = 1250 train time = 8 s train loss = 0.814707 train acc = 0.9000, test acc = 0.5867
+  1%|          | 16/1301 [00:00<00:08, 157.34it/s]Random Image set 0 Evaluate 10 random ConvNet, test acc mean = 0.5738 std = 0.0182
+-------------------------
+lr_net:[0.0001]*6 + [0.00001]*10
+100%|██████████| 1301/1301 [00:08<00:00, 147.96it/s]
+[2023-02-23 20:26:29] Evaluate_00: epoch = 1300 train time = 8 s train loss = 0.063977 train acc = 1.0000, test acc = 0.5683
+100%|██████████| 1301/1301 [00:08<00:00, 148.46it/s]
+[2023-02-23 20:26:38] Evaluate_01: epoch = 1300 train time = 8 s train loss = 0.197501 train acc = 1.0000, test acc = 0.5817
+100%|██████████| 1301/1301 [00:08<00:00, 148.48it/s]
+[2023-02-23 20:26:47] Evaluate_02: epoch = 1300 train time = 8 s train loss = 0.050550 train acc = 1.0000, test acc = 0.5433
+100%|██████████| 1301/1301 [00:08<00:00, 148.48it/s]
+[2023-02-23 20:26:57] Evaluate_03: epoch = 1300 train time = 8 s train loss = 0.058247 train acc = 1.0000, test acc = 0.5983
+100%|██████████| 1301/1301 [00:09<00:00, 142.27it/s]
+[2023-02-23 20:27:06] Evaluate_04: epoch = 1300 train time = 9 s train loss = 0.725406 train acc = 0.9000, test acc = 0.5417
+100%|██████████| 1301/1301 [00:09<00:00, 142.38it/s]
+[2023-02-23 20:27:16] Evaluate_05: epoch = 1300 train time = 9 s train loss = 0.896282 train acc = 0.8000, test acc = 0.5633
+100%|██████████| 1301/1301 [00:09<00:00, 142.27it/s]
+[2023-02-23 20:27:25] Evaluate_06: epoch = 1300 train time = 9 s train loss = 0.761691 train acc = 1.0000, test acc = 0.5433
+100%|██████████| 1301/1301 [00:09<00:00, 142.60it/s]
+[2023-02-23 20:27:35] Evaluate_07: epoch = 1300 train time = 9 s train loss = 0.103841 train acc = 1.0000, test acc = 0.5600
+100%|██████████| 1301/1301 [00:08<00:00, 145.52it/s]
+[2023-02-23 20:27:44] Evaluate_08: epoch = 1300 train time = 8 s train loss = 0.152295 train acc = 1.0000, test acc = 0.5867
+100%|██████████| 1301/1301 [00:08<00:00, 148.75it/s]
+[2023-02-23 20:27:54] Evaluate_09: epoch = 1300 train time = 8 s train loss = 0.033281 train acc = 1.0000, test acc = 0.5617
+  1%|▏         | 17/1351 [00:00<00:08, 161.51it/s]Random Image set 0 Evaluate 10 random ConvNet, test acc mean = 0.5648 std = 0.0184
+-------------------------
+lr_net:[0.0001]*7 + [0.00001]*10
+100%|██████████| 1351/1351 [00:09<00:00, 145.51it/s]
+[2023-02-23 20:28:03] Evaluate_00: epoch = 1350 train time = 9 s train loss = 0.063654 train acc = 1.0000, test acc = 0.5833
+100%|██████████| 1351/1351 [00:09<00:00, 146.12it/s]
+[2023-02-23 20:28:13] Evaluate_01: epoch = 1350 train time = 9 s train loss = 0.052078 train acc = 1.0000, test acc = 0.5500
+100%|██████████| 1351/1351 [00:09<00:00, 142.74it/s]
+[2023-02-23 20:28:23] Evaluate_02: epoch = 1350 train time = 9 s train loss = 0.036755 train acc = 1.0000, test acc = 0.5133
+100%|██████████| 1351/1351 [00:09<00:00, 144.20it/s]
+[2023-02-23 20:28:33] Evaluate_03: epoch = 1350 train time = 9 s train loss = 0.054675 train acc = 1.0000, test acc = 0.5950
+100%|██████████| 1351/1351 [00:09<00:00, 143.03it/s]
+[2023-02-23 20:28:43] Evaluate_04: epoch = 1350 train time = 9 s train loss = 0.026100 train acc = 1.0000, test acc = 0.5883
+100%|██████████| 1351/1351 [00:09<00:00, 142.40it/s]
+[2023-02-23 20:28:53] Evaluate_05: epoch = 1350 train time = 9 s train loss = 0.055738 train acc = 1.0000, test acc = 0.5650
+100%|██████████| 1351/1351 [00:09<00:00, 141.94it/s]
+[2023-02-23 20:29:03] Evaluate_06: epoch = 1350 train time = 9 s train loss = 0.050785 train acc = 1.0000, test acc = 0.5283
+100%|██████████| 1351/1351 [00:09<00:00, 144.58it/s]
+[2023-02-23 20:29:12] Evaluate_07: epoch = 1350 train time = 9 s train loss = 0.637772 train acc = 1.0000, test acc = 0.5500
+100%|██████████| 1351/1351 [00:09<00:00, 148.40it/s]
+[2023-02-23 20:29:22] Evaluate_08: epoch = 1350 train time = 9 s train loss = 0.033330 train acc = 1.0000, test acc = 0.4950
+100%|██████████| 1351/1351 [00:09<00:00, 143.24it/s]
+[2023-02-23 20:29:32] Evaluate_09: epoch = 1350 train time = 9 s train loss = 0.057834 train acc = 1.0000, test acc = 0.5517
+Random Image set 0 Evaluate 10 random ConvNet, test acc mean = 0.5520 std = 0.0310
+-------------------------
+lr_net:[0.0001]*8 + [0.00001]*10
+100%|██████████| 1401/1401 [00:09<00:00, 147.99it/s]
+[2023-02-23 20:29:42] Evaluate_00: epoch = 1400 train time = 9 s train loss = 0.032291 train acc = 1.0000, test acc = 0.5233
+100%|██████████| 1401/1401 [00:09<00:00, 148.48it/s]
+[2023-02-23 20:29:52] Evaluate_01: epoch = 1400 train time = 9 s train loss = 0.041413 train acc = 1.0000, test acc = 0.5250
+100%|██████████| 1401/1401 [00:09<00:00, 148.49it/s]
+[2023-02-23 20:30:02] Evaluate_02: epoch = 1400 train time = 9 s train loss = 0.020012 train acc = 1.0000, test acc = 0.5483
+100%|██████████| 1401/1401 [00:09<00:00, 148.66it/s]
+[2023-02-23 20:30:11] Evaluate_03: epoch = 1400 train time = 9 s train loss = 0.605437 train acc = 0.9000, test acc = 0.5917
+100%|██████████| 1401/1401 [00:09<00:00, 148.25it/s]
+[2023-02-23 20:30:21] Evaluate_04: epoch = 1400 train time = 9 s train loss = 0.110166 train acc = 1.0000, test acc = 0.5733
+100%|██████████| 1401/1401 [00:09<00:00, 148.18it/s]
+[2023-02-23 20:30:31] Evaluate_05: epoch = 1400 train time = 9 s train loss = 0.015429 train acc = 1.0000, test acc = 0.5183
+100%|██████████| 1401/1401 [00:09<00:00, 147.93it/s]
+[2023-02-23 20:30:41] Evaluate_06: epoch = 1400 train time = 9 s train loss = 0.037221 train acc = 1.0000, test acc = 0.5633
+100%|██████████| 1401/1401 [00:09<00:00, 148.05it/s]
+[2023-02-23 20:30:51] Evaluate_07: epoch = 1400 train time = 9 s train loss = 0.051809 train acc = 1.0000, test acc = 0.5300
+100%|██████████| 1401/1401 [00:09<00:00, 148.30it/s]
+[2023-02-23 20:31:01] Evaluate_08: epoch = 1400 train time = 9 s train loss = 0.053604 train acc = 1.0000, test acc = 0.5500
+100%|██████████| 1401/1401 [00:09<00:00, 148.21it/s]
+[2023-02-23 20:31:11] Evaluate_09: epoch = 1400 train time = 9 s train loss = 0.059628 train acc = 1.0000, test acc = 0.5200
+Random Image set 0 Evaluate 10 random ConvNet, test acc mean = 0.5443 std = 0.0240
+-------------------------
+lr_net:[0.0001]*9 + [0.00001]*10
+100%|██████████| 1451/1451 [00:09<00:00, 148.80it/s]
+[2023-02-23 20:31:21] Evaluate_00: epoch = 1450 train time = 9 s train loss = 0.067899 train acc = 1.0000, test acc = 0.5667
+100%|██████████| 1451/1451 [00:09<00:00, 148.39it/s]
+[2023-02-23 20:31:31] Evaluate_01: epoch = 1450 train time = 9 s train loss = 0.452331 train acc = 1.0000, test acc = 0.5283
+100%|██████████| 1451/1451 [00:09<00:00, 148.12it/s]
+[2023-02-23 20:31:42] Evaluate_02: epoch = 1450 train time = 9 s train loss = 0.085439 train acc = 1.0000, test acc = 0.5633
+100%|██████████| 1451/1451 [00:09<00:00, 148.74it/s]
+[2023-02-23 20:31:52] Evaluate_03: epoch = 1450 train time = 9 s train loss = 0.139327 train acc = 1.0000, test acc = 0.5650
+100%|██████████| 1451/1451 [00:09<00:00, 148.46it/s]
+[2023-02-23 20:32:02] Evaluate_04: epoch = 1450 train time = 9 s train loss = 0.025929 train acc = 1.0000, test acc = 0.5850
+100%|██████████| 1451/1451 [00:09<00:00, 147.90it/s]
+[2023-02-23 20:32:12] Evaluate_05: epoch = 1450 train time = 9 s train loss = 0.056113 train acc = 1.0000, test acc = 0.5900
+100%|██████████| 1451/1451 [00:09<00:00, 147.95it/s]
+[2023-02-23 20:32:23] Evaluate_06: epoch = 1450 train time = 9 s train loss = 0.039922 train acc = 1.0000, test acc = 0.5433
+100%|██████████| 1451/1451 [00:10<00:00, 144.95it/s]
+[2023-02-23 20:32:33] Evaluate_07: epoch = 1450 train time = 10 s train loss = 0.768423 train acc = 0.8000, test acc = 0.5533
+100%|██████████| 1451/1451 [00:09<00:00, 147.97it/s]
+[2023-02-23 20:32:43] Evaluate_08: epoch = 1450 train time = 9 s train loss = 0.052941 train acc = 1.0000, test acc = 0.5967
+100%|██████████| 1451/1451 [00:09<00:00, 148.73it/s]
+[2023-02-23 20:32:54] Evaluate_09: epoch = 1450 train time = 9 s train loss = 0.041219 train acc = 1.0000, test acc = 0.5533
+Random Image set 0 Evaluate 10 random ConvNet, test acc mean = 0.5645 std = 0.0203
+-------------------------
+lr_net:[0.0001]*10 + [0.00001]*10
+100%|██████████| 1501/1501 [00:10<00:00, 148.63it/s]
+[2023-02-23 20:33:04] Evaluate_00: epoch = 1500 train time = 10 s train loss = 0.064077 train acc = 1.0000, test acc = 0.5633
+100%|██████████| 1501/1501 [00:10<00:00, 148.57it/s]
+[2023-02-23 20:33:15] Evaluate_01: epoch = 1500 train time = 10 s train loss = 0.038566 train acc = 1.0000, test acc = 0.5617
+100%|██████████| 1501/1501 [00:10<00:00, 149.14it/s]
+[2023-02-23 20:33:25] Evaluate_02: epoch = 1500 train time = 10 s train loss = 0.044543 train acc = 1.0000, test acc = 0.5433
+100%|██████████| 1501/1501 [00:10<00:00, 148.90it/s]
+[2023-02-23 20:33:36] Evaluate_03: epoch = 1500 train time = 10 s train loss = 0.039533 train acc = 1.0000, test acc = 0.5250
+100%|██████████| 1501/1501 [00:10<00:00, 149.21it/s]
+[2023-02-23 20:33:46] Evaluate_04: epoch = 1500 train time = 10 s train loss = 0.023754 train acc = 1.0000, test acc = 0.6000
+100%|██████████| 1501/1501 [00:10<00:00, 149.04it/s]
+[2023-02-23 20:33:57] Evaluate_05: epoch = 1500 train time = 10 s train loss = 0.041957 train acc = 1.0000, test acc = 0.5283
+100%|██████████| 1501/1501 [00:10<00:00, 148.73it/s]
+[2023-02-23 20:34:07] Evaluate_06: epoch = 1500 train time = 10 s train loss = 0.049431 train acc = 1.0000, test acc = 0.5217
+100%|██████████| 1501/1501 [00:10<00:00, 148.73it/s]
+[2023-02-23 20:34:18] Evaluate_07: epoch = 1500 train time = 10 s train loss = 0.039080 train acc = 1.0000, test acc = 0.5617
+100%|██████████| 1501/1501 [00:10<00:00, 148.12it/s]
+[2023-02-23 20:34:29] Evaluate_08: epoch = 1500 train time = 10 s train loss = 0.034687 train acc = 1.0000, test acc = 0.5667
+100%|██████████| 1501/1501 [00:10<00:00, 148.80it/s]
+[2023-02-23 20:34:39] Evaluate_09: epoch = 1500 train time = 10 s train loss = 0.042144 train acc = 1.0000, test acc = 0.5550
+  0%|          | 0/1551 [00:00<?, ?it/s]Random Image set 0 Evaluate 10 random ConvNet, test acc mean = 0.5527 std = 0.0226
+-------------------------
+lr_net:[0.0001]*11 + [0.00001]*10
+100%|██████████| 1551/1551 [00:10<00:00, 149.40it/s]
+[2023-02-23 20:34:50] Evaluate_00: epoch = 1550 train time = 10 s train loss = 0.031555 train acc = 1.0000, test acc = 0.5217
+100%|██████████| 1551/1551 [00:10<00:00, 149.05it/s]
+[2023-02-23 20:35:01] Evaluate_01: epoch = 1550 train time = 10 s train loss = 0.027947 train acc = 1.0000, test acc = 0.5183
+100%|██████████| 1551/1551 [00:10<00:00, 148.84it/s]
+[2023-02-23 20:35:12] Evaluate_02: epoch = 1550 train time = 10 s train loss = 0.033166 train acc = 1.0000, test acc = 0.5683
+100%|██████████| 1551/1551 [00:10<00:00, 148.78it/s]
+[2023-02-23 20:35:23] Evaluate_03: epoch = 1550 train time = 10 s train loss = 0.019991 train acc = 1.0000, test acc = 0.5433
+100%|██████████| 1551/1551 [00:10<00:00, 148.65it/s]
+[2023-02-23 20:35:33] Evaluate_04: epoch = 1550 train time = 10 s train loss = 0.028296 train acc = 1.0000, test acc = 0.5583
+100%|██████████| 1551/1551 [00:10<00:00, 149.28it/s]
+[2023-02-23 20:35:44] Evaluate_05: epoch = 1550 train time = 10 s train loss = 0.026015 train acc = 1.0000, test acc = 0.5083
+100%|██████████| 1551/1551 [00:10<00:00, 148.12it/s]
+[2023-02-23 20:35:55] Evaluate_06: epoch = 1550 train time = 10 s train loss = 0.037653 train acc = 1.0000, test acc = 0.5717
+100%|██████████| 1551/1551 [00:10<00:00, 149.09it/s]
+[2023-02-23 20:36:06] Evaluate_07: epoch = 1550 train time = 10 s train loss = 0.043219 train acc = 1.0000, test acc = 0.4950
+100%|██████████| 1551/1551 [00:10<00:00, 149.14it/s]
+[2023-02-23 20:36:17] Evaluate_08: epoch = 1550 train time = 10 s train loss = 0.122372 train acc = 1.0000, test acc = 0.5217
+100%|██████████| 1551/1551 [00:10<00:00, 148.94it/s]
+[2023-02-23 20:36:28] Evaluate_09: epoch = 1550 train time = 10 s train loss = 0.020969 train acc = 1.0000, test acc = 0.5233
+Random Image set 0 Evaluate 10 random ConvNet, test acc mean = 0.5330 std = 0.0247
+-------------------------
+lr_net:[0.0001]*12 + [0.00001]*10
+100%|██████████| 1601/1601 [00:10<00:00, 149.35it/s]
+[2023-02-23 20:36:39] Evaluate_00: epoch = 1600 train time = 10 s train loss = 0.029994 train acc = 1.0000, test acc = 0.5550
+100%|██████████| 1601/1601 [00:10<00:00, 149.12it/s]
+[2023-02-23 20:36:50] Evaluate_01: epoch = 1600 train time = 10 s train loss = 0.032088 train acc = 1.0000, test acc = 0.5633
+100%|██████████| 1601/1601 [00:10<00:00, 149.71it/s]
+[2023-02-23 20:37:01] Evaluate_02: epoch = 1600 train time = 10 s train loss = 0.529403 train acc = 0.9000, test acc = 0.5317
+100%|██████████| 1601/1601 [00:10<00:00, 148.79it/s]
+[2023-02-23 20:37:13] Evaluate_03: epoch = 1600 train time = 10 s train loss = 0.031660 train acc = 1.0000, test acc = 0.5433
+100%|██████████| 1601/1601 [00:10<00:00, 149.29it/s]
+[2023-02-23 20:37:24] Evaluate_04: epoch = 1600 train time = 10 s train loss = 0.007673 train acc = 1.0000, test acc = 0.5417
+100%|██████████| 1601/1601 [00:10<00:00, 149.08it/s]
+[2023-02-23 20:37:35] Evaluate_05: epoch = 1600 train time = 10 s train loss = 0.113284 train acc = 1.0000, test acc = 0.5000
+100%|██████████| 1601/1601 [00:10<00:00, 148.79it/s]
+[2023-02-23 20:37:46] Evaluate_06: epoch = 1600 train time = 10 s train loss = 0.035022 train acc = 1.0000, test acc = 0.5600
+100%|██████████| 1601/1601 [00:10<00:00, 147.23it/s]
+[2023-02-23 20:37:58] Evaluate_07: epoch = 1600 train time = 10 s train loss = 0.031635 train acc = 1.0000, test acc = 0.5150
+100%|██████████| 1601/1601 [00:10<00:00, 148.31it/s]
+[2023-02-23 20:38:09] Evaluate_08: epoch = 1600 train time = 10 s train loss = 0.038831 train acc = 1.0000, test acc = 0.5100
+100%|██████████| 1601/1601 [00:10<00:00, 147.20it/s]
+[2023-02-23 20:38:20] Evaluate_09: epoch = 1600 train time = 10 s train loss = 0.055844 train acc = 1.0000, test acc = 0.5200
+  1%|          | 16/1651 [00:00<00:10, 154.57it/s]Random Image set 0 Evaluate 10 random ConvNet, test acc mean = 0.5340 std = 0.0210
+-------------------------
+lr_net:[0.0001]*13 + [0.00001]*10
+100%|██████████| 1651/1651 [00:11<00:00, 147.45it/s]
+[2023-02-23 20:38:32] Evaluate_00: epoch = 1650 train time = 11 s train loss = 0.025891 train acc = 1.0000, test acc = 0.5133
+100%|██████████| 1651/1651 [00:11<00:00, 145.92it/s]
+[2023-02-23 20:38:44] Evaluate_01: epoch = 1650 train time = 11 s train loss = 0.431796 train acc = 0.9000, test acc = 0.5950
+100%|██████████| 1651/1651 [00:11<00:00, 145.10it/s]
+[2023-02-23 20:38:56] Evaluate_02: epoch = 1650 train time = 11 s train loss = 0.007578 train acc = 1.0000, test acc = 0.5567
+100%|██████████| 1651/1651 [00:11<00:00, 149.55it/s]
+[2023-02-23 20:39:07] Evaluate_03: epoch = 1650 train time = 11 s train loss = 0.557313 train acc = 1.0000, test acc = 0.5267
+100%|██████████| 1651/1651 [00:11<00:00, 149.42it/s]
+[2023-02-23 20:39:19] Evaluate_04: epoch = 1650 train time = 11 s train loss = 0.024147 train acc = 1.0000, test acc = 0.5217
+100%|██████████| 1651/1651 [00:11<00:00, 149.68it/s]
+[2023-02-23 20:39:30] Evaluate_05: epoch = 1650 train time = 11 s train loss = 0.023750 train acc = 1.0000, test acc = 0.5850
+100%|██████████| 1651/1651 [00:11<00:00, 149.39it/s]
+[2023-02-23 20:39:42] Evaluate_06: epoch = 1650 train time = 11 s train loss = 0.024496 train acc = 1.0000, test acc = 0.5833
+100%|██████████| 1651/1651 [00:11<00:00, 149.47it/s]
+[2023-02-23 20:39:53] Evaluate_07: epoch = 1650 train time = 11 s train loss = 0.117051 train acc = 1.0000, test acc = 0.5167
+100%|██████████| 1651/1651 [00:11<00:00, 149.74it/s]
+[2023-02-23 20:40:05] Evaluate_08: epoch = 1650 train time = 11 s train loss = 0.025009 train acc = 1.0000, test acc = 0.5467
+100%|██████████| 1651/1651 [00:11<00:00, 149.77it/s]
+[2023-02-23 20:40:16] Evaluate_09: epoch = 1650 train time = 11 s train loss = 0.023199 train acc = 1.0000, test acc = 0.4950
+  0%|          | 0/1701 [00:00<?, ?it/s]Random Image set 0 Evaluate 10 random ConvNet, test acc mean = 0.5440 std = 0.0330
+-------------------------
+lr_net:[0.0001]*14 + [0.00001]*10
+100%|██████████| 1701/1701 [00:11<00:00, 149.84it/s]
+[2023-02-23 20:40:28] Evaluate_00: epoch = 1700 train time = 11 s train loss = 0.011640 train acc = 1.0000, test acc = 0.5267
+100%|██████████| 1701/1701 [00:11<00:00, 149.74it/s]
+[2023-02-23 20:40:40] Evaluate_01: epoch = 1700 train time = 11 s train loss = 0.031648 train acc = 1.0000, test acc = 0.5333
+100%|██████████| 1701/1701 [00:11<00:00, 149.76it/s]
+[2023-02-23 20:40:52] Evaluate_02: epoch = 1700 train time = 11 s train loss = 0.018836 train acc = 1.0000, test acc = 0.4883
+100%|██████████| 1701/1701 [00:11<00:00, 149.70it/s]
+[2023-02-23 20:41:04] Evaluate_03: epoch = 1700 train time = 11 s train loss = 0.543565 train acc = 0.9000, test acc = 0.5267
+100%|██████████| 1701/1701 [00:11<00:00, 149.87it/s]
+[2023-02-23 20:41:15] Evaluate_04: epoch = 1700 train time = 11 s train loss = 0.008893 train acc = 1.0000, test acc = 0.5000
+100%|██████████| 1701/1701 [00:11<00:00, 149.51it/s]
+[2023-02-23 20:41:27] Evaluate_05: epoch = 1700 train time = 11 s train loss = 0.029855 train acc = 1.0000, test acc = 0.5683
+100%|██████████| 1701/1701 [00:11<00:00, 149.68it/s]
+[2023-02-23 20:41:39] Evaluate_06: epoch = 1700 train time = 11 s train loss = 0.028857 train acc = 1.0000, test acc = 0.5533
+100%|██████████| 1701/1701 [00:11<00:00, 149.47it/s]
+[2023-02-23 20:41:51] Evaluate_07: epoch = 1700 train time = 11 s train loss = 0.416120 train acc = 0.9000, test acc = 0.5067
+100%|██████████| 1701/1701 [00:11<00:00, 149.30it/s]
+[2023-02-23 20:42:03] Evaluate_08: epoch = 1700 train time = 11 s train loss = 0.027503 train acc = 1.0000, test acc = 0.5600
+100%|██████████| 1701/1701 [00:11<00:00, 149.67it/s]
+[2023-02-23 20:42:15] Evaluate_09: epoch = 1700 train time = 11 s train loss = 0.009252 train acc = 1.0000, test acc = 0.5517
+Random Image set 0 Evaluate 10 random ConvNet, test acc mean = 0.5315 std = 0.0256
+-------------------------
+[0.5631666666666667, 0.5738333333333334, 0.5648333333333333, 0.5519999999999999, 0.5443333333333333, 0.5645, 0.5526666666666666, 0.533, 0.534, 0.544, 0.5315000000000001]
+Mean test accuracy of 10 ramdom sets: 0.5507121212121212
+
+
+lr_net:[0.0001]*0 + [0.00001]*10
+100%|██████████| 1001/1001 [00:06<00:00, 146.20it/s]
+[2023-02-23 21:04:03] Evaluate_00: epoch = 1000 train time = 6 s train loss = 0.765498 train acc = 1.0000, test acc = 0.5300
+100%|██████████| 1001/1001 [00:06<00:00, 147.42it/s]
+[2023-02-23 21:04:10] Evaluate_01: epoch = 1000 train time = 6 s train loss = 1.493734 train acc = 0.8000, test acc = 0.5467
+100%|██████████| 1001/1001 [00:06<00:00, 146.65it/s]
+[2023-02-23 21:04:17] Evaluate_02: epoch = 1000 train time = 6 s train loss = 0.670632 train acc = 1.0000, test acc = 0.5567
+100%|██████████| 1001/1001 [00:06<00:00, 146.53it/s]
+[2023-02-23 21:04:24] Evaluate_03: epoch = 1000 train time = 6 s train loss = 0.672915 train acc = 1.0000, test acc = 0.5417
+100%|██████████| 1001/1001 [00:07<00:00, 139.53it/s]
+[2023-02-23 21:04:32] Evaluate_04: epoch = 1000 train time = 7 s train loss = 0.680832 train acc = 1.0000, test acc = 0.4950
+100%|██████████| 1001/1001 [00:06<00:00, 146.48it/s]
+[2023-02-23 21:04:39] Evaluate_05: epoch = 1000 train time = 6 s train loss = 0.731285 train acc = 1.0000, test acc = 0.5100
+100%|██████████| 1001/1001 [00:06<00:00, 146.31it/s]
+[2023-02-23 21:04:47] Evaluate_06: epoch = 1000 train time = 6 s train loss = 0.692221 train acc = 1.0000, test acc = 0.5117
+100%|██████████| 1001/1001 [00:06<00:00, 146.42it/s]
+[2023-02-23 21:04:54] Evaluate_07: epoch = 1000 train time = 6 s train loss = 0.618808 train acc = 1.0000, test acc = 0.5100
+100%|██████████| 1001/1001 [00:06<00:00, 146.46it/s]
+[2023-02-23 21:05:01] Evaluate_08: epoch = 1000 train time = 6 s train loss = 0.693347 train acc = 1.0000, test acc = 0.5133
+100%|██████████| 1001/1001 [00:06<00:00, 146.52it/s]
+[2023-02-23 21:05:09] Evaluate_09: epoch = 1000 train time = 6 s train loss = 0.663574 train acc = 1.0000, test acc = 0.5233
+Random Image set 1 Evaluate 10 random ConvNet, test acc mean = 0.5238 std = 0.0185
+-------------------------
+lr_net:[0.0001]*1 + [0.00001]*10
+100%|██████████| 1051/1051 [00:07<00:00, 146.68it/s]
+[2023-02-23 21:05:16] Evaluate_00: epoch = 1050 train time = 7 s train loss = 0.400178 train acc = 1.0000, test acc = 0.5667
+100%|██████████| 1051/1051 [00:07<00:00, 146.77it/s]
+[2023-02-23 21:05:24] Evaluate_01: epoch = 1050 train time = 7 s train loss = 0.323871 train acc = 1.0000, test acc = 0.5617
+100%|██████████| 1051/1051 [00:07<00:00, 146.79it/s]
+[2023-02-23 21:05:31] Evaluate_02: epoch = 1050 train time = 7 s train loss = 0.209586 train acc = 1.0000, test acc = 0.5283
+100%|██████████| 1051/1051 [00:07<00:00, 146.92it/s]
+[2023-02-23 21:05:39] Evaluate_03: epoch = 1050 train time = 7 s train loss = 0.216285 train acc = 1.0000, test acc = 0.5400
+100%|██████████| 1051/1051 [00:07<00:00, 147.61it/s]
+[2023-02-23 21:05:47] Evaluate_04: epoch = 1050 train time = 7 s train loss = 1.341281 train acc = 0.6000, test acc = 0.5933
+100%|██████████| 1051/1051 [00:07<00:00, 146.84it/s]
+[2023-02-23 21:05:54] Evaluate_05: epoch = 1050 train time = 7 s train loss = 0.504502 train acc = 1.0000, test acc = 0.5733
+100%|██████████| 1051/1051 [00:07<00:00, 146.93it/s]
+[2023-02-23 21:06:02] Evaluate_06: epoch = 1050 train time = 7 s train loss = 1.200155 train acc = 0.8000, test acc = 0.5933
+100%|██████████| 1051/1051 [00:07<00:00, 146.73it/s]
+[2023-02-23 21:06:09] Evaluate_07: epoch = 1050 train time = 7 s train loss = 1.331363 train acc = 0.6000, test acc = 0.5183
+100%|██████████| 1051/1051 [00:07<00:00, 146.92it/s]
+[2023-02-23 21:06:17] Evaluate_08: epoch = 1050 train time = 7 s train loss = 0.316247 train acc = 1.0000, test acc = 0.5667
+100%|██████████| 1051/1051 [00:07<00:00, 147.31it/s]
+[2023-02-23 21:06:25] Evaluate_09: epoch = 1050 train time = 7 s train loss = 0.196059 train acc = 1.0000, test acc = 0.5683
+Random Image set 1 Evaluate 10 random ConvNet, test acc mean = 0.5610 std = 0.0239
+-------------------------
+lr_net:[0.0001]*2 + [0.00001]*10
+100%|██████████| 1101/1101 [00:07<00:00, 147.86it/s]
+[2023-02-23 21:06:32] Evaluate_00: epoch = 1100 train time = 7 s train loss = 0.260610 train acc = 1.0000, test acc = 0.5650
+100%|██████████| 1101/1101 [00:07<00:00, 147.36it/s]
+[2023-02-23 21:06:40] Evaluate_01: epoch = 1100 train time = 7 s train loss = 0.235865 train acc = 1.0000, test acc = 0.5700
+100%|██████████| 1101/1101 [00:07<00:00, 141.23it/s]
+[2023-02-23 21:06:49] Evaluate_02: epoch = 1100 train time = 7 s train loss = 0.181481 train acc = 1.0000, test acc = 0.5633
+100%|██████████| 1101/1101 [00:07<00:00, 146.64it/s]
+[2023-02-23 21:06:57] Evaluate_03: epoch = 1100 train time = 7 s train loss = 0.299607 train acc = 1.0000, test acc = 0.5500
+100%|██████████| 1101/1101 [00:07<00:00, 147.26it/s]
+[2023-02-23 21:07:05] Evaluate_04: epoch = 1100 train time = 7 s train loss = 1.168789 train acc = 0.7000, test acc = 0.5683
+100%|██████████| 1101/1101 [00:07<00:00, 146.80it/s]
+[2023-02-23 21:07:12] Evaluate_05: epoch = 1100 train time = 7 s train loss = 0.283482 train acc = 0.9000, test acc = 0.6183
+100%|██████████| 1101/1101 [00:07<00:00, 147.70it/s]
+[2023-02-23 21:07:20] Evaluate_06: epoch = 1100 train time = 7 s train loss = 0.091201 train acc = 1.0000, test acc = 0.5667
+100%|██████████| 1101/1101 [00:07<00:00, 147.07it/s]
+[2023-02-23 21:07:28] Evaluate_07: epoch = 1100 train time = 7 s train loss = 0.175888 train acc = 1.0000, test acc = 0.5550
+100%|██████████| 1101/1101 [00:07<00:00, 147.59it/s]
+[2023-02-23 21:07:36] Evaluate_08: epoch = 1100 train time = 7 s train loss = 0.242760 train acc = 1.0000, test acc = 0.5800
+100%|██████████| 1101/1101 [00:07<00:00, 147.32it/s]
+[2023-02-23 21:07:44] Evaluate_09: epoch = 1100 train time = 7 s train loss = 0.228262 train acc = 1.0000, test acc = 0.5600
+Random Image set 1 Evaluate 10 random ConvNet, test acc mean = 0.5697 std = 0.0180
+-------------------------
+lr_net:[0.0001]*3 + [0.00001]*10
+100%|██████████| 1151/1151 [00:07<00:00, 147.32it/s]
+[2023-02-23 21:07:52] Evaluate_00: epoch = 1150 train time = 7 s train loss = 0.152969 train acc = 1.0000, test acc = 0.5767
+100%|██████████| 1151/1151 [00:07<00:00, 147.09it/s]
+[2023-02-23 21:08:01] Evaluate_01: epoch = 1150 train time = 7 s train loss = 0.158531 train acc = 1.0000, test acc = 0.5767
+100%|██████████| 1151/1151 [00:07<00:00, 147.50it/s]
+[2023-02-23 21:08:09] Evaluate_02: epoch = 1150 train time = 7 s train loss = 0.120576 train acc = 1.0000, test acc = 0.5600
+100%|██████████| 1151/1151 [00:07<00:00, 147.80it/s]
+[2023-02-23 21:08:17] Evaluate_03: epoch = 1150 train time = 7 s train loss = 0.151689 train acc = 1.0000, test acc = 0.5883
+100%|██████████| 1151/1151 [00:07<00:00, 147.99it/s]
+[2023-02-23 21:08:25] Evaluate_04: epoch = 1150 train time = 7 s train loss = 0.152736 train acc = 1.0000, test acc = 0.5267
+100%|██████████| 1151/1151 [00:07<00:00, 147.52it/s]
+[2023-02-23 21:08:34] Evaluate_05: epoch = 1150 train time = 7 s train loss = 0.148598 train acc = 1.0000, test acc = 0.5383
+100%|██████████| 1151/1151 [00:07<00:00, 147.96it/s]
+[2023-02-23 21:08:42] Evaluate_06: epoch = 1150 train time = 7 s train loss = 0.766352 train acc = 0.9000, test acc = 0.5700
+100%|██████████| 1151/1151 [00:07<00:00, 147.09it/s]
+[2023-02-23 21:08:50] Evaluate_07: epoch = 1150 train time = 7 s train loss = 0.138629 train acc = 1.0000, test acc = 0.5833
+100%|██████████| 1151/1151 [00:07<00:00, 147.53it/s]
+[2023-02-23 21:08:58] Evaluate_08: epoch = 1150 train time = 7 s train loss = 0.149099 train acc = 1.0000, test acc = 0.5783
+100%|██████████| 1151/1151 [00:07<00:00, 147.42it/s]
+[2023-02-23 21:09:07] Evaluate_09: epoch = 1150 train time = 7 s train loss = 0.170205 train acc = 1.0000, test acc = 0.6000
+Random Image set 1 Evaluate 10 random ConvNet, test acc mean = 0.5698 std = 0.0213
+-------------------------
+lr_net:[0.0001]*4 + [0.00001]*10
+100%|██████████| 1201/1201 [00:08<00:00, 146.94it/s]
+[2023-02-23 20:42:23] Evaluate_00: epoch = 1200 train time = 8 s train loss = 0.714097 train acc = 0.9000, test acc = 0.6150
+100%|██████████| 1201/1201 [00:08<00:00, 146.88it/s]
+[2023-02-23 20:42:32] Evaluate_01: epoch = 1200 train time = 8 s train loss = 0.141759 train acc = 1.0000, test acc = 0.5767
+100%|██████████| 1201/1201 [00:08<00:00, 146.85it/s]
+[2023-02-23 20:42:40] Evaluate_02: epoch = 1200 train time = 8 s train loss = 0.060307 train acc = 1.0000, test acc = 0.5667
+100%|██████████| 1201/1201 [00:08<00:00, 146.83it/s]
+[2023-02-23 20:42:49] Evaluate_03: epoch = 1200 train time = 8 s train loss = 0.089408 train acc = 1.0000, test acc = 0.5717
+100%|██████████| 1201/1201 [00:08<00:00, 146.77it/s]
+[2023-02-23 20:42:58] Evaluate_04: epoch = 1200 train time = 8 s train loss = 0.376556 train acc = 0.9000, test acc = 0.5983
+100%|██████████| 1201/1201 [00:08<00:00, 146.94it/s]
+[2023-02-23 20:43:06] Evaluate_05: epoch = 1200 train time = 8 s train loss = 0.958836 train acc = 0.8000, test acc = 0.5867
+100%|██████████| 1201/1201 [00:08<00:00, 146.48it/s]
+[2023-02-23 20:43:15] Evaluate_06: epoch = 1200 train time = 8 s train loss = 0.903093 train acc = 0.6000, test acc = 0.5683
+100%|██████████| 1201/1201 [00:08<00:00, 147.07it/s]
+[2023-02-23 20:43:24] Evaluate_07: epoch = 1200 train time = 8 s train loss = 0.051418 train acc = 1.0000, test acc = 0.5350
+100%|██████████| 1201/1201 [00:08<00:00, 147.49it/s]
+[2023-02-23 20:43:32] Evaluate_08: epoch = 1200 train time = 8 s train loss = 0.118770 train acc = 1.0000, test acc = 0.5117
+100%|██████████| 1201/1201 [00:08<00:00, 147.28it/s]
+[2023-02-23 20:43:41] Evaluate_09: epoch = 1200 train time = 8 s train loss = 0.123445 train acc = 1.0000, test acc = 0.5900
+Random Image set 1 Evaluate 10 random ConvNet, test acc mean = 0.5720 std = 0.0286
+-------------------------
+lr_net:[0.0001]*5 + [0.00001]*10
+100%|██████████| 1251/1251 [00:08<00:00, 146.92it/s]
+[2023-02-23 20:43:50] Evaluate_00: epoch = 1250 train time = 8 s train loss = 0.057170 train acc = 1.0000, test acc = 0.5567
+100%|██████████| 1251/1251 [00:08<00:00, 147.47it/s]
+[2023-02-23 20:43:59] Evaluate_01: epoch = 1250 train time = 8 s train loss = 0.107051 train acc = 1.0000, test acc = 0.5717
+100%|██████████| 1251/1251 [00:08<00:00, 147.75it/s]
+[2023-02-23 20:44:08] Evaluate_02: epoch = 1250 train time = 8 s train loss = 0.053173 train acc = 1.0000, test acc = 0.5833
+100%|██████████| 1251/1251 [00:08<00:00, 147.78it/s]
+[2023-02-23 20:44:17] Evaluate_03: epoch = 1250 train time = 8 s train loss = 0.028959 train acc = 1.0000, test acc = 0.5800
+100%|██████████| 1251/1251 [00:08<00:00, 146.67it/s]
+[2023-02-23 20:44:26] Evaluate_04: epoch = 1250 train time = 8 s train loss = 0.129121 train acc = 1.0000, test acc = 0.5650
+100%|██████████| 1251/1251 [00:08<00:00, 147.01it/s]
+[2023-02-23 20:44:35] Evaluate_05: epoch = 1250 train time = 8 s train loss = 0.112097 train acc = 1.0000, test acc = 0.5300
+100%|██████████| 1251/1251 [00:08<00:00, 147.22it/s]
+[2023-02-23 20:44:44] Evaluate_06: epoch = 1250 train time = 8 s train loss = 0.063471 train acc = 1.0000, test acc = 0.5833
+100%|██████████| 1251/1251 [00:08<00:00, 147.50it/s]
+[2023-02-23 20:44:53] Evaluate_07: epoch = 1250 train time = 8 s train loss = 0.037249 train acc = 1.0000, test acc = 0.5633
+100%|██████████| 1251/1251 [00:08<00:00, 147.17it/s]
+[2023-02-23 20:45:02] Evaluate_08: epoch = 1250 train time = 8 s train loss = 0.078186 train acc = 1.0000, test acc = 0.5650
+100%|██████████| 1251/1251 [00:08<00:00, 147.14it/s]
+[2023-02-23 20:45:10] Evaluate_09: epoch = 1250 train time = 8 s train loss = 0.034020 train acc = 1.0000, test acc = 0.5817
+  1%|          | 16/1301 [00:00<00:08, 156.34it/s]Random Image set 1 Evaluate 10 random ConvNet, test acc mean = 0.5680 std = 0.0156
+-------------------------
+lr_net:[0.0001]*6 + [0.00001]*10
+100%|██████████| 1301/1301 [00:08<00:00, 147.59it/s]
+[2023-02-23 20:45:20] Evaluate_00: epoch = 1300 train time = 8 s train loss = 0.049977 train acc = 1.0000, test acc = 0.6117
+100%|██████████| 1301/1301 [00:08<00:00, 147.99it/s]
+[2023-02-23 20:45:29] Evaluate_01: epoch = 1300 train time = 8 s train loss = 0.111596 train acc = 1.0000, test acc = 0.5217
+100%|██████████| 1301/1301 [00:08<00:00, 147.68it/s]
+[2023-02-23 20:45:38] Evaluate_02: epoch = 1300 train time = 8 s train loss = 0.073025 train acc = 1.0000, test acc = 0.5817
+100%|██████████| 1301/1301 [00:08<00:00, 147.13it/s]
+[2023-02-23 20:45:48] Evaluate_03: epoch = 1300 train time = 8 s train loss = 0.075753 train acc = 1.0000, test acc = 0.5900
+100%|██████████| 1301/1301 [00:08<00:00, 147.63it/s]
+[2023-02-23 20:45:57] Evaluate_04: epoch = 1300 train time = 8 s train loss = 0.018873 train acc = 1.0000, test acc = 0.5833
+100%|██████████| 1301/1301 [00:08<00:00, 147.81it/s]
+[2023-02-23 20:46:06] Evaluate_05: epoch = 1300 train time = 8 s train loss = 0.184139 train acc = 1.0000, test acc = 0.5133
+100%|██████████| 1301/1301 [00:08<00:00, 147.21it/s]
+[2023-02-23 20:46:15] Evaluate_06: epoch = 1300 train time = 8 s train loss = 0.588783 train acc = 0.9000, test acc = 0.5267
+100%|██████████| 1301/1301 [00:08<00:00, 147.84it/s]
+[2023-02-23 20:46:25] Evaluate_07: epoch = 1300 train time = 8 s train loss = 0.153747 train acc = 1.0000, test acc = 0.5650
+100%|██████████| 1301/1301 [00:08<00:00, 147.71it/s]
+[2023-02-23 20:46:34] Evaluate_08: epoch = 1300 train time = 8 s train loss = 0.553378 train acc = 1.0000, test acc = 0.5450
+100%|██████████| 1301/1301 [00:08<00:00, 147.28it/s]
+[2023-02-23 20:46:43] Evaluate_09: epoch = 1300 train time = 8 s train loss = 0.076475 train acc = 1.0000, test acc = 0.5617
+Random Image set 1 Evaluate 10 random ConvNet, test acc mean = 0.5600 std = 0.0310
+-------------------------
+lr_net:[0.0001]*7 + [0.00001]*10
+100%|██████████| 1351/1351 [00:09<00:00, 148.17it/s]
+[2023-02-23 20:46:53] Evaluate_00: epoch = 1350 train time = 9 s train loss = 0.444652 train acc = 0.9000, test acc = 0.5900
+100%|██████████| 1351/1351 [00:09<00:00, 148.14it/s]
+[2023-02-23 20:47:02] Evaluate_01: epoch = 1350 train time = 9 s train loss = 0.073554 train acc = 1.0000, test acc = 0.5550
+100%|██████████| 1351/1351 [00:09<00:00, 147.89it/s]
+[2023-02-23 20:47:12] Evaluate_02: epoch = 1350 train time = 9 s train loss = 0.730608 train acc = 0.9000, test acc = 0.5283
+100%|██████████| 1351/1351 [00:09<00:00, 148.36it/s]
+[2023-02-23 20:47:22] Evaluate_03: epoch = 1350 train time = 9 s train loss = 0.018023 train acc = 1.0000, test acc = 0.5450
+100%|██████████| 1351/1351 [00:09<00:00, 147.46it/s]
+[2023-02-23 20:47:31] Evaluate_04: epoch = 1350 train time = 9 s train loss = 0.059033 train acc = 1.0000, test acc = 0.5350
+100%|██████████| 1351/1351 [00:09<00:00, 147.95it/s]
+[2023-02-23 20:47:41] Evaluate_05: epoch = 1350 train time = 9 s train loss = 0.054381 train acc = 1.0000, test acc = 0.5667
+100%|██████████| 1351/1351 [00:09<00:00, 147.86it/s]
+[2023-02-23 20:47:50] Evaluate_06: epoch = 1350 train time = 9 s train loss = 0.080767 train acc = 1.0000, test acc = 0.5350
+100%|██████████| 1351/1351 [00:09<00:00, 147.66it/s]
+[2023-02-23 20:48:00] Evaluate_07: epoch = 1350 train time = 9 s train loss = 0.059836 train acc = 1.0000, test acc = 0.5467
+100%|██████████| 1351/1351 [00:09<00:00, 147.40it/s]
+[2023-02-23 20:48:10] Evaluate_08: epoch = 1350 train time = 9 s train loss = 0.055515 train acc = 1.0000, test acc = 0.5450
+100%|██████████| 1351/1351 [00:09<00:00, 147.79it/s]
+[2023-02-23 20:48:19] Evaluate_09: epoch = 1350 train time = 9 s train loss = 0.608604 train acc = 1.0000, test acc = 0.5617
+Random Image set 1 Evaluate 10 random ConvNet, test acc mean = 0.5508 std = 0.0174
+-------------------------
+lr_net:[0.0001]*8 + [0.00001]*10
+100%|██████████| 1401/1401 [00:09<00:00, 148.39it/s]
+[2023-02-23 20:48:29] Evaluate_00: epoch = 1400 train time = 9 s train loss = 0.049154 train acc = 1.0000, test acc = 0.5933
+100%|██████████| 1401/1401 [00:09<00:00, 148.40it/s]
+[2023-02-23 20:48:39] Evaluate_01: epoch = 1400 train time = 9 s train loss = 0.560272 train acc = 1.0000, test acc = 0.5533
+100%|██████████| 1401/1401 [00:09<00:00, 148.48it/s]
+[2023-02-23 20:48:49] Evaluate_02: epoch = 1400 train time = 9 s train loss = 0.024214 train acc = 1.0000, test acc = 0.5817
+100%|██████████| 1401/1401 [00:09<00:00, 148.42it/s]
+[2023-02-23 20:48:59] Evaluate_03: epoch = 1400 train time = 9 s train loss = 0.133196 train acc = 1.0000, test acc = 0.5183
+100%|██████████| 1401/1401 [00:09<00:00, 147.64it/s]
+[2023-02-23 20:49:09] Evaluate_04: epoch = 1400 train time = 9 s train loss = 0.290488 train acc = 1.0000, test acc = 0.5733
+100%|██████████| 1401/1401 [00:09<00:00, 147.58it/s]
+[2023-02-23 20:49:19] Evaluate_05: epoch = 1400 train time = 9 s train loss = 1.072826 train acc = 0.7000, test acc = 0.5800
+100%|██████████| 1401/1401 [00:09<00:00, 148.24it/s]
+[2023-02-23 20:49:29] Evaluate_06: epoch = 1400 train time = 9 s train loss = 0.095352 train acc = 1.0000, test acc = 0.5367
+100%|██████████| 1401/1401 [00:09<00:00, 148.13it/s]
+[2023-02-23 20:49:39] Evaluate_07: epoch = 1400 train time = 9 s train loss = 0.060529 train acc = 1.0000, test acc = 0.5267
+100%|██████████| 1401/1401 [00:09<00:00, 148.07it/s]
+[2023-02-23 20:49:49] Evaluate_08: epoch = 1400 train time = 9 s train loss = 0.014327 train acc = 1.0000, test acc = 0.5700
+100%|██████████| 1401/1401 [00:09<00:00, 147.87it/s]
+[2023-02-23 20:49:58] Evaluate_09: epoch = 1400 train time = 9 s train loss = 0.055168 train acc = 1.0000, test acc = 0.5250
+Random Image set 1 Evaluate 10 random ConvNet, test acc mean = 0.5558 std = 0.0260
+-------------------------
+lr_net:[0.0001]*9 + [0.00001]*10
+100%|██████████| 1451/1451 [00:09<00:00, 148.53it/s]
+[2023-02-23 20:50:09] Evaluate_00: epoch = 1450 train time = 9 s train loss = 0.028710 train acc = 1.0000, test acc = 0.5450
+100%|██████████| 1451/1451 [00:09<00:00, 148.77it/s]
+[2023-02-23 20:50:19] Evaluate_01: epoch = 1450 train time = 9 s train loss = 0.044542 train acc = 1.0000, test acc = 0.5500
+100%|██████████| 1451/1451 [00:09<00:00, 148.59it/s]
+[2023-02-23 20:50:29] Evaluate_02: epoch = 1450 train time = 9 s train loss = 0.070206 train acc = 1.0000, test acc = 0.5317
+100%|██████████| 1451/1451 [00:09<00:00, 148.44it/s]
+[2023-02-23 20:50:39] Evaluate_03: epoch = 1450 train time = 9 s train loss = 0.039459 train acc = 1.0000, test acc = 0.5600
+100%|██████████| 1451/1451 [00:09<00:00, 148.53it/s]
+[2023-02-23 20:50:50] Evaluate_04: epoch = 1450 train time = 9 s train loss = 0.041236 train acc = 1.0000, test acc = 0.5533
+ 86%|████████▌ | 1248/1451 [00:08<00:01, 155.71it/s]
+Process finished with exit code 143 (interrupted by signal 15: SIGTERM)
+
+
+
