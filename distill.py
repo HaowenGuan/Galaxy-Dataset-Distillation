@@ -555,7 +555,7 @@ def main(args):
                    "Start_Epoch": start_epoch}, step=it)
 
         # Detect overfitting and level up!
-        if it % 10 == 0 and len(test_loss) >= 400:
+        if it % 10 == 0 and len(test_loss) >= 100:
             correlation = np.corrcoef(test_loss, list(range(len(test_loss))))[0, 1]
             three_sigma = 3 * np.sqrt(1 / (len(test_loss) - 2))
             if not trending:
@@ -570,7 +570,7 @@ def main(args):
                 #     args.syn_steps = min(args.syn_steps + 1, 50)
                 #     min_test_idx = it
                 #     wandb.log({"Synthetic_Step": args.syn_steps}, step=it)
-                if not trending and len(test_loss) % 400 == 0:
+                if not trending and len(test_loss) % 200 == 0:
                     # If model didn't produce a global minimum on right half of test data, decrease lr_img
                     args.lr_img *= 0.9
                     optimizer_img = torch.optim.SGD([image_syn], lr=args.lr_img, momentum=0.5)
