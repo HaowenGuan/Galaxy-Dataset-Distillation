@@ -32,9 +32,9 @@ def main(args):
     print("CUDNN STATUS: {}".format(torch.backends.cudnn.enabled))
 
     args.dsa = True if args.dsa == 'True' else False
-    args.device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
+    args.device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-    eval_it_pool = np.arange(args.eval_it, args.Iteration + 1, args.eval_it).tolist()
+    eval_it_pool = np.arange(1, args.Iteration + 1, args.eval_it).tolist()
     channel, im_size, num_classes, class_names, mean, std, dst_train, dst_test, testloader, loader_train_dict, class_map, class_map_inv = get_dataset(args.dataset, args.data_path, args.batch_real, args.subset, args=args)
     model_eval_pool = get_eval_pool(args.eval_mode, args.model, args.model)
 
@@ -556,7 +556,7 @@ def main(args):
                    "Start_Epoch": start_epoch}, step=it)
 
         # Detect overfitting and level up!
-        if it % 10 == 0 and len(test_loss) >= 100:
+        if len(test_loss) >= 100 and len(test_loss) % 10 == 0:
             correlation = np.corrcoef(test_loss, list(range(len(test_loss))))[0, 1]
             three_sigma = 3 * np.sqrt(1 / (len(test_loss) - 2))
             if not trending:
@@ -576,6 +576,9 @@ def main(args):
                     args.lr_img *= 0.9
                     optimizer_img = torch.optim.SGD([image_syn], lr=args.lr_img, momentum=0.5)
                     wandb.log({"Image Learning Rate": args.lr_img}, step=it)
+                if len(test_loss) >= 1000:
+                    print('Test Loss stop improving. End with early stopping!')
+                    exit(0)
             if trending and np.mean(test_loss[-(2 * interval):-interval]) <= np.mean(test_loss[-interval:]) or \
                     correlation > three_sigma:
                 # reset
