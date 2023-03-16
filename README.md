@@ -27,63 +27,111 @@ Below is our current best distilled **one per class synthetic images**. The ACC 
 
 ### Distillation Hyperparameter
 
-```cmd
-# Stage Distillation starting range: [0, init_epoch)
---init_epoch=1
+* Stage Distillation starting range: `[0, init_epoch)`
 
-# syntheic lr, its size should match init_epoch: list[float]
+```text
+--init_epoch=1
+```
+
+* Synthetic lr, its size should match `init_epoch`: `list[float]`
+
+```text
 --lr_teacher
 0.001
 --init_epoch=1
-# or
+------------------
 --lr_teacher
 0.001
 0.0005
 0.0001
 --init_epoch=3
+```
 
-# Dataset Name: str
+* Dataset Name: `str`
+
+```text
 --dataset=gzoo2
+```
 
-# Image Per Class: int
+Image Per Class: `int`
+
+```text
 --ipc=1
+```
 
-# Synthetic Step, usually, the larger the better, uses more GPU memory and slower
+* Synthetic Step: `int`, usually the larger, the better, uses more GPU memory and slower.
+```text
 --syn_steps=15
+```
 
-# For Stage distillation, fix this to 1
+* Fix this to 1
+
+```text
 --expert_epochs=1
+```
 
-# Use the number of epoch in buffer minus 1
+* Maximum epoch for stage distillation: `int`. Use the number of epoch in buffer minus 1.
+
+```text
 --max_start_epoch=29
+```
 
-# Learning rate for updating synthetic image
+* Learning rate for updating synthetic image: `int`
+* 
+```text
 --lr_img=1000
+```
 
-# Learning rate for updating lr_teacher
+* Learning rate for updating lr_teacher: `float`
+
+```text
 --lr_lr=0.01
+```
 
-# Choose from {noise|real}
+* Synthetic image initialization. Choose from: {noise|real}
+
+```text
 --pix_init=noise
+```
 
-# Buffer path
+* Buffer path: `str`
+
+```text
 --buffer_path=/data/sbcaesar/galaxy_buffers
+```
 
-# Dataset Path
+* Dataset Path: `str`
+
+```text
 --data_path={path_to_dataset}
+```
 
-# Maximum number of iteration
+* Maximum number of iteration: `int`
+
+```text
 --Iteration=10000
+```
 
-# Evaluation interval size
+* Evaluation interval: `int`
+
+```text
 --eval_it=200
+```
 
-# (Optional: default 1) Count the iteration from this given value.
+* (Optional: `default: 1`) Count the iteration from this given value.
+
+```text
 --prev_iter=21001
+```
 
-# (Optional: str) Customize your wandb job name
+* (Optional: `str`) Customize your wandb job name
+
+```text
 --wandb_name=my_job_1
+```
 
-# (Optional: str) Load pretrained synthetic image, format is "wandb_name/images_#.pt"
+* (Optional: `str`) Load pretrained synthetic image, format is "wandb_name/images_#.pt"
+
+```text
 --load_syn_image=continue-5ipc-epoch-all/images_21000.pt
 ```
