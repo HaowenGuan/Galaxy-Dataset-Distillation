@@ -23,3 +23,67 @@ To study this sub dataset, we averaged the 100 images of each class and form the
 Below is our current best distilled **one per class synthetic images**. The ACC is as high as $46$%. (Full Dataset is $65$%).
 
 ![100 distill](docs/distill_100_per_class_0.46_ACC.png)
+
+
+### Distillation Hyperparameter
+
+```cmd
+# Stage Distillation starting range: [0, init_epoch)
+--init_epoch=1
+
+# syntheic lr, its size should match init_epoch: list[float]
+--lr_teacher
+0.001
+--init_epoch=1
+# or
+--lr_teacher
+0.001
+0.0005
+0.0001
+--init_epoch=3
+
+# Dataset Name: str
+--dataset=gzoo2
+
+# Image Per Class: int
+--ipc=1
+
+# Synthetic Step, usually, the larger the better, uses more GPU memory and slower
+--syn_steps=15
+
+# For Stage distillation, fix this to 1
+--expert_epochs=1
+
+# Use the number of epoch in buffer minus 1
+--max_start_epoch=29
+
+# Learning rate for updating synthetic image
+--lr_img=1000
+
+# Learning rate for updating lr_teacher
+--lr_lr=0.01
+
+# Choose from {noise|real}
+--pix_init=noise
+
+# Buffer path
+--buffer_path=/data/sbcaesar/galaxy_buffers
+
+# Dataset Path
+--data_path={path_to_dataset}
+
+# Maximum number of iteration
+--Iteration=10000
+
+# Evaluation interval size
+--eval_it=200
+
+# (Optional: default 1) Count the iteration from this given value.
+--prev_iter=21001
+
+# (Optional: str) Customize your wandb job name
+--wandb_name=my_job_1
+
+# (Optional: str) Load pretrained synthetic image, format is "wandb_name/images_#.pt"
+--load_syn_image=continue-5ipc-epoch-all/images_21000.pt
+```
