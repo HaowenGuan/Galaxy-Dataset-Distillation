@@ -133,12 +133,12 @@ def main(args):
         image_syn = torch.randn(size=(num_classes * args.ipc, channel, im_size[0]*args.canvas_size, im_size[1]*args.canvas_size), dtype=torch.float)
     else:
         if args.load_syn_image:
-            image_syn = torch.load(os.path.join(".", "logged_files", args.dataset, '1ipc-300', 'images_3000.pt'))
+            image_syn = torch.load(os.path.join(".", "logged_files", args.dataset, args.load_syn_image))
         else:
             image_syn = torch.randn(size=(num_classes * args.ipc, channel, im_size[0], im_size[1]), dtype=torch.float)
 
 
-    syn_lr = torch.tensor(args.lr_teacher).to(args.device)
+    # syn_lr = torch.tensor(args.lr_teacher).to(args.device)
 
     if args.pix_init == 'real':
         print('initialize synthetic data from random real images')
@@ -208,7 +208,7 @@ def main(args):
     from torchvision import transforms
     blur = transforms.GaussianBlur(kernel_size=(3, 3), sigma=(0.3, 0.3)).to(args.device)
 
-    # stage match trajectory #1 --------------------
+    # stage match trajectory #0 --------------------
     start_epoch_cap = args.init_epoch
     test_loss = []
     min_test = float('inf')
@@ -217,15 +217,28 @@ def main(args):
     print(wandb.run.name)
     log_syn_lr_list = []
     optimizer_lr_list = []
-    for _ in range(start_epoch_cap):
-        log_syn_lr = torch.log(syn_lr).detach().to(args.device).requires_grad_(True)
-        optimizer_lr = torch.optim.SGD([log_syn_lr], lr=args.lr_lr, momentum=0.5)
-        log_syn_lr_list.append(log_syn_lr)
-        optimizer_lr_list.append(optimizer_lr)
+    print(args.lr_teacher)
+    if isinstance(args.lr_teacher, list):
+        for i in range(start_epoch_cap):
+            if i >= len(args.lr_teacher):
+                i = -1
+            syn_lr = torch.tensor(float(args.lr_teacher[i])).to(args.device)
+            log_syn_lr = torch.log(syn_lr).detach().to(args.device).requires_grad_(True)
+            optimizer_lr = torch.optim.SGD([log_syn_lr], lr=args.lr_lr, momentum=0.5)
+            log_syn_lr_list.append(log_syn_lr)
+            optimizer_lr_list.append(optimizer_lr)
+    else:
+        print("Warning, the lr_teacher should be a list")
+        syn_lr = torch.tensor(args.lr_teacher).to(args.device)
+        for _ in range(start_epoch_cap):
+            log_syn_lr = torch.log(syn_lr).detach().to(args.device).requires_grad_(True)
+            optimizer_lr = torch.optim.SGD([log_syn_lr], lr=args.lr_lr, momentum=0.5)
+            log_syn_lr_list.append(log_syn_lr)
+            optimizer_lr_list.append(optimizer_lr)
     # ----------------------------------------------
 
     for it in range(args.prev_iter, args.Iteration+1):
-        # stage match trajectory #0 --------------------
+        # stage match trajectory #1 --------------------
         start_epoch = it % int(start_epoch_cap)
         syn_lr = torch.exp(log_syn_lr_list[start_epoch])
         test_syn_lr = torch.exp(log_syn_lr_list[-1])
@@ -308,6 +321,9 @@ def main(args):
                     wandb.log({"cf_iteration": wandb.Image(plt)}, step=it)
 
         if it in eval_it_pool and (save_this_it or it % 1000 == 0):
+            print(it, 'lr_list --------------------------------')
+            for lr in log_syn_lr_list:
+                print(torch.exp(lr).item(), end =" ")
             with torch.no_grad():
                 image_save = image_syn.cuda()
 
@@ -539,11 +555,12 @@ def main(args):
                    "Start_Epoch": start_epoch}, step=it)
 
         # Detect overfitting and level up!
-        if len(test_loss) >= 400:
+        if it % 10 == 0 and len(test_loss) >= 400:
             correlation = np.corrcoef(test_loss, list(range(len(test_loss))))[0, 1]
+            three_sigma = 3 * np.sqrt(1 / (len(test_loss) - 2))
             if not trending:
                 interval = len(test_loss) // 2
-                trending = correlation < -0.4
+                trending = correlation < -three_sigma
                 if trending:
                     print('trending------------', it, correlation)
                 if it % 100 == 0:
@@ -553,22 +570,23 @@ def main(args):
                 #     args.syn_steps = min(args.syn_steps + 1, 50)
                 #     min_test_idx = it
                 #     wandb.log({"Synthetic_Step": args.syn_steps}, step=it)
-                if not trending and len(test_loss) % 200 == 0:
+                if not trending and len(test_loss) % 400 == 0:
                     # If model didn't produce a global minimum on right half of test data, decrease lr_img
                     args.lr_img *= 0.9
                     optimizer_img = torch.optim.SGD([image_syn], lr=args.lr_img, momentum=0.5)
                     wandb.log({"Image Learning Rate": args.lr_img}, step=it)
             if trending and np.mean(test_loss[-(2 * interval):-interval]) <= np.mean(test_loss[-interval:]) or \
-                    correlation > 0.2:
+                    correlation > three_sigma:
                 # reset
-                start_epoch_cap = min(start_epoch_cap + 1, args.max_start_epoch)
                 test_loss = []
                 min_test = float('inf')
                 trending = False
-                log_syn_lr = log_syn_lr_list[-1].detach().to(args.device).requires_grad_(True)
-                optimizer_lr = torch.optim.SGD([log_syn_lr], lr=args.lr_lr, momentum=0.5)
-                log_syn_lr_list.append(log_syn_lr)
-                optimizer_lr_list.append(optimizer_lr)
+                if start_epoch_cap + 1 <= args.max_start_epoch:
+                    start_epoch_cap += 1
+                    log_syn_lr = log_syn_lr_list[-1].clone().detach().to(args.device).requires_grad_(True)
+                    optimizer_lr = torch.optim.SGD([log_syn_lr], lr=args.lr_lr, momentum=0.5)
+                    log_syn_lr_list.append(log_syn_lr)
+                    optimizer_lr_list.append(optimizer_lr)
 
         for _ in student_params:
             del _
@@ -602,7 +620,8 @@ if __name__ == '__main__':
 
     parser.add_argument('--lr_img', type=float, default=1000, help='learning rate for updating synthetic images')
     parser.add_argument('--lr_lr', type=float, default=1e-05, help='learning rate for updating... learning rate')
-    parser.add_argument('--lr_teacher', type=float, default=0.01, help='initialization for synthetic learning rate')
+    # parser.add_argument('--lr_teacher', type=float, default=0.01, help='initialization for synthetic learning rate')
+    parser.add_argument('--lr_teacher', '--list', nargs='+', help='<Required> Set flag', required=True)
 
     parser.add_argument('--lr_init', type=float, default=0.01, help='how to init lr (alpha)')
 

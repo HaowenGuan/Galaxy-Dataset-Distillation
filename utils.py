@@ -58,7 +58,7 @@ def get_dataset(dataset, data_path, batch_size=1, subset="imagenette", args=None
     loader_train_dict = None
     class_map_inv = None
 
-    if dataset == 'gzoo2_prob':
+    if dataset == 'gzoo2_normal':
         channel = 3
         im_size = (128, 128)
         num_classes = 10
@@ -105,6 +105,7 @@ def get_dataset(dataset, data_path, batch_size=1, subset="imagenette", args=None
             id = int(image[:-4])
             img = cv.imread(image_dir)
             img = cv.cvtColor(img, cv.COLOR_BGR2RGB)
+            img = img[img.shape[0] // 4:(img.shape[0] * 3) // 4, img.shape[1] // 4:(img.shape[1] * 3) // 4]
             img = cv.resize(img, (128, 128), interpolation=cv.INTER_AREA) / 255
             img = torch.from_numpy(img.T)
             img = transforms.Normalize(mean, std)(img)
@@ -112,8 +113,8 @@ def get_dataset(dataset, data_path, batch_size=1, subset="imagenette", args=None
             dst_total.append((img, get_classes(id)))
 
         np.random.shuffle(dst_total)
-        dst_train = dst_total[:int(0.8 * len(dst_total))]
-        dst_test = dst_total[int(0.8 * len(dst_total)):]
+        dst_train = []
+        dst_test = dst_total
 
         class_names = [str(i) for i in range(num_classes)]
         class_map = {x:x for x in range(num_classes)}
@@ -810,6 +811,7 @@ def evaluate_synset(it, it_eval, net, num_classes, images_train, labels_train, d
         Epoch = int(args.epoch_eval_train)
         lr_schedule = [[Epoch//2+1, lr * 0.1]]
         optimizer = torch.optim.SGD(net.parameters(), lr=lr, momentum=0.9, weight_decay=0.0005)
+    print(lr_schedule)
 
     criterion = nn.CrossEntropyLoss().to(args.device)
 
