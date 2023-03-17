@@ -587,7 +587,7 @@ def main(args):
                 if trending:
                     print('[Still Trending] --- CorrCoef:', r, "Length:", test_loss_length, 'Interval Size:', s)
                 else:
-                    print("[Not Trending] --- CorrCoef:", r, "Three Sigma:", three_sigma, "Length:", test_loss_length)
+                    print("[Not Trending] --- CorrCoef:", r, "Three Sigma:", 4 * sigma, "Length:", test_loss_length)
 
 
         for _ in student_params:
