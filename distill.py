@@ -32,6 +32,7 @@ def main(args):
     print("CUDNN STATUS: {}".format(torch.backends.cudnn.enabled))
 
     args.dsa = True if args.dsa == 'True' else False
+    # os.environ['CUDA_VISIBLE_DEVICES'] = '5'
     args.device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
     eval_it_pool = np.arange(1, args.Iteration + 1, args.eval_it).tolist()
@@ -557,7 +558,7 @@ def main(args):
             # s = (1 - abs(r)) * test_loss_length // 2
             sigma = np.sqrt(1 / (test_loss_length - 2))
             if not trending:
-                trending = r < - (4 * sigma)
+                trending = r < - (6 * sigma)
                 if trending:
                     print('[Start Trending] --- Correlation Coefficient:', r)
                     starting_point = test_loss_length
@@ -587,7 +588,7 @@ def main(args):
                 if trending:
                     print('[Still Trending] --- CorrCoef:', r, "Length:", test_loss_length, 'Interval Size:', s)
                 else:
-                    print("[Not Trending] --- CorrCoef:", r, "Three Sigma:", 4 * sigma, "Length:", test_loss_length)
+                    print("[Not Trending] --- CorrCoef:", r, "Three Sigma:", 6 * sigma, "Length:", test_loss_length)
 
 
         for _ in student_params:
