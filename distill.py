@@ -566,7 +566,7 @@ def main(args):
                     # If model didn't produce a global minimum on right half of test data, decrease lr_img by 10%
                     for param_group in optimizer_img.param_groups:
                         param_group['lr'] *= 0.9
-                    wandb.log({"Image Learning Rate": args.lr_img}, step=it)
+                    wandb.log({"Image Learning Rate": param_group['lr']}, step=it)
                     if param_group['lr'] < args.lr_img * 0.1 and test_loss_length >= 1000:
                         # Early Stopping Criteria
                         print('Test Loss stop improving. End with early stopping!')
