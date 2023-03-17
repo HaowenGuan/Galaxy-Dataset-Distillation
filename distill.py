@@ -554,11 +554,11 @@ def main(args):
         test_loss_length = len(test_loss)
         if test_loss_length >= 100 and test_loss_length % 10 == 0:
             r = np.corrcoef(test_loss, list(range(test_loss_length)))[0, 1]
-            s = test_loss_length - int(test_loss_length // 2 + abs(r) * (test_loss_length // 2 - 50))
-            # s = (1 - abs(r)) * test_loss_length // 2
+            s = test_loss_length - int(test_loss_length // 2 + abs(r) * (test_loss_length // 2 - 20))
+            # s = int((1 - abs(r)) * test_loss_length // 2)
             sigma = np.sqrt(1 / (test_loss_length - 2))
             if not trending:
-                trending = r < - (6 * sigma)
+                trending = r < -(5 * sigma)
                 if trending:
                     print('[Start Trending] --- Correlation Coefficient:', r)
                     starting_point = test_loss_length
