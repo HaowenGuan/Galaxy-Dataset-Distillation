@@ -555,9 +555,9 @@ def main(args):
             r = np.corrcoef(test_loss, list(range(test_loss_length)))[0, 1]
             s = test_loss_length - int(test_loss_length // 2 + abs(r) * (test_loss_length // 2 - 50))
             # s = (1 - abs(r)) * test_loss_length // 2
-            three_sigma = 3 * np.sqrt(1 / (test_loss_length - 2))
+            sigma = np.sqrt(1 / (test_loss_length - 2))
             if not trending:
-                trending = r < -three_sigma
+                trending = r < - (4 * sigma)
                 if trending:
                     print('[Start Trending] --- Correlation Coefficient:', r)
                     starting_point = test_loss_length
@@ -571,7 +571,7 @@ def main(args):
                         # Early Stopping Criteria
                         print('Test Loss stop improving. End with early stopping!')
                         exit(0)
-            if trending and (np.mean(test_loss[-(2 * s):-s]) <= np.mean(test_loss[-s:]) or test_loss_length - starting_point >= 1000) or r > three_sigma:
+            if trending and (np.mean(test_loss[-(2 * s):-s]) <= np.mean(test_loss[-s:]) or test_loss_length - starting_point >= 1000) or r > 3 * sigma:
                 # Reset Stat and Level Up
                 print('[Trending Ends] --- Current Epoch Length:',test_loss_length, 'Interval Size:', s)
                 test_loss = []
