@@ -216,10 +216,10 @@ def main(args):
     min_test = float('inf')
     min_test_idx = 0
     trending = False
-    print(wandb.run.name)
+    print("Wandb Job Name:", wandb.run.name)
+    print("Input lr_teacher List:", args.lr_teacher)
     log_syn_lr_list = []
     optimizer_lr_list = []
-    print(args.lr_teacher)
     if isinstance(args.lr_teacher, list):
         for i in range(start_epoch_cap):
             if i >= len(args.lr_teacher):
@@ -247,8 +247,6 @@ def main(args):
         # ----------------------------------------------
         save_this_it = False
 
-        # writer.add_scalar('Progress', it, it)
-        # wandb.log({"Progress": it}, step=it)
         ''' Evaluate synthetic data '''
         if it in eval_it_pool:
             for model_eval in model_eval_pool:
@@ -280,7 +278,7 @@ def main(args):
                     for i in log_syn_lr_list:
                         args.lr_net.append(torch.exp(i).item())
 
-                    _, acc_train, acc_test, train_cf, test_cf = evaluate_synset(it, it_eval, net_eval, num_classes, image_syn_eval, label_syn_eval, dst_test, trainloader, args, texture=args.texture)
+                    _, acc_train, acc_test, train_cf, test_cf = evaluate_synset(it, it_eval, net_eval, num_classes, image_syn_eval, label_syn_eval, dst_train, dst_test, trainloader, testloader, args, texture=args.texture)
                     total_train_cf += train_cf
                     total_test_cf += test_cf
                     accs_test.append(acc_test)
@@ -290,17 +288,21 @@ def main(args):
                 accs_train = np.array(accs_train)
                 acc_test_mean = np.mean(accs_test)
                 acc_test_std = np.std(accs_test)
-                if acc_test_mean > best_acc[model_eval]:
-                    best_acc[model_eval] = acc_test_mean
-                    best_std[model_eval] = acc_test_std
+                acc_train_mean = np.mean(accs_train)
+                acc_train_std = np.std(accs_train)
+                if acc_train_mean > best_acc[model_eval]:
+                    best_acc[model_eval] = acc_train_mean
+                    best_std[model_eval] = acc_train_std
                     save_this_it = True
-                print('Evaluate %d random %s, mean = %.4f std = %.4f\n-------------------------'%(len(accs_test), model_eval, acc_test_mean, acc_test_std))
+                print('Evaluate %d random %s, train set mean = %.4f std = %.4f'%(len(accs_train), model_eval, acc_train_mean, acc_train_std))
+                print('Evaluate %d random %s, test set mean = %.4f std = %.4f\n-------------------------'%(len(accs_test), model_eval, acc_test_mean, acc_test_std))
                 wandb.log({'Accuracy/{}'.format(model_eval): acc_test_mean}, step=it)
+                wandb.log({'Accuracy/{}'.format(model_eval + "_Train"): acc_train_mean}, step=it)
                 wandb.log({'Max_Accuracy/{}'.format(model_eval): best_acc[model_eval]}, step=it)
-                wandb.log({'Std/{}'.format(model_eval): acc_test_std}, step=it)
+                wandb.log({'Std/{}'.format(model_eval): acc_train_std}, step=it)
                 wandb.log({'Max_Std/{}'.format(model_eval): best_std[model_eval]}, step=it)
 
-                for name, cf_matrix in [["test", total_test_cf]]:
+                for name, cf_matrix in [["train", total_train_cf], ["test", total_test_cf]]:
                     cf_matrix = cf_matrix.tolist()
                     for r in cf_matrix:
                         t = sum(r)
@@ -316,10 +318,10 @@ def main(args):
                     wandb.log({"cf_iteration": wandb.Image(plt)}, step=it)
 
         if it in eval_it_pool and (save_this_it or it % 1000 == 0):
-            print('lr_list: [', end='')
+            printing_lr_list = []
             for lr in log_syn_lr_list:
-                print(torch.exp(lr).item(), end=', ')
-            print(']')
+                printing_lr_list.append(torch.exp(lr).item())
+            print('lr_list:', printing_lr_list)
             with torch.no_grad():
                 image_save = image_syn.cuda()
 
@@ -552,27 +554,26 @@ def main(args):
 
         # Detect Overfitting and Level Up
         test_loss_length = len(test_loss)
-        if test_loss_length >= 100 and test_loss_length % 10 == 0:
+        if test_loss_length >= args.min_test_length and test_loss_length % 10 == 0:
             r = np.corrcoef(test_loss, list(range(test_loss_length)))[0, 1]
-            s = test_loss_length - int(test_loss_length // 2 + abs(r) * (test_loss_length // 2 - 20))
-            # s = int((1 - abs(r)) * test_loss_length // 2)
+            s = test_loss_length - int(test_loss_length // 2 + abs(r) * (test_loss_length // 2 - args.pad_interval))
+            # s = int((1 - abs(r)) * test_loss_length // 2) # If args.pad_interval == 0, above and this is equivalent
             sigma = np.sqrt(1 / (test_loss_length - 2))
             if not trending:
-                trending = r < -(5 * sigma)
+                trending = r < -(args.sigma * sigma)
                 if trending:
                     print('[Start Trending] --- Correlation Coefficient:', r)
                     starting_point = test_loss_length
-
-                if not trending and test_loss_length % 100 == 0:
+                if not trending and test_loss_length % args.lr_img_decay_interval == 0:
                     # If model didn't produce a global minimum on right half of test data, decrease lr_img by 10%
                     for param_group in optimizer_img.param_groups:
                         param_group['lr'] *= 0.9
                     wandb.log({"Image Learning Rate": param_group['lr']}, step=it)
-                    if param_group['lr'] < args.lr_img * 0.1 and test_loss_length >= 1000:
+                    if param_group['lr'] < args.lr_img * 0.05:
                         # Early Stopping Criteria
                         print('Test Loss stop improving. End with early stopping!')
                         exit(0)
-            if trending and (np.mean(test_loss[-(2 * s):-s]) <= np.mean(test_loss[-s:]) or test_loss_length - starting_point >= 1000) or r > 3 * sigma:
+            if trending and (np.mean(test_loss[-(2 * s):-s]) <= np.mean(test_loss[-s:]) or test_loss_length - starting_point >= args.max_trending_time) or r > 3 * sigma:
                 # Reset Stat and Level Up
                 print('[Trending Ends] --- Current Epoch Length:',test_loss_length, 'Interval Size:', s)
                 test_loss = []
@@ -588,7 +589,7 @@ def main(args):
                 if trending:
                     print('[Still Trending] --- CorrCoef:', r, "Length:", test_loss_length, 'Interval Size:', s)
                 else:
-                    print("[Not Trending] --- CorrCoef:", r, "Three Sigma:", 6 * sigma, "Length:", test_loss_length)
+                    print("[Not Trending] --- CorrCoef:", r, "Sigma Threshold:", - args.sigma * sigma, "Length:", test_loss_length)
 
 
         for _ in student_params:
@@ -669,6 +670,12 @@ if __name__ == '__main__':
     parser.add_argument('--prev_iter', type=int, default=1, help="Resume training start from previous iter")
     parser.add_argument('--wandb_name', type=str, default=None, help="Custom WanDB name")
     parser.add_argument('--load_syn_image', type=str, default=None, help="previous syn image")
+    # Stage Distillation Hyperparameter
+    parser.add_argument('--min_test_length', type=int, default=100, help="Minimum iteration for each epoch")
+    parser.add_argument('--sigma', type=int, default=5, help="CorrCoef Threshold for starting trending")
+    parser.add_argument('--pad_interval', type=int, default=10, help="[0, minimum_test_length // 2]")
+    parser.add_argument('--max_trending_time', type=int, default=1000, help="Maximum duration for stay in trend")
+    parser.add_argument('--lr_img_decay_interval', type=int, default=100, help="Decrease lr_img by 0.1 after a while")
 
     args = parser.parse_args()
 

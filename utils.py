@@ -630,8 +630,6 @@ def get_network(model, channel, num_classes, im_size=(32, 32), dist=True):
         net = ConvNet(channel=channel, num_classes=num_classes, net_width=net_width, net_depth=7, net_act=net_act, net_norm=net_norm, net_pooling=net_pooling, im_size=im_size)
     elif model == 'ConvNetD8':
         net = ConvNet(channel=channel, num_classes=num_classes, net_width=net_width, net_depth=8, net_act=net_act, net_norm=net_norm, net_pooling=net_pooling, im_size=im_size)
-
-
     elif model == 'ConvNetW32':
         net = ConvNet(channel=channel, num_classes=num_classes, net_width=32, net_depth=net_depth, net_act=net_act, net_norm=net_norm, net_pooling=net_pooling)
     elif model == 'ConvNetW64':
@@ -644,18 +642,15 @@ def get_network(model, channel, num_classes, im_size=(32, 32), dist=True):
         net = ConvNet(channel=channel, num_classes=num_classes, net_width=512, net_depth=net_depth, net_act=net_act, net_norm=net_norm, net_pooling=net_pooling)
     elif model == 'ConvNetW1024':
         net = ConvNet(channel=channel, num_classes=num_classes, net_width=1024, net_depth=net_depth, net_act=net_act, net_norm=net_norm, net_pooling=net_pooling)
-
     elif model == "ConvNetKIP":
         net = ConvNet(channel=channel, num_classes=num_classes, net_width=1024, net_depth=net_depth, net_act=net_act,
                       net_norm="none", net_pooling=net_pooling)
-
     elif model == 'ConvNetAS':
         net = ConvNet(channel=channel, num_classes=num_classes, net_width=net_width, net_depth=net_depth, net_act='sigmoid', net_norm=net_norm, net_pooling=net_pooling)
     elif model == 'ConvNetAR':
         net = ConvNet(channel=channel, num_classes=num_classes, net_width=net_width, net_depth=net_depth, net_act='relu', net_norm=net_norm, net_pooling=net_pooling)
     elif model == 'ConvNetAL':
         net = ConvNet(channel=channel, num_classes=num_classes, net_width=net_width, net_depth=net_depth, net_act='leakyrelu', net_norm=net_norm, net_pooling=net_pooling)
-
     elif model == 'ConvNetNN':
         net = ConvNet(channel=channel, num_classes=num_classes, net_width=net_width, net_depth=net_depth, net_act=net_act, net_norm='none', net_pooling=net_pooling)
     elif model == 'ConvNetBN':
@@ -666,28 +661,26 @@ def get_network(model, channel, num_classes, im_size=(32, 32), dist=True):
         net = ConvNet(channel=channel, num_classes=num_classes, net_width=net_width, net_depth=net_depth, net_act=net_act, net_norm='instancenorm', net_pooling=net_pooling)
     elif model == 'ConvNetGN':
         net = ConvNet(channel=channel, num_classes=num_classes, net_width=net_width, net_depth=net_depth, net_act=net_act, net_norm='groupnorm', net_pooling=net_pooling)
-
     elif model == 'ConvNetNP':
         net = ConvNet(channel=channel, num_classes=num_classes, net_width=net_width, net_depth=net_depth, net_act=net_act, net_norm=net_norm, net_pooling='none')
     elif model == 'ConvNetMP':
         net = ConvNet(channel=channel, num_classes=num_classes, net_width=net_width, net_depth=net_depth, net_act=net_act, net_norm=net_norm, net_pooling='maxpooling')
     elif model == 'ConvNetAP':
         net = ConvNet(channel=channel, num_classes=num_classes, net_width=net_width, net_depth=net_depth, net_act=net_act, net_norm=net_norm, net_pooling='avgpooling')
-
-
     else:
         net = None
         exit('DC error: unknown model')
 
-    if dist:
-        gpu_num = torch.cuda.device_count()
-        if gpu_num>0:
-            device = 'cuda:0'
-            # if gpu_num>1:
-            #     net = nn.DataParallel(net)
-        else:
-            device = 'cpu'
-        net = net.to(device)
+    # if dist:
+    #     gpu_num = torch.cuda.device_count()
+    #     if gpu_num>0:
+    #         # os.environ['CUDA_VISIBLE_DEVICES'] = '5'
+    #         device = 'cuda'
+    #         if gpu_num>1:
+    #             net = nn.DataParallel(net)
+    #     else:
+    #         device = 'cpu'
+    #     net = net.to(device)
 
     return net
 
@@ -793,7 +786,7 @@ def epoch_regression(mode, dataloader, net, optimizer, criterion, args, aug, tex
     return loss_avg
 
 
-def evaluate_synset(it, it_eval, net, num_classes, images_train, labels_train, dst_test, testloader, args, return_loss=False, texture=False):
+def evaluate_synset(it, it_eval, net, num_classes, images_train, labels_train, dst_val, dst_test, valloader, testloader, args, return_loss=False, texture=False):
     net = net.to(args.device)
     images_train = images_train.to(args.device)
     labels_train = labels_train.to(args.device)
@@ -811,7 +804,9 @@ def evaluate_synset(it, it_eval, net, num_classes, images_train, labels_train, d
         Epoch = int(args.epoch_eval_train)
         lr_schedule = [[Epoch//2+1, lr * 0.1]]
         optimizer = torch.optim.SGD(net.parameters(), lr=lr, momentum=0.9, weight_decay=0.0005)
-    print(lr_schedule)
+    if it_eval == 0:
+        print("Current lr schedule(showing in backward):")
+        print(lr_schedule)
 
     criterion = nn.CrossEntropyLoss().to(args.device)
 
@@ -828,6 +823,7 @@ def evaluate_synset(it, it_eval, net, num_classes, images_train, labels_train, d
         loss_train_list.append(loss_train)
         if ep == Epoch:
             with torch.no_grad():
+                loss_val, acc_val = epoch('test', valloader, net, optimizer, criterion, args, aug=False)
                 loss_test, acc_test = epoch('test', testloader, net, optimizer, criterion, args, aug=False)
         if len(lr_schedule) > 0 and ep == lr_schedule[-1][0]:
             cur = lr_schedule.pop()
@@ -835,12 +831,11 @@ def evaluate_synset(it, it_eval, net, num_classes, images_train, labels_train, d
 
     time_train = time.time() - start
 
-    print('%s Evaluate_%02d: epoch = %04d train time = %d s train loss = %.6f train acc = %.4f, test acc = %.4f' % (get_time(), it_eval, Epoch, int(time_train), loss_train, acc_train, acc_test))
-    
-    train_cf, test_cf = np.array([[0] * num_classes for _ in range(num_classes)]), np.array([[0] * num_classes for _ in range(num_classes)])
-    for dataset, name, count, cf_matrix in [[trainloader, "train", len(dst_train), train_cf],[testloader, "test", len(dst_test), test_cf]]:
-        # total_acc = torch.zeros(num_classes)
+    print('%s Evaluate_%02d: epoch = %04d train time = %d s train loss = %.6f, validation acc = %.4f, test acc = %.4f' % (get_time(), it_eval, Epoch, int(time_train), loss_train, acc_val, acc_test))
 
+    # Calculate Confusion Matrices
+    val_cf, test_cf = np.array([[0] * num_classes for _ in range(num_classes)]), np.array([[0] * num_classes for _ in range(num_classes)])
+    for dataset, name, count, cf_matrix in [[valloader, "val", len(dst_val), val_cf],[testloader, "test", len(dst_test), test_cf]]:
         pred = []
         true = []
         for i_batch, datum in enumerate(dataset):
@@ -853,26 +848,11 @@ def evaluate_synset(it, it_eval, net, num_classes, images_train, labels_train, d
             pred += output.tolist()
             true += lab.tolist()
 
-            # for i in range(lab.shape[0]):
-            #     if output[i] == lab[i]:
-            #         total_acc[lab[i]] += 1
-        
-        # print(name, "set ACC of each class", total_acc / count)
-
         cf_matrix += confusion_matrix(true, pred)
-        # print(cf_matrix)
-        # df_cm = pd.DataFrame(cf_matrix, index = [i for i in class_names], 
-        #     columns = [i for i in class_names])
-        # plt.figure(figsize = (12,7))
-        # sn.heatmap(df_cm, annot=True, fmt='g')
-        # plt.title('Confusion Matrix Iteration{} Evaluation{} {}'.format(it, it_eval, name))
-        # plt.xlabel("Prediction")
-        # plt.ylabel("True Label")
-        # plt.savefig('./cf_matrix_distill/cf_iteration{}_evaluation{}_{}.png'.format(it, it_eval, name))
     if return_loss:
-        return net, acc_train_list, acc_test, loss_train_list, loss_test, train_cf, test_cf
+        return net, acc_train_list, acc_test, loss_train_list, loss_test, val_cf, test_cf
     else:
-        return net, acc_train_list, acc_test, train_cf, test_cf
+        return net, acc_val, acc_test, val_cf, test_cf
 
 
 def augment(images, dc_aug_param, device):
