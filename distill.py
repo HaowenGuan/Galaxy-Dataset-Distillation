@@ -289,17 +289,10 @@ def main(args):
                 accs_train = np.array(accs_train)
                 acc_test_mean = np.mean(accs_test)
                 acc_test_std = np.std(accs_test)
-                # stage match trajectory #2 --------------------
                 if acc_test_mean > best_acc[model_eval]:
                     best_acc[model_eval] = acc_test_mean
                     best_std[model_eval] = acc_test_std
                     save_this_it = True
-                #     start_epoch_cap = int(start_epoch_cap) # 重置stage累计
-                # else:
-                #     if it > 1000:
-                #         start_epoch_cap += 0.5
-                #         start_epoch_cap = min(start_epoch_cap, args.max_start_epoch)
-                # ----------------------------------------------
                 print('Evaluate %d random %s, mean = %.4f std = %.4f\n-------------------------'%(len(accs_test), model_eval, acc_test_mean, acc_test_std))
                 wandb.log({'Accuracy/{}'.format(model_eval): acc_test_mean}, step=it)
                 wandb.log({'Max_Accuracy/{}'.format(model_eval): best_acc[model_eval]}, step=it)
@@ -322,9 +315,10 @@ def main(args):
                     wandb.log({"cf_iteration": wandb.Image(plt)}, step=it)
 
         if it in eval_it_pool and (save_this_it or it % 1000 == 0):
-            print(it, 'lr_list --------------------------------')
+            print('lr_list: [', end='')
             for lr in log_syn_lr_list:
-                print(torch.exp(lr).item(), end =" ")
+                print(torch.exp(lr).item(), end=', ')
+            print(']')
             with torch.no_grad():
                 image_save = image_syn.cuda()
 
@@ -555,33 +549,31 @@ def main(args):
         wandb.log({"Grand_Loss_epoch_" + str(start_epoch): grand_loss.detach().cpu(),
                    "Start_Epoch": start_epoch}, step=it)
 
-        # Detect overfitting and level up!
-        if len(test_loss) >= 100 and len(test_loss) % 10 == 0:
-            correlation = np.corrcoef(test_loss, list(range(len(test_loss))))[0, 1]
-            three_sigma = 3 * np.sqrt(1 / (len(test_loss) - 2))
+        # Detect Overfitting and Level Up
+        test_loss_length = len(test_loss)
+        if test_loss_length >= 100 and test_loss_length % 10 == 0:
+            r = np.corrcoef(test_loss, list(range(test_loss_length)))[0, 1]
+            s = test_loss_length - int(test_loss_length // 2 + abs(r) * (test_loss_length // 2 - 50))
+            # s = (1 - abs(r)) * test_loss_length // 2
+            three_sigma = 3 * np.sqrt(1 / (test_loss_length - 2))
             if not trending:
-                interval = len(test_loss) // 2
-                trending = correlation < -three_sigma
+                trending = r < -three_sigma
                 if trending:
-                    print('trending------------', it, correlation)
-                if it % 100 == 0:
-                    print("trending?????", np.corrcoef(test_loss, list(range(len(test_loss)))))
-                # if not trending and interval < it - min_test_idx:
-                #     # If model didn't produce a global minimum on right half of test data, increment syn_steps
-                #     args.syn_steps = min(args.syn_steps + 1, 50)
-                #     min_test_idx = it
-                #     wandb.log({"Synthetic_Step": args.syn_steps}, step=it)
-                if not trending and len(test_loss) % 200 == 0:
-                    # If model didn't produce a global minimum on right half of test data, decrease lr_img
-                    args.lr_img *= 0.9
-                    optimizer_img = torch.optim.SGD([image_syn], lr=args.lr_img, momentum=0.5)
+                    print('[Start Trending] --- Correlation Coefficient:', r)
+                    starting_point = test_loss_length
+
+                if not trending and test_loss_length % 100 == 0:
+                    # If model didn't produce a global minimum on right half of test data, decrease lr_img by 10%
+                    for param_group in optimizer_img.param_groups:
+                        param_group['lr'] *= 0.9
                     wandb.log({"Image Learning Rate": args.lr_img}, step=it)
-                if len(test_loss) >= 1000:
-                    print('Test Loss stop improving. End with early stopping!')
-                    exit(0)
-            if trending and np.mean(test_loss[-(2 * interval):-interval]) <= np.mean(test_loss[-interval:]) or \
-                    correlation > three_sigma:
-                # reset
+                    if param_group['lr'] < args.lr_img * 0.1 and test_loss_length >= 1000:
+                        # Early Stopping Criteria
+                        print('Test Loss stop improving. End with early stopping!')
+                        exit(0)
+            if trending and (np.mean(test_loss[-(2 * s):-s]) <= np.mean(test_loss[-s:]) or test_loss_length - starting_point >= 1000) or r > three_sigma:
+                # Reset Stat and Level Up
+                print('[Trending Ends] --- Current Epoch Length:',test_loss_length, 'Interval Size:', s)
                 test_loss = []
                 min_test = float('inf')
                 trending = False
@@ -591,6 +583,12 @@ def main(args):
                     optimizer_lr = torch.optim.SGD([log_syn_lr], lr=args.lr_lr, momentum=0.5)
                     log_syn_lr_list.append(log_syn_lr)
                     optimizer_lr_list.append(optimizer_lr)
+            if test_loss_length % 100 == 0:
+                if trending:
+                    print('[Still Trending] --- CorrCoef:', r, "Length:", test_loss_length, 'Interval Size:', s)
+                else:
+                    print("[Not Trending] --- CorrCoef:", r, "Three Sigma:", three_sigma, "Length:", test_loss_length)
+
 
         for _ in student_params:
             del _
