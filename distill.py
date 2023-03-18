@@ -32,7 +32,7 @@ def main(args):
     print("CUDNN STATUS: {}".format(torch.backends.cudnn.enabled))
 
     args.dsa = True if args.dsa == 'True' else False
-    os.environ['CUDA_VISIBLE_DEVICES'] = '5'
+    os.environ['CUDA_VISIBLE_DEVICES'] = '3'
     args.device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
     eval_it_pool = np.arange(0, args.Iteration + 1, args.eval_it).tolist()
@@ -562,13 +562,12 @@ def main(args):
             # s = int((1 - abs(r)) * test_loss_length // 2) # If args.pad_interval == 0, above and this is equivalent
             sigma = np.sqrt(1 / (test_loss_length - 2))
             if not trending and not fine_tuning:
-                if test_loss_length > args.fine_tune:
+                if test_loss_length > args.max_duration:
                     fine_tuning = True
                 if not fine_tuning:
                     trending = r < -(args.sigma * sigma)
                 if trending:
                     print('[Start Trending] --- Correlation Coefficient:', r, 'epoch', start_epoch_cap - 1, "+" * 16)
-                    starting_point = test_loss_length
             if fine_tuning and test_loss_length % 50 == 0:
                 # If model didn't produce a global minimum on right half of test data, decrease lr_img by 10%
                 for param_group in optimizer_img.param_groups:
@@ -579,7 +578,7 @@ def main(args):
                     # Early Stopping Criteria
                     print('Test Loss stop improving. End with early stopping!')
                     exit(0)
-            if trending and (np.mean(test_loss[-(2 * s):-s]) <= np.mean(test_loss[-s:]) or test_loss_length - starting_point >= args.max_trending_time) or r > 3 * sigma:
+            if trending and (np.mean(test_loss[-(2 * s):-s]) <= np.mean(test_loss[-s:]) or test_loss_length >= args.max_duration) or r > 3 * sigma:
                 # Reset Stat and Level Up
                 print('[Trending Ends] --- Current Epoch Length:',test_loss_length, 'Interval Size:', s, "=" * 16)
                 test_loss = []
@@ -680,8 +679,7 @@ if __name__ == '__main__':
     parser.add_argument('--min_test_length', type=int, default=100, help="Minimum iteration for each epoch")
     parser.add_argument('--sigma', type=int, default=5, help="CorrCoef Threshold for starting trending")
     parser.add_argument('--pad_interval', type=int, default=10, help="[0, minimum_test_length // 2]")
-    parser.add_argument('--max_trending_time', type=int, default=1000, help="Maximum duration for stay in trend")
-    parser.add_argument('--fine_tune', type=int, default=1000, help="Fine tuning trigger period for not enter trend")
+    parser.add_argument('--max_duration', type=int, default=1000, help="Maximum duration for stay in one trend")
     parser.add_argument('--warm_up', type=int, default=100, help="Warm up noise init before start stage distillation")
     parser.add_argument('--method', type=str, default=None, help="stage-MTT | original-MTT")
 
