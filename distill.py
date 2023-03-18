@@ -32,7 +32,7 @@ def main(args):
     print("CUDNN STATUS: {}".format(torch.backends.cudnn.enabled))
 
     args.dsa = True if args.dsa == 'True' else False
-    # os.environ['CUDA_VISIBLE_DEVICES'] = '1,2,3,4,5'
+    os.environ['CUDA_VISIBLE_DEVICES'] = '5'
     args.device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
     eval_it_pool = np.arange(0, args.Iteration + 1, args.eval_it).tolist()
@@ -216,6 +216,7 @@ def main(args):
     min_test = float('inf')
     min_test_idx = 0
     trending = False
+    fine_tuning = False
     print("Wandb Job Name:", wandb.run.name)
     print("Input lr_teacher List:", args.lr_teacher)
     log_syn_lr_list = []
@@ -417,63 +418,64 @@ def main(args):
                 random.shuffle(buffer)
 
         # Using Next Epoch as Test Set------------------
-        starting_params = expert_trajectory[start_epoch_cap]
-        target_params = expert_trajectory[start_epoch_cap + args.expert_epochs]
-        target_params = torch.cat([p.data.to(args.device).reshape(-1) for p in target_params], 0)
-        student_params = torch.cat([p.data.to(args.device).reshape(-1) for p in starting_params], 0).requires_grad_(True)
-        starting_params = torch.cat([p.data.to(args.device).reshape(-1) for p in starting_params], 0)
+        if it >= args.warm_up:
+            starting_params = expert_trajectory[start_epoch_cap]
+            target_params = expert_trajectory[start_epoch_cap + args.expert_epochs]
+            target_params = torch.cat([p.data.to(args.device).reshape(-1) for p in target_params], 0)
+            student_params = torch.cat([p.data.to(args.device).reshape(-1) for p in starting_params], 0).requires_grad_(True)
+            starting_params = torch.cat([p.data.to(args.device).reshape(-1) for p in starting_params], 0)
 
-        syn_images = image_syn
-        y_hat = label_syn.to(args.device)
-        indices_chunks = []
+            syn_images = image_syn
+            y_hat = label_syn.to(args.device)
+            indices_chunks = []
 
-        for step in range(args.syn_steps):
+            for step in range(args.syn_steps):
 
-            if not indices_chunks:
-                indices = torch.randperm(len(syn_images))
-                indices_chunks = list(torch.split(indices, args.batch_syn))
+                if not indices_chunks:
+                    indices = torch.randperm(len(syn_images))
+                    indices_chunks = list(torch.split(indices, args.batch_syn))
 
-            these_indices = indices_chunks.pop()
+                these_indices = indices_chunks.pop()
 
-            x = syn_images[these_indices]
-            this_y = y_hat[these_indices]
+                x = syn_images[these_indices]
+                this_y = y_hat[these_indices]
 
-            if args.texture:
-                x = torch.cat([torch.stack([torch.roll(im, (torch.randint(im_size[0]*args.canvas_size, (1,)), torch.randint(im_size[1]*args.canvas_size, (1,))), (1,2))[:,:im_size[0],:im_size[1]] for im in x]) for _ in range(args.canvas_samples)])
-                this_y = torch.cat([this_y for _ in range(args.canvas_samples)])
+                if args.texture:
+                    x = torch.cat([torch.stack([torch.roll(im, (torch.randint(im_size[0]*args.canvas_size, (1,)), torch.randint(im_size[1]*args.canvas_size, (1,))), (1,2))[:,:im_size[0],:im_size[1]] for im in x]) for _ in range(args.canvas_samples)])
+                    this_y = torch.cat([this_y for _ in range(args.canvas_samples)])
 
-            if args.dsa and (not args.no_aug):
-                x = DiffAugment(x, args.dsa_strategy, param=args.dsa_param)
+                if args.dsa and (not args.no_aug):
+                    x = DiffAugment(x, args.dsa_strategy, param=args.dsa_param)
 
-            if args.distributed:
-                forward_params = student_params.unsqueeze(0).expand(torch.cuda.device_count(), -1)
-            else:
-                forward_params = student_params
-            x = student_net(x, flat_param=forward_params)
-            ce_loss = criterion(x, this_y)
+                if args.distributed:
+                    forward_params = student_params.unsqueeze(0).expand(torch.cuda.device_count(), -1)
+                else:
+                    forward_params = student_params
+                x = student_net(x, flat_param=forward_params)
+                ce_loss = criterion(x, this_y)
 
-            grad = torch.autograd.grad(ce_loss, student_params, create_graph=True)[0]
+                grad = torch.autograd.grad(ce_loss, student_params, create_graph=True)[0]
 
-            student_params = student_params - test_syn_lr * grad
+                student_params = student_params - test_syn_lr * grad
 
-        param_loss = torch.tensor(0.0).to(args.device)
-        param_dist = torch.tensor(0.0).to(args.device)
+            param_loss = torch.tensor(0.0).to(args.device)
+            param_dist = torch.tensor(0.0).to(args.device)
 
-        param_loss += torch.nn.functional.mse_loss(student_params, target_params, reduction="sum")
-        param_dist += torch.nn.functional.mse_loss(starting_params, target_params, reduction="sum")
+            param_loss += torch.nn.functional.mse_loss(student_params, target_params, reduction="sum")
+            param_dist += torch.nn.functional.mse_loss(starting_params, target_params, reduction="sum")
 
-        param_loss /= num_params
-        param_dist /= num_params
+            param_loss /= num_params
+            param_dist /= num_params
 
-        param_loss /= param_dist
+            param_loss /= param_dist
 
-        test_grand_loss = float(param_loss.detach().cpu())
-        test_loss.append(test_grand_loss)
-        if test_loss[-1] < min_test:
-            min_test = test_loss[-1]
-            min_test_idx = it
-        wandb.log({"Next_Epoch_Test_Loss": test_loss[-1]}, step=it)
-        del param_loss, param_dist, test_grand_loss
+            test_grand_loss = float(param_loss.detach().cpu())
+            test_loss.append(test_grand_loss)
+            if test_loss[-1] < min_test:
+                min_test = test_loss[-1]
+                min_test_idx = it
+            wandb.log({"Next_Epoch_Test_Loss": test_loss[-1]}, step=it)
+            del param_loss, param_dist, test_grand_loss
         #-----------------------------------------------
 
         starting_params = expert_trajectory[start_epoch]
@@ -550,7 +552,7 @@ def main(args):
             optimizer_lr_list[start_epoch].step()
 
         wandb.log({"Grand_Loss_epoch_" + str(start_epoch): grand_loss.detach().cpu(),
-                   "Start_Epoch": start_epoch_cap}, step=it)
+                   "Start_Epoch": start_epoch_cap - 1}, step=it)
 
         # Detect Overfitting and Level Up
         test_loss_length = len(test_loss)
@@ -559,21 +561,24 @@ def main(args):
             s = test_loss_length - int(test_loss_length // 2 + abs(r) * (test_loss_length // 2 - args.pad_interval))
             # s = int((1 - abs(r)) * test_loss_length // 2) # If args.pad_interval == 0, above and this is equivalent
             sigma = np.sqrt(1 / (test_loss_length - 2))
-            if not trending:
-                trending = r < -(args.sigma * sigma)
+            if not trending and not fine_tuning:
+                if test_loss_length > args.fine_tune:
+                    fine_tuning = True
+                if not fine_tuning:
+                    trending = r < -(args.sigma * sigma)
                 if trending:
-                    print('[Start Trending] --- Correlation Coefficient:', r, "+" * 16)
+                    print('[Start Trending] --- Correlation Coefficient:', r, 'epoch', start_epoch_cap - 1, "+" * 16)
                     starting_point = test_loss_length
-                if not trending and test_loss_length % args.lr_img_decay_interval == 0:
-                    # If model didn't produce a global minimum on right half of test data, decrease lr_img by 10%
-                    for param_group in optimizer_img.param_groups:
-                        param_group['lr'] *= 0.9
-                    wandb.log({"Image Learning Rate": param_group['lr']}, step=it)
-                    print('[LR Decay] --- Image Learning Rate:', param_group['lr'], "|" * 16)
-                    if param_group['lr'] < args.lr_img * 0.05:
-                        # Early Stopping Criteria
-                        print('Test Loss stop improving. End with early stopping!')
-                        exit(0)
+            if fine_tuning and test_loss_length % 50 == 0:
+                # If model didn't produce a global minimum on right half of test data, decrease lr_img by 10%
+                for param_group in optimizer_img.param_groups:
+                    param_group['lr'] *= 0.9
+                wandb.log({"Image Learning Rate": param_group['lr']}, step=it)
+                print('[LR Decay] --- Image Learning Rate:', param_group['lr'], "|" * 16)
+                if param_group['lr'] < args.lr_img * 0.1:
+                    # Early Stopping Criteria
+                    print('Test Loss stop improving. End with early stopping!')
+                    exit(0)
             if trending and (np.mean(test_loss[-(2 * s):-s]) <= np.mean(test_loss[-s:]) or test_loss_length - starting_point >= args.max_trending_time) or r > 3 * sigma:
                 # Reset Stat and Level Up
                 print('[Trending Ends] --- Current Epoch Length:',test_loss_length, 'Interval Size:', s, "=" * 16)
@@ -586,7 +591,7 @@ def main(args):
                     optimizer_lr = torch.optim.SGD([log_syn_lr], lr=args.lr_lr, momentum=0.5)
                     log_syn_lr_list.append(log_syn_lr)
                     optimizer_lr_list.append(optimizer_lr)
-            if test_loss_length % 50 == 0:
+            if not fine_tuning and test_loss_length % 50 == 0:
                 if trending:
                     print('[Still Trending] --- CorrCoef:', r, "Length:", test_loss_length, 'Interval Size:', s, "~" * 16)
                 else:
@@ -673,10 +678,11 @@ if __name__ == '__main__':
     parser.add_argument('--load_syn_image', type=str, default=None, help="previous syn image")
     # Stage Distillation Hyperparameter
     parser.add_argument('--min_test_length', type=int, default=100, help="Minimum iteration for each epoch")
-    parser.add_argument('--sigma', type=int, default=3, help="CorrCoef Threshold for starting trending")
+    parser.add_argument('--sigma', type=int, default=5, help="CorrCoef Threshold for starting trending")
     parser.add_argument('--pad_interval', type=int, default=10, help="[0, minimum_test_length // 2]")
     parser.add_argument('--max_trending_time', type=int, default=1000, help="Maximum duration for stay in trend")
-    parser.add_argument('--lr_img_decay_interval', type=int, default=100, help="Decrease lr_img by 0.1 after a while")
+    parser.add_argument('--fine_tune', type=int, default=1000, help="Fine tuning trigger period for not enter trend")
+    parser.add_argument('--warm_up', type=int, default=100, help="Warm up noise init before start stage distillation")
 
     args = parser.parse_args()
 
