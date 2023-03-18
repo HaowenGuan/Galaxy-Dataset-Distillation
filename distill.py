@@ -683,6 +683,7 @@ if __name__ == '__main__':
     parser.add_argument('--max_trending_time', type=int, default=1000, help="Maximum duration for stay in trend")
     parser.add_argument('--fine_tune', type=int, default=1000, help="Fine tuning trigger period for not enter trend")
     parser.add_argument('--warm_up', type=int, default=100, help="Warm up noise init before start stage distillation")
+    parser.add_argument('--method', type=str, default=None, help="stage-MTT | original-MTT")
 
     args = parser.parse_args()
 
