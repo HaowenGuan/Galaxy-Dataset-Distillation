@@ -32,10 +32,10 @@ def main(args):
     print("CUDNN STATUS: {}".format(torch.backends.cudnn.enabled))
 
     args.dsa = True if args.dsa == 'True' else False
-    # os.environ['CUDA_VISIBLE_DEVICES'] = '5'
+    # os.environ['CUDA_VISIBLE_DEVICES'] = '1,2,3,4,5'
     args.device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-    eval_it_pool = np.arange(1, args.Iteration + 1, args.eval_it).tolist()
+    eval_it_pool = np.arange(0, args.Iteration + 1, args.eval_it).tolist()
     channel, im_size, num_classes, class_names, mean, std, dst_train, dst_test, testloader, loader_train_dict, class_map, class_map_inv = get_dataset(args.dataset, args.data_path, args.batch_real, args.subset, args=args)
     model_eval_pool = get_eval_pool(args.eval_mode, args.model, args.model)
 
@@ -550,7 +550,7 @@ def main(args):
             optimizer_lr_list[start_epoch].step()
 
         wandb.log({"Grand_Loss_epoch_" + str(start_epoch): grand_loss.detach().cpu(),
-                   "Start_Epoch": start_epoch}, step=it)
+                   "Start_Epoch": start_epoch_cap}, step=it)
 
         # Detect Overfitting and Level Up
         test_loss_length = len(test_loss)
@@ -562,20 +562,21 @@ def main(args):
             if not trending:
                 trending = r < -(args.sigma * sigma)
                 if trending:
-                    print('[Start Trending] --- Correlation Coefficient:', r)
+                    print('[Start Trending] --- Correlation Coefficient:', r, "+" * 16)
                     starting_point = test_loss_length
                 if not trending and test_loss_length % args.lr_img_decay_interval == 0:
                     # If model didn't produce a global minimum on right half of test data, decrease lr_img by 10%
                     for param_group in optimizer_img.param_groups:
                         param_group['lr'] *= 0.9
                     wandb.log({"Image Learning Rate": param_group['lr']}, step=it)
+                    print('[LR Decay] --- Image Learning Rate:', param_group['lr'], "|" * 16)
                     if param_group['lr'] < args.lr_img * 0.05:
                         # Early Stopping Criteria
                         print('Test Loss stop improving. End with early stopping!')
                         exit(0)
             if trending and (np.mean(test_loss[-(2 * s):-s]) <= np.mean(test_loss[-s:]) or test_loss_length - starting_point >= args.max_trending_time) or r > 3 * sigma:
                 # Reset Stat and Level Up
-                print('[Trending Ends] --- Current Epoch Length:',test_loss_length, 'Interval Size:', s)
+                print('[Trending Ends] --- Current Epoch Length:',test_loss_length, 'Interval Size:', s, "=" * 16)
                 test_loss = []
                 min_test = float('inf')
                 trending = False
@@ -585,11 +586,11 @@ def main(args):
                     optimizer_lr = torch.optim.SGD([log_syn_lr], lr=args.lr_lr, momentum=0.5)
                     log_syn_lr_list.append(log_syn_lr)
                     optimizer_lr_list.append(optimizer_lr)
-            if test_loss_length % 100 == 0:
+            if test_loss_length % 50 == 0:
                 if trending:
-                    print('[Still Trending] --- CorrCoef:', r, "Length:", test_loss_length, 'Interval Size:', s)
+                    print('[Still Trending] --- CorrCoef:', r, "Length:", test_loss_length, 'Interval Size:', s, "~" * 16)
                 else:
-                    print("[Not Trending] --- CorrCoef:", r, "Sigma Threshold:", - args.sigma * sigma, "Length:", test_loss_length)
+                    print("[Not Trending] --- CorrCoef:", r, "Sigma Threshold:", - args.sigma * sigma, "Length:", test_loss_length, "-" * 16)
 
 
         for _ in student_params:
@@ -667,12 +668,12 @@ if __name__ == '__main__':
 
     parser.add_argument('--init_epoch', type=int, default=1, help="starting point of stage wise distillation")
     parser.add_argument('--fix_lr_teacher', action='store_true', help="Fix the lr_teach if you are confident")
-    parser.add_argument('--prev_iter', type=int, default=1, help="Resume training start from previous iter")
+    parser.add_argument('--prev_iter', type=int, default=0, help="Resume training start from previous iter")
     parser.add_argument('--wandb_name', type=str, default=None, help="Custom WanDB name")
     parser.add_argument('--load_syn_image', type=str, default=None, help="previous syn image")
     # Stage Distillation Hyperparameter
     parser.add_argument('--min_test_length', type=int, default=100, help="Minimum iteration for each epoch")
-    parser.add_argument('--sigma', type=int, default=5, help="CorrCoef Threshold for starting trending")
+    parser.add_argument('--sigma', type=int, default=3, help="CorrCoef Threshold for starting trending")
     parser.add_argument('--pad_interval', type=int, default=10, help="[0, minimum_test_length // 2]")
     parser.add_argument('--max_trending_time', type=int, default=1000, help="Maximum duration for stay in trend")
     parser.add_argument('--lr_img_decay_interval', type=int, default=100, help="Decrease lr_img by 0.1 after a while")
