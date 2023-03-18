@@ -32,7 +32,7 @@ def main(args):
     print("CUDNN STATUS: {}".format(torch.backends.cudnn.enabled))
 
     args.dsa = True if args.dsa == 'True' else False
-    os.environ['CUDA_VISIBLE_DEVICES'] = '3'
+    # os.environ['CUDA_VISIBLE_DEVICES'] = '3'
     args.device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
     eval_it_pool = np.arange(0, args.Iteration + 1, args.eval_it).tolist()
