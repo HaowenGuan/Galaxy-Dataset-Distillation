@@ -32,7 +32,8 @@ def main(args):
     print("CUDNN STATUS: {}".format(torch.backends.cudnn.enabled))
 
     args.dsa = True if args.dsa == 'True' else False
-    # os.environ['CUDA_VISIBLE_DEVICES'] = '3'
+    if args.cuda_gpu:
+        os.environ['CUDA_VISIBLE_DEVICES'] = args.cuda_gpu
     args.device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
     eval_it_pool = np.arange(0, args.Iteration + 1, args.eval_it).tolist()
@@ -682,6 +683,7 @@ if __name__ == '__main__':
     parser.add_argument('--max_duration', type=int, default=1000, help="Maximum duration for stay in one trend")
     parser.add_argument('--warm_up', type=int, default=100, help="Warm up noise init before start stage distillation")
     parser.add_argument('--method', type=str, default=None, help="stage-MTT | original-MTT")
+    parser.add_argument('--cuda_gpu', type=str, default=None, help="specify which GPU(s) to use")
 
     args = parser.parse_args()
 
