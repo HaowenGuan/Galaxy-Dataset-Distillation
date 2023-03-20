@@ -88,6 +88,8 @@ def main(args):
         args.batch_syn = num_classes * args.ipc
 
     args.distributed = torch.cuda.device_count() > 1 and args.ipc != 1
+    if args.distributed:
+        print('Using multiple GPUs', torch.cuda.device_count())
     # args.distributed = False
     print("--------------------------------------------------------------", args.distributed)
 
@@ -419,7 +421,7 @@ def main(args):
                 random.shuffle(buffer)
 
         # Using Next Epoch as Test Set------------------
-        if it >= args.warm_up:
+        if args.pix_init == 'real' or it >= args.warm_up:
             starting_params = expert_trajectory[start_epoch_cap]
             target_params = expert_trajectory[start_epoch_cap + args.expert_epochs]
             target_params = torch.cat([p.data.to(args.device).reshape(-1) for p in target_params], 0)
