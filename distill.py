@@ -421,64 +421,63 @@ def main(args):
                 random.shuffle(buffer)
 
         # Using Next Epoch as Test Set------------------
-        if args.pix_init == 'real' or it >= args.warm_up:
-            starting_params = expert_trajectory[start_epoch_cap]
-            target_params = expert_trajectory[start_epoch_cap + args.expert_epochs]
-            target_params = torch.cat([p.data.to(args.device).reshape(-1) for p in target_params], 0)
-            student_params = torch.cat([p.data.to(args.device).reshape(-1) for p in starting_params], 0).requires_grad_(True)
-            starting_params = torch.cat([p.data.to(args.device).reshape(-1) for p in starting_params], 0)
+        starting_params = expert_trajectory[start_epoch_cap]
+        target_params = expert_trajectory[start_epoch_cap + args.expert_epochs]
+        target_params = torch.cat([p.data.to(args.device).reshape(-1) for p in target_params], 0)
+        student_params = torch.cat([p.data.to(args.device).reshape(-1) for p in starting_params], 0).requires_grad_(True)
+        starting_params = torch.cat([p.data.to(args.device).reshape(-1) for p in starting_params], 0)
 
-            syn_images = image_syn
-            y_hat = label_syn.to(args.device)
-            indices_chunks = []
+        syn_images = image_syn
+        y_hat = label_syn.to(args.device)
+        indices_chunks = []
 
-            for step in range(args.syn_steps):
+        for step in range(args.syn_steps):
 
-                if not indices_chunks:
-                    indices = torch.randperm(len(syn_images))
-                    indices_chunks = list(torch.split(indices, args.batch_syn))
+            if not indices_chunks:
+                indices = torch.randperm(len(syn_images))
+                indices_chunks = list(torch.split(indices, args.batch_syn))
 
-                these_indices = indices_chunks.pop()
+            these_indices = indices_chunks.pop()
 
-                x = syn_images[these_indices]
-                this_y = y_hat[these_indices]
+            x = syn_images[these_indices]
+            this_y = y_hat[these_indices]
 
-                if args.texture:
-                    x = torch.cat([torch.stack([torch.roll(im, (torch.randint(im_size[0]*args.canvas_size, (1,)), torch.randint(im_size[1]*args.canvas_size, (1,))), (1,2))[:,:im_size[0],:im_size[1]] for im in x]) for _ in range(args.canvas_samples)])
-                    this_y = torch.cat([this_y for _ in range(args.canvas_samples)])
+            if args.texture:
+                x = torch.cat([torch.stack([torch.roll(im, (torch.randint(im_size[0]*args.canvas_size, (1,)), torch.randint(im_size[1]*args.canvas_size, (1,))), (1,2))[:,:im_size[0],:im_size[1]] for im in x]) for _ in range(args.canvas_samples)])
+                this_y = torch.cat([this_y for _ in range(args.canvas_samples)])
 
-                if args.dsa and (not args.no_aug):
-                    x = DiffAugment(x, args.dsa_strategy, param=args.dsa_param)
+            if args.dsa and (not args.no_aug):
+                x = DiffAugment(x, args.dsa_strategy, param=args.dsa_param)
 
-                if args.distributed:
-                    forward_params = student_params.unsqueeze(0).expand(torch.cuda.device_count(), -1)
-                else:
-                    forward_params = student_params
-                x = student_net(x, flat_param=forward_params)
-                ce_loss = criterion(x, this_y)
+            if args.distributed:
+                forward_params = student_params.unsqueeze(0).expand(torch.cuda.device_count(), -1)
+            else:
+                forward_params = student_params
+            x = student_net(x, flat_param=forward_params)
+            ce_loss = criterion(x, this_y)
 
-                grad = torch.autograd.grad(ce_loss, student_params, create_graph=True)[0]
+            grad = torch.autograd.grad(ce_loss, student_params, create_graph=True)[0]
 
-                student_params = student_params - test_syn_lr * grad
+            student_params = student_params - test_syn_lr * grad
 
-            param_loss = torch.tensor(0.0).to(args.device)
-            param_dist = torch.tensor(0.0).to(args.device)
+        param_loss = torch.tensor(0.0).to(args.device)
+        param_dist = torch.tensor(0.0).to(args.device)
 
-            param_loss += torch.nn.functional.mse_loss(student_params, target_params, reduction="sum")
-            param_dist += torch.nn.functional.mse_loss(starting_params, target_params, reduction="sum")
+        param_loss += torch.nn.functional.mse_loss(student_params, target_params, reduction="sum")
+        param_dist += torch.nn.functional.mse_loss(starting_params, target_params, reduction="sum")
 
-            param_loss /= num_params
-            param_dist /= num_params
+        param_loss /= num_params
+        param_dist /= num_params
 
-            param_loss /= param_dist
+        param_loss /= param_dist
 
-            test_grand_loss = float(param_loss.detach().cpu())
-            test_loss.append(test_grand_loss)
-            if test_loss[-1] < min_test:
-                min_test = test_loss[-1]
-                min_test_idx = it
-            wandb.log({"Next_Epoch_Test_Loss": test_loss[-1]}, step=it)
-            del param_loss, param_dist, test_grand_loss
+        test_grand_loss = float(param_loss.detach().cpu())
+        test_loss.append(test_grand_loss)
+        if test_loss[-1] < min_test:
+            min_test = test_loss[-1]
+            min_test_idx = it
+        wandb.log({"Next_Epoch_Test_Loss": test_loss[-1]}, step=it)
+        del param_loss, param_dist, test_grand_loss
         #-----------------------------------------------
 
         starting_params = expert_trajectory[start_epoch]
@@ -683,7 +682,6 @@ if __name__ == '__main__':
     parser.add_argument('--sigma', type=int, default=5, help="CorrCoef Threshold for starting trending")
     parser.add_argument('--pad_interval', type=int, default=10, help="[0, minimum_test_length // 2]")
     parser.add_argument('--max_duration', type=int, default=1000, help="Maximum duration for stay in one trend")
-    parser.add_argument('--warm_up', type=int, default=100, help="Warm up noise init before start stage distillation")
     parser.add_argument('--method', type=str, default=None, help="stage-MTT | original-MTT")
     parser.add_argument('--cuda_gpu', type=str, default=None, help="specify which GPU(s) to use")
 
