@@ -16,15 +16,17 @@ import matplotlib.pyplot as plt
 from reparam_module import ReparamModule
 
 import warnings
+
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
-def main(args):
 
+def main(args):
     if args.zca and args.texture:
         raise AssertionError("Cannot use zca and texture together")
 
     if args.texture and args.pix_init == "real":
-        print("WARNING: Using texture with real initialization will take a very long time to smooth out the boundaries between images.")
+        print(
+            "WARNING: Using texture with real initialization will take a very long time to smooth out the boundaries between images.")
 
     if args.max_experts is not None and args.max_files is not None:
         args.total_experts = args.max_experts * args.max_files
@@ -37,14 +39,15 @@ def main(args):
     args.device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
     eval_it_pool = np.arange(0, args.Iteration + 1, args.eval_it).tolist()
-    channel, im_size, num_classes, class_names, mean, std, dst_train, dst_test, testloader, loader_train_dict, class_map, class_map_inv = get_dataset(args.dataset, args.data_path, args.batch_real, args.subset, args=args)
+    channel, im_size, num_classes, class_names, mean, std, dst_train, dst_test, testloader, loader_train_dict, class_map, class_map_inv = get_dataset(
+        args.dataset, args.data_path, args.batch_real, args.subset, args=args)
     model_eval_pool = get_eval_pool(args.eval_mode, args.model, args.model)
 
     im_res = im_size[0]
 
     args.im_size = im_size
 
-    accs_all_exps = dict() # record performances of all experiments
+    accs_all_exps = dict()  # record performances of all experiments
     for key in model_eval_pool:
         accs_all_exps[key] = []
 
@@ -93,7 +96,6 @@ def main(args):
     # args.distributed = False
     print("--------------------------------------------------------------", args.distributed)
 
-
     print('Hyper-parameters: \n', args.__dict__)
     print('Evaluation model pool: ', model_eval_pool)
 
@@ -114,15 +116,15 @@ def main(args):
 
     class_weights = []
     for c in range(num_classes):
-        class_weights.append(1-len(indices_class[c])/len(labels_all))
-        print('class c = %d: %d real images'%(c, len(indices_class[c])))
+        class_weights.append(1 - len(indices_class[c]) / len(labels_all))
+        print('class c = %d: %d real images' % (c, len(indices_class[c])))
 
     print("Class Weights:", class_weights)
     class_weights = torch.tensor(class_weights).to(args.device)
 
     for ch in range(channel):
-        print('real images channel %d, mean = %.4f, std = %.4f'%(ch, torch.mean(images_all[:, ch]), torch.std(images_all[:, ch])))
-
+        print('real images channel %d, mean = %.4f, std = %.4f' % (
+            ch, torch.mean(images_all[:, ch]), torch.std(images_all[:, ch])))
 
     def get_images(c, n):  # get random n images from class c
         idx_shuffle = np.random.permutation(indices_class[c])[:n]
@@ -135,13 +137,14 @@ def main(args):
     label_syn = torch.tensor([np.ones(args.ipc, dtype=np.int_) * i for i in range(num_classes)], dtype=torch.long,
                              requires_grad=False, device=args.device).view(-1)
     if args.texture:
-        image_syn = torch.randn(size=(num_classes * args.ipc, channel, im_size[0]*args.canvas_size, im_size[1]*args.canvas_size), dtype=torch.float)
+        image_syn = torch.randn(
+            size=(num_classes * args.ipc, channel, im_size[0] * args.canvas_size, im_size[1] * args.canvas_size),
+            dtype=torch.float)
     else:
         if args.load_syn_image:
             image_syn = torch.load(os.path.join(".", "logged_files", args.dataset, args.load_syn_image))
         else:
             image_syn = torch.randn(size=(num_classes * args.ipc, channel, im_size[0], im_size[1]), dtype=torch.float)
-
 
     # syn_lr = torch.tensor(args.lr_teacher).to(args.device)
 
@@ -159,7 +162,6 @@ def main(args):
     else:
         print('initialize synthetic data from random noise')
 
-
     ''' training '''
     image_syn = image_syn.detach().to(args.device).requires_grad_(True)
     # log_syn_lr = torch.log(syn_lr).detach().to(args.device).requires_grad_(True)
@@ -168,7 +170,7 @@ def main(args):
     optimizer_img.zero_grad()
 
     criterion = nn.CrossEntropyLoss().to(args.device)
-    print('%s training begins'%get_time())
+    print('%s training begins' % get_time())
 
     expert_dir = os.path.join(args.buffer_path, args.dataset)
     if args.dataset == "ImageNet":
@@ -216,9 +218,7 @@ def main(args):
     # stage match trajectory #0 --------------------
     start_epoch_cap = args.init_epoch
     test_loss = []
-    min_test = float('inf')
-    min_test_idx = 0
-    trending = False
+    passed = False
     fine_tuning = False
     print("Wandb Job Name:", wandb.run.name)
     print("Input lr_teacher List:", args.lr_teacher)
@@ -243,7 +243,7 @@ def main(args):
             optimizer_lr_list.append(optimizer_lr)
     # ----------------------------------------------
 
-    for it in range(args.prev_iter, args.Iteration+1):
+    for it in range(args.prev_iter, args.Iteration + 1):
         # stage match trajectory #1 --------------------
         start_epoch = it % int(start_epoch_cap)
         syn_lr = torch.exp(log_syn_lr_list[start_epoch])
@@ -254,7 +254,8 @@ def main(args):
         ''' Evaluate synthetic data '''
         if it in eval_it_pool:
             for model_eval in model_eval_pool:
-                print('-------------------------\nEvaluation\nmodel_train = %s, model_eval = %s, iteration = %d'%(args.model, model_eval, it))
+                print('-------------------------\nEvaluation\nmodel_train = %s, model_eval = %s, iteration = %d' % (
+                    args.model, model_eval, it))
                 if args.dsa:
                     print('DSA augmentation strategy: \n', args.dsa_strategy)
                     print('DSA augmentation parameters: \n', args.dsa_param.__dict__)
@@ -263,16 +264,19 @@ def main(args):
 
                 accs_test = []
                 accs_train = []
-                
-                total_train_cf, total_test_cf = np.array([[0] * num_classes for _ in range(num_classes)]), np.array([[0] * num_classes for _ in range(num_classes)])
-                
+
+                total_train_cf, total_test_cf = np.array([[0] * num_classes for _ in range(num_classes)]), np.array(
+                    [[0] * num_classes for _ in range(num_classes)])
+
                 for it_eval in range(args.num_eval):
-                    net_eval = get_network(model_eval, channel, num_classes, im_size).to(args.device) # get a random model
+                    net_eval = get_network(model_eval, channel, num_classes, im_size).to(
+                        args.device)  # get a random model
 
                     eval_labs = label_syn
                     with torch.no_grad():
                         image_save = image_syn
-                    image_syn_eval, label_syn_eval = copy.deepcopy(image_save.detach()), copy.deepcopy(eval_labs.detach()) # avoid any unaware modification
+                    image_syn_eval, label_syn_eval = copy.deepcopy(image_save.detach()), copy.deepcopy(
+                        eval_labs.detach())  # avoid any unaware modification
 
                     # [Using the last epoch's lr to do evaluation]
                     # args.lr_net = torch.exp(log_syn_lr_list[-1]).item() * 5
@@ -282,12 +286,15 @@ def main(args):
                     for i in log_syn_lr_list:
                         args.lr_net.append(torch.exp(i).item())
 
-                    _, acc_train, acc_test, train_cf, test_cf = evaluate_synset(it, it_eval, net_eval, num_classes, image_syn_eval, label_syn_eval, dst_train, dst_test, trainloader, testloader, args, texture=args.texture)
+                    _, acc_train, acc_test, train_cf, test_cf = evaluate_synset(it, it_eval, net_eval, num_classes,
+                                                                                image_syn_eval, label_syn_eval,
+                                                                                dst_train, dst_test, trainloader,
+                                                                                testloader, args, texture=args.texture)
                     total_train_cf += train_cf
                     total_test_cf += test_cf
                     accs_test.append(acc_test)
                     accs_train.append(acc_train)
-                
+
                 accs_test = np.array(accs_test)
                 accs_train = np.array(accs_train)
                 acc_test_mean = np.mean(accs_test)
@@ -298,8 +305,10 @@ def main(args):
                     best_acc[model_eval] = acc_train_mean
                     best_std[model_eval] = acc_train_std
                     save_this_it = True
-                print('Evaluate %d random %s, train set mean = %.4f std = %.4f'%(len(accs_train), model_eval, acc_train_mean, acc_train_std))
-                print('Evaluate %d random %s, test set mean = %.4f std = %.4f\n-------------------------'%(len(accs_test), model_eval, acc_test_mean, acc_test_std))
+                print('Evaluate %d random %s, train set mean = %.4f std = %.4f' % (
+                    len(accs_train), model_eval, acc_train_mean, acc_train_std))
+                print('Evaluate %d random %s, test set mean = %.4f std = %.4f\n-------------------------' % (
+                    len(accs_test), model_eval, acc_test_mean, acc_test_std))
                 wandb.log({'Accuracy/{}'.format(model_eval): acc_test_mean}, step=it)
                 wandb.log({'Accuracy/{}'.format(model_eval + "_Train"): acc_train_mean}, step=it)
                 wandb.log({'Max_Accuracy/{}'.format(model_eval): best_acc[model_eval]}, step=it)
@@ -320,6 +329,7 @@ def main(args):
                     plt.ylabel("True Label")
                     plt.savefig('./cf_matrix_distill/cf_iteration_{}_{}.png'.format(it, name))
                     wandb.log({"cf_iteration": wandb.Image(plt)}, step=it)
+                    plt.close()
 
         if it in eval_it_pool and (save_this_it or it % 1000 == 0):
             printing_lr_list = []
@@ -355,12 +365,13 @@ def main(args):
                     for clip_val in [2.5]:
                         std = torch.std(image_save)
                         mean = torch.mean(image_save)
-                        upsampled = torch.clip(image_save, min=mean-clip_val*std, max=mean+clip_val*std)
+                        upsampled = torch.clip(image_save, min=mean - clip_val * std, max=mean + clip_val * std)
                         if args.dataset != "ImageNet":
                             upsampled = torch.repeat_interleave(upsampled, repeats=4, dim=2)
                             upsampled = torch.repeat_interleave(upsampled, repeats=4, dim=3)
                         grid = torchvision.utils.make_grid(upsampled, nrow=10, normalize=True, scale_each=True)
-                        wandb.log({"Clipped_Synthetic_Images/std_{}".format(clip_val): wandb.Image(torch.nan_to_num(grid.detach().cpu()))}, step=it)
+                        wandb.log({"Clipped_Synthetic_Images/std_{}".format(clip_val): wandb.Image(
+                            torch.nan_to_num(grid.detach().cpu()))}, step=it)
 
                     if args.zca:
                         image_save = image_save.to(args.device)
@@ -375,7 +386,9 @@ def main(args):
                             upsampled = torch.repeat_interleave(upsampled, repeats=4, dim=3)
                         grid = torchvision.utils.make_grid(upsampled, nrow=10, normalize=True, scale_each=True)
                         wandb.log({"Reconstructed_Images": wandb.Image(torch.nan_to_num(grid.detach().cpu()))}, step=it)
-                        wandb.log({'Reconstructed_Pixels': wandb.Histogram(torch.nan_to_num(image_save.detach().cpu()))}, step=it)
+                        wandb.log(
+                            {'Reconstructed_Pixels': wandb.Histogram(torch.nan_to_num(image_save.detach().cpu()))},
+                            step=it)
 
                         for clip_val in [2.5]:
                             std = torch.std(image_save)
@@ -390,7 +403,8 @@ def main(args):
 
         wandb.log({"Synthetic_LR_" + str(start_epoch): syn_lr.detach().cpu()}, step=it)
 
-        student_net = get_network(args.model, channel, num_classes, im_size, dist=False).to(args.device)  # get a random model
+        student_net = get_network(args.model, channel, num_classes, im_size, dist=False).to(
+            args.device)  # get a random model
 
         student_net = ReparamModule(student_net)
 
@@ -425,7 +439,8 @@ def main(args):
             starting_params = expert_trajectory[start_epoch_cap]
             target_params = expert_trajectory[start_epoch_cap + args.expert_epochs]
             target_params = torch.cat([p.data.to(args.device).reshape(-1) for p in target_params], 0)
-            student_params = torch.cat([p.data.to(args.device).reshape(-1) for p in starting_params], 0).requires_grad_(True)
+            student_params = torch.cat([p.data.to(args.device).reshape(-1) for p in starting_params], 0).requires_grad_(
+                True)
             starting_params = torch.cat([p.data.to(args.device).reshape(-1) for p in starting_params], 0)
 
             syn_images = image_syn
@@ -444,7 +459,10 @@ def main(args):
                 this_y = y_hat[these_indices]
 
                 if args.texture:
-                    x = torch.cat([torch.stack([torch.roll(im, (torch.randint(im_size[0]*args.canvas_size, (1,)), torch.randint(im_size[1]*args.canvas_size, (1,))), (1,2))[:,:im_size[0],:im_size[1]] for im in x]) for _ in range(args.canvas_samples)])
+                    x = torch.cat([torch.stack([torch.roll(im, (torch.randint(im_size[0] * args.canvas_size, (1,)),
+                                                                torch.randint(im_size[1] * args.canvas_size, (1,))),
+                                                           (1, 2))[:, :im_size[0], :im_size[1]] for im in x]) for _ in
+                                   range(args.canvas_samples)])
                     this_y = torch.cat([this_y for _ in range(args.canvas_samples)])
 
                 if args.dsa and (not args.no_aug):
@@ -474,18 +492,16 @@ def main(args):
 
             test_grand_loss = float(param_loss.detach().cpu())
             test_loss.append(test_grand_loss)
-            if test_loss[-1] < min_test:
-                min_test = test_loss[-1]
-                min_test_idx = it
             wandb.log({"Next_Epoch_Test_Loss": test_loss[-1]}, step=it)
             del param_loss, param_dist, test_grand_loss
-        #-----------------------------------------------
+        # -----------------------------------------------
 
         starting_params = expert_trajectory[start_epoch]
         target_params = expert_trajectory[start_epoch + args.expert_epochs]
         target_params = torch.cat([p.data.to(args.device).reshape(-1) for p in target_params], 0)
 
-        student_params = [torch.cat([p.data.to(args.device).reshape(-1) for p in starting_params], 0).requires_grad_(True)]
+        student_params = [
+            torch.cat([p.data.to(args.device).reshape(-1) for p in starting_params], 0).requires_grad_(True)]
 
         starting_params = torch.cat([p.data.to(args.device).reshape(-1) for p in starting_params], 0)
 
@@ -505,12 +521,15 @@ def main(args):
 
             these_indices = indices_chunks.pop()
 
-
             x = syn_images[these_indices]
             this_y = y_hat[these_indices]
 
             if args.texture:
-                x = torch.cat([torch.stack([torch.roll(im, (torch.randint(im_size[0]*args.canvas_size, (1,)), torch.randint(im_size[1]*args.canvas_size, (1,))), (1,2))[:,:im_size[0],:im_size[1]] for im in x]) for _ in range(args.canvas_samples)])
+                x = torch.cat([torch.stack([torch.roll(im, (
+                    torch.randint(im_size[0] * args.canvas_size, (1,)),
+                    torch.randint(im_size[1] * args.canvas_size, (1,))),
+                                                       (1, 2))[:, :im_size[0], :im_size[1]] for im in x]) for _ in
+                               range(args.canvas_samples)])
                 this_y = torch.cat([this_y for _ in range(args.canvas_samples)])
 
             if args.dsa and (not args.no_aug):
@@ -527,7 +546,6 @@ def main(args):
 
             student_params.append(student_params[-1] - syn_lr * grad)
 
-
         param_loss = torch.tensor(0.0).to(args.device)
         param_dist = torch.tensor(0.0).to(args.device)
 
@@ -536,7 +554,6 @@ def main(args):
 
         param_loss_list.append(param_loss)
         param_dist_list.append(param_dist)
-
 
         param_loss /= num_params
         param_dist /= num_params
@@ -557,41 +574,36 @@ def main(args):
         wandb.log({"Grand_Loss_epoch_" + str(start_epoch): grand_loss.detach().cpu(),
                    "Start_Epoch": start_epoch_cap - 1}, step=it)
 
-        # Detect Overfitting and Level Up
-        test_loss_length = len(test_loss)
-        if test_loss_length >= args.min_test_length and test_loss_length % 10 == 0:
-            r = np.corrcoef(test_loss, list(range(test_loss_length)))[0, 1]
-            s = test_loss_length - int(test_loss_length // 2 + abs(r) * (test_loss_length // 2 - args.pad_interval))
-            # s = int((1 - abs(r)) * test_loss_length // 2) # If args.pad_interval == 0, above and this is equivalent
-            sigma = np.sqrt(1 / (test_loss_length - 2))
-            if not trending and not fine_tuning:
-                if test_loss_length > args.max_duration:
-                    fine_tuning = True
+        # Stage Distillation Algorithm and Level Up
+        cur_duration = len(test_loss)
+        if cur_duration >= args.min_duration and cur_duration % 10 == 0:
+            r = np.corrcoef(test_loss, list(range(cur_duration)))[0, 1]
+            sigma = np.sqrt(1 / (cur_duration - 2))
+            if not passed and not fine_tuning:
+                fine_tuning = cur_duration > args.max_duration
                 if not fine_tuning:
-                    trending = r < -(args.sigma * sigma)
-                if trending:
-                    print('[Start Trending] --- Correlation Coefficient:', r, 'epoch', start_epoch_cap - 1, "+" * 16)
-            if fine_tuning and test_loss_length % 50 == 0:
-                # If model didn't produce a global minimum on right half of test data, decrease lr_img by 10%
+                    passed = r < -(args.sigma * sigma)
+            if fine_tuning and it % 50 == 0:
                 for param_group in optimizer_img.param_groups:
-                    param_group['lr'] *= 0.9
+                    param_group['lr'] *= 0.8
                 wandb.log({"Image Learning Rate": param_group['lr']}, step=it)
-                print('[LR Decay] --- Image Learning Rate:', param_group['lr'], "|" * 16)
+                statement = '{:^70}'.format('[LR Decaying] --- Image Learning Rate: {}'.format(param_group['lr']))
+                print("!" * 16, statement, "!" * 16)
                 if param_group['lr'] < args.lr_img * 0.1:
-                    # Early Stopping Criteria
+                    # Automatically Ending the algorithm after fine-tuning
                     print('Test Loss stop improving. End with early stopping!')
                     exit(0)
-            if not fine_tuning and test_loss_length % 50 == 0:
-                if trending:
-                    print('[Still Trending] --- CorrCoef:', r, "Length:", test_loss_length, 'Interval Size:', s, "~" * 16)
-                else:
-                    print("[Not Trending] --- CorrCoef:", r, "Sigma Threshold:", - args.sigma * sigma, "Length:", test_loss_length, "-" * 16)
-            if trending and (np.mean(test_loss[-(2 * s):-s]) <= np.mean(test_loss[-s:]) or test_loss_length >= args.max_duration) or r > 3 * sigma:
-                # Reset Stat and Level Up
-                print('[Trending Ends] --- Current Epoch Length:',test_loss_length, 'Interval Size:', s, "=" * 16)
+            elif not passed and cur_duration % 20 == 0:
+                statement = '[Pending] --- CorrCoef: {} Threshold: {} Length: {}'
+                statement = '{:^70}'.format(statement.format(round(r, 5), round(-args.sigma * sigma, 5), cur_duration))
+                print("~" * 16, statement, "~" * 16)
+            elif passed or r > 3 * sigma:
+                # Reset Stat and Leveling Up
+                # r > 3 * sigma is the condition for edge case that image is overfitting training epoch
+                statement = '{:^70}'.format('[Leveling Up] --- Current Epoch Length: {}'.format(cur_duration))
+                print("=" * 16, statement, "=" * 16)
                 test_loss = []
-                min_test = float('inf')
-                trending = False
+                passed = False
                 if start_epoch_cap + 1 <= args.max_start_epoch:
                     start_epoch_cap += 1
                     log_syn_lr = log_syn_lr_list[-1].clone().detach().to(args.device).requires_grad_(True)
@@ -599,11 +611,10 @@ def main(args):
                     log_syn_lr_list.append(log_syn_lr)
                     optimizer_lr_list.append(optimizer_lr)
 
-
         for _ in student_params:
             del _
 
-        if it%10 == 0:
+        if it % 10 == 0:
             print('%s iter = %04d, loss = %.4f' % (get_time(), it, grand_loss.item()))
 
     wandb.finish()
@@ -614,7 +625,8 @@ if __name__ == '__main__':
 
     parser.add_argument('--dataset', type=str, default='CIFAR10', help='dataset')
 
-    parser.add_argument('--subset', type=str, default='imagenette', help='ImageNet subset. This only does anything when --dataset=ImageNet')
+    parser.add_argument('--subset', type=str, default='imagenette',
+                        help='ImageNet subset. This only does anything when --dataset=ImageNet')
 
     parser.add_argument('--model', type=str, default='ConvNet', help='model')
 
@@ -627,15 +639,14 @@ if __name__ == '__main__':
 
     parser.add_argument('--eval_it', type=int, default=100, help='how often to evaluate')
 
-    parser.add_argument('--epoch_eval_train', type=int, default=1000, help='epochs to train a model with synthetic data')
+    parser.add_argument('--epoch_eval_train', type=int, default=1000,
+                        help='epochs to train a model with synthetic data')
     parser.add_argument('--Iteration', type=int, default=4000, help='how many distillation steps to perform')
 
     parser.add_argument('--lr_img', type=float, default=1000, help='learning rate for updating synthetic images')
     parser.add_argument('--lr_lr', type=float, default=1e-05, help='learning rate for updating... learning rate')
     # parser.add_argument('--lr_teacher', type=float, default=0.01, help='initialization for synthetic learning rate')
     parser.add_argument('--lr_teacher', '--list', nargs='+', help='<Required> Set flag', required=True)
-
-    parser.add_argument('--lr_init', type=float, default=0.01, help='how to init lr (alpha)')
 
     parser.add_argument('--batch_real', type=int, default=256, help='batch size for real data')
     parser.add_argument('--batch_syn', type=int, default=None, help='should only use this if you run out of VRAM')
@@ -655,11 +666,13 @@ if __name__ == '__main__':
 
     parser.add_argument('--expert_epochs', type=int, default=3, help='how many expert epochs the target params are')
     parser.add_argument('--syn_steps', type=int, default=20, help='how many steps to take on synthetic data.')
-    parser.add_argument('--max_start_epoch', type=int, default=29, help='max epoch we can start at. It must be smaller than buffer epoch.')
+    parser.add_argument('--max_start_epoch', type=int, default=29,
+                        help='max epoch we can start at. It must be smaller than buffer epoch.')
 
     parser.add_argument('--zca', action='store_true', help="do ZCA whitening")
 
-    parser.add_argument('--load_all', action='store_true', help="only use if you can fit all expert trajectories into RAM")
+    parser.add_argument('--load_all', action='store_true',
+                        help="only use if you can fit all expert trajectories into RAM")
 
     parser.add_argument('--no_aug', type=bool, default=False, help='this turns off diff aug during distillation')
 
@@ -667,9 +680,10 @@ if __name__ == '__main__':
     parser.add_argument('--canvas_size', type=int, default=2, help='size of synthetic canvas')
     parser.add_argument('--canvas_samples', type=int, default=1, help='number of canvas samples per iteration')
 
-
-    parser.add_argument('--max_files', type=int, default=None, help='number of expert files to read (leave as None unless doing ablations)')
-    parser.add_argument('--max_experts', type=int, default=None, help='number of experts to read per file (leave as None unless doing ablations)')
+    parser.add_argument('--max_files', type=int, default=None,
+                        help='number of expert files to read (leave as None unless doing ablations)')
+    parser.add_argument('--max_experts', type=int, default=None,
+                        help='number of experts to read per file (leave as None unless doing ablations)')
 
     parser.add_argument('--force_save', action='store_true', help='this will save images for 50ipc')
 
@@ -678,11 +692,10 @@ if __name__ == '__main__':
     parser.add_argument('--prev_iter', type=int, default=0, help="Resume training start from previous iter")
     parser.add_argument('--wandb_name', type=str, default=None, help="Custom WanDB name")
     parser.add_argument('--load_syn_image', type=str, default=None, help="previous syn image")
-    # Stage Distillation Hyperparameter
-    parser.add_argument('--min_test_length', type=int, default=100, help="Minimum iteration for each epoch")
+    # Stage Distillation Hyper-parameter
+    parser.add_argument('--min_duration', type=int, default=200, help="Minimum iteration for each epoch")
+    parser.add_argument('--max_duration', type=int, default=1000, help="Maximum iteration for stay in one epoch")
     parser.add_argument('--sigma', type=int, default=5, help="CorrCoef Threshold for starting trending")
-    parser.add_argument('--pad_interval', type=int, default=10, help="[1, minimum_test_length // 2]")
-    parser.add_argument('--max_duration', type=int, default=1000, help="Maximum duration for stay in one trend")
     parser.add_argument('--method', type=str, default=None, help="stage-MTT | original-MTT")
     parser.add_argument('--cuda_gpu', type=str, default=None, help="specify which GPU(s) to use")
 
