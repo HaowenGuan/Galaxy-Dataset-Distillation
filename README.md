@@ -24,114 +24,37 @@ Below is our current best distilled **one per class synthetic images**. The ACC 
 
 ![100 distill](docs/distill_100_per_class_0.46_ACC.png)
 
-
 ### Distillation Hyperparameter
 
-* Stage Distillation starting range: `[0, init_epoch)`
+| Argument Example                    | Description                                                                                                 |
+| ----------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `--init_epoch=1`                    | Stage Distillation starting epoch range, (recommending value: 1): `[0, init_epoch)`                         |
+| `--lr_teacher 0.001 --init_epoch=1` | `Synthetic lr`, its length should match the value of `init_epoch`, split the values by space: `list[float]` |
+| `--dataset=CIFAR10`                 | Dataset Name: `str`                                                                                         |
+| `--ipc=1`                           | Distillation Image Per Class: `int`                                                                         |
+| `--syn_steps=15`                    | Synthetic Step: `int`, usually the larger, the better, uses more GPU memory and slower.                     |
+| `--expert_epochs=1`                 | Refer to MTT-Distillation. For this algorithm, Fix it to 1                                                  |
+| `--max_start_epoch=29`              | Maximum epoch for stage distillation: `int`. Use the number of epoch in buffer minus 1.                     |
+| `--lr_img=1000`                     | Learning rate for updating synthetic image: `int`                                                           |
+| `--lr_lr=0.01`                      | Learning rate for updating lr_teacher: `float`                                                              |
+| `--pix_init=noise`                  | Synthetic image initialization. Choose from: {noise/real}                                                   |
+| `--buffer_path={path}`              | Buffer path: `str`                                                                                          |
+| `--data_path={path_to_dataset}`     | Dataset Path: `str`                                                                                         |
+| `--Iteration=10000`                 | Maximum number of iteration: `int`                                                                          |
+| `--eval_it=200`                     | Evaluation interval: `int`                                                                                  |
+| `--prev_iter=0`                     | (Optional: `default: 0`) Count the iteration from this given value.                                         |
+| `--wandb_name=Job_1`                | (Optional: `str`) Customize your wandb job name                                                             |
+| `--load_syn_image={path}`           | (Optional: `str`) Load pretrained synthetic image, format is `wandb_name/images_#.pt`                       |
 
-```text
---init_epoch=1
-```
+## WanDB Guide
 
-* Synthetic lr, its size should match `init_epoch`: `list[float]`
+Stagewise-MTT algorithm generates an independent `loss` and `synthetic lr` for each individual epoch. When the values log into WanDB server, each value will be plotted in an individual plot. In this guide, we will show you how to plot them in a same plot for better visualization. For example:
 
-```text
---lr_teacher
-0.001
---init_epoch=1
-------------------
---lr_teacher
-0.001
-0.0005
-0.0001
---init_epoch=3
-```
+![WanDB](docs/wandb_example.png)
 
-* Dataset Name: `str`
+In general, you could follow the [official Line Plot documentation](https://docs.wandb.ai/guides/app/features/panels/line-plot) to do configuration.
 
-```text
---dataset=gzoo2
-```
+Here, we will give instruction to generate the exact example showing above.
 
-Image Per Class: `int`
-
-```text
---ipc=1
-```
-
-* Synthetic Step: `int`, usually the larger, the better, uses more GPU memory and slower.
-```text
---syn_steps=15
-```
-
-* Fix this to 1
-
-```text
---expert_epochs=1
-```
-
-* Maximum epoch for stage distillation: `int`. Use the number of epoch in buffer minus 1.
-
-```text
---max_start_epoch=29
-```
-
-* Learning rate for updating synthetic image: `int`
-* 
-```text
---lr_img=1000
-```
-
-* Learning rate for updating lr_teacher: `float`
-
-```text
---lr_lr=0.01
-```
-
-* Synthetic image initialization. Choose from: {noise|real}
-
-```text
---pix_init=noise
-```
-
-* Buffer path: `str`
-
-```text
---buffer_path=/data/sbcaesar/galaxy_buffers
-```
-
-* Dataset Path: `str`
-
-```text
---data_path={path_to_dataset}
-```
-
-* Maximum number of iteration: `int`
-
-```text
---Iteration=10000
-```
-
-* Evaluation interval: `int`
-
-```text
---eval_it=200
-```
-
-* (Optional: `default: 1`) Count the iteration from this given value.
-
-```text
---prev_iter=21001
-```
-
-* (Optional: `str`) Customize your wandb job name
-
-```text
---wandb_name=my_job_1
-```
-
-* (Optional: `str`) Load pretrained synthetic image, format is "wandb_name/images_#.pt"
-
-```text
---load_syn_image=continue-5ipc-epoch-all/images_21000.pt
-```
+* Delete all individual plot in the format of `Grand_Loss_epoch_` and `Synthetic_LR_`. (The data is still saved in the backend of WanDB)
+* Manually add some number of new panels (based on how many epochs you used). **Note that each line plot can hold at most 10 lines**. Edit each panel, select the regular expression tab in `y`, and type something like `^Grand_Loss_epoch_[0-9]$`.
