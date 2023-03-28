@@ -120,11 +120,12 @@ def main(args):
     print("Load test!")
     mean_acc_all = []
     trainloader = torch.utils.data.DataLoader(dst_train, batch_size=128, shuffle=False, num_workers=2)
-    for image_set in range(10):
+    for image_set in range(1):
 
         label_syn = torch.tensor([np.ones(args.ipc)*i for i in range(num_classes)], dtype=torch.long, requires_grad=False, device=args.device).view(-1)
         # image_syn = torch.randn(size=(num_classes * args.ipc, channel, im_size[0], im_size[1]), dtype=torch.float)
-        image_syn = torch.load("/data/sbcaesar/mac_galaxy/logged_files/CIFAR10/hg-test-cifar10-no-zca-10ipc/images_15000.pt")
+        image_syn = torch.load("/data/sbcaesar/xuan_galaxy/logged_files/CIFAR10/xuan_cifar10-stagewise-zca_real_final_2/images_3000.pt")
+        # image_syn = torch.load("/data/sbcaesar/guan_galaxy/logged_files/CIFAR10/cifar10-10ipc-zca-stage-noise-final-2/images_4600.pt")
 
         # for c in range(num_classes):
         #     image_syn.data[c * args.ipc:(c + 1) * args.ipc] = get_images_average(c, args.ipc).detach().data
@@ -133,42 +134,51 @@ def main(args):
         eval_it_pool = np.arange(0, args.Iteration + 1, args.eval_it).tolist()
         model_eval_pool = get_eval_pool(args.eval_mode, args.model, args.model)
         syn_lr = torch.tensor(args.lr_teacher).to(args.device)
-        args.lr_net = [0.02753339894115925, 0.021951986476778984, 0.019854243844747543, 0.020864170044660568, 0.023337967693805695, 0.027003154158592224, 0.030240267515182495, 0.03351694718003273, 0.03639672324061394, 0.03785112500190735, 0.038243964314460754, 0.038664381951093674, 0.03858708217740059]
-        args.lr_net += [0.003858708217740059] * 15
+        # args.lr_net = [0.005886, 0.009666, 0.01157, 0.01119, 0.01072, 0.01047, 0.01036]
+        # args.lr_net += [0.005831] * 13
+
+        # args.lr_net = [0.01] * 10 + [0.00001] * 10
+
+        for x in range(1,21):
+            args.lr_net = [0.01] * x
+            print("lr_net:[0.01]*{}".format(x))
+            # args.lr_net = [0.01644] * x
+            # print("lr_net:[0.01644]*{}".format(x))
+            # args.lr_net = [0.01934, 0.01742, 0.01644, 0.0175, 0.01974, 0.02125, 0.02199, 0.02187, 0.02131, 0.02067]
+            # print("lr_net = [0.01934, 0.01742, 0.01644, 0.0175, 0.01974, 0.02125, 0.02199, 0.02187, 0.02131, 0.02067]")
+
+            for model_eval in model_eval_pool:
+
+                accs_test = []
+                accs_train = []
+                for it_eval in range(args.num_eval):
+                    net_eval = get_network(model_eval, channel, num_classes, im_size).to(args.device) # get a random model
+
+                    eval_labs = label_syn
+                    with torch.no_grad():
+                        image_save = image_syn
+                    image_syn_eval, label_syn_eval = copy.deepcopy(image_save.detach()), copy.deepcopy(eval_labs.detach()) # avoid any unaware modification
 
 
-        for model_eval in model_eval_pool:
+                    _, acc_train, acc_test, train_cf, test_cf = evaluate_synset(1, it_eval, net_eval, num_classes,
+                                                                                image_syn_eval, label_syn_eval, dst_train, dst_test,
+                                                                                trainloader, testloader, args, texture=args.texture)
+                    accs_test.append(acc_test)
+                    accs_train.append(acc_train)
 
-            accs_test = []
-            accs_train = []
-            for it_eval in range(args.num_eval):
-                net_eval = get_network(model_eval, channel, num_classes, im_size).to(args.device) # get a random model
-
-                eval_labs = label_syn
-                with torch.no_grad():
-                    image_save = image_syn
-                image_syn_eval, label_syn_eval = copy.deepcopy(image_save.detach()), copy.deepcopy(eval_labs.detach()) # avoid any unaware modification
-
-
-                _, acc_train, acc_test, train_cf, test_cf = evaluate_synset(1, it_eval, net_eval, num_classes,
-                                                                            image_syn_eval, label_syn_eval, dst_train, dst_test,
-                                                                            trainloader, testloader, args, texture=args.texture)
-                accs_test.append(acc_test)
-                accs_train.append(acc_train)
-
-            accs_test = np.array(accs_test)
-            accs_train = np.array(accs_train)
-            acc_test_mean = np.mean(accs_test)
-            acc_test_std = np.std(accs_test)
-            acc_train_mean = np.mean(accs_train)
-            acc_train_std = np.std(accs_train)
-            mean_acc_all.append(acc_train_mean)
-        print('Evaluate %d random %s, train set mean = %.4f std = %.4f' % (
-            len(accs_train), model_eval, acc_train_mean, acc_train_std))
-        print('Evaluate %d random %s, test set mean = %.4f std = %.4f\n-------------------------' % (
-            len(accs_test), model_eval, acc_test_mean, acc_test_std))
+                accs_test = np.array(accs_test)
+                accs_train = np.array(accs_train)
+                acc_test_mean = np.mean(accs_test)
+                acc_test_std = np.std(accs_test)
+                acc_train_mean = np.mean(accs_train)
+                acc_train_std = np.std(accs_train)
+                mean_acc_all.append(acc_test_mean)
+            print('Evaluate %d random %s, train set mean = %.4f std = %.4f' % (
+                len(accs_train), model_eval, acc_train_mean, acc_train_std))
+            print('Evaluate %d random %s, test set mean = %.4f std = %.4f\n-------------------------' % (
+                len(accs_test), model_eval, acc_test_mean, acc_test_std))
     print(mean_acc_all)
-    print("Mean test accuracy of 10 ramdom sets:", sum(mean_acc_all)/len(mean_acc_all))
+    print("Mean test accuracy of {} all trials: {}".format(len(mean_acc_all), sum(mean_acc_all)/len(mean_acc_all)))
 
 
 
