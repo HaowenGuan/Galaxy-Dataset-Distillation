@@ -15,7 +15,7 @@ import argparse
 
 def _fetch(outfile, RA, DEC, scale, width=424, height=424):
     """Fetch the image at the given RA, DEC from the SDSS server"""
-    url = ("http://casjobs.sdss.org/ImgCutoutDR7/""getjpeg.aspx?ra=%.8f&dec=%.8f&scale=%.2f&width=%i&height=%i" % (
+    url = ("http://casjobs.sdss.org/ImgCutoutDR7/""getjpeg.aspx?ra=%.8f&dec=%.8f&scale=%.8f&width=%i&height=%i" % (
         RA, DEC, scale, width, height))
 
     print("downloading%s" % url)
@@ -41,18 +41,8 @@ if __name__ == '__main__':
         if not os.path.exists('gzoo2/image'):
             os.makedirs('gzoo2/image')
 
-        data = []
-        ttype = dict()
-        with open(os.path.join('gzoo2', 'table2.dat')) as file:
-            for line in file:
-                cur = line.rstrip().split()
-                if len(cur) == 60:
-                    cur.pop(-2)
-                data.append(cur)
-                ttype[cur[0]] = cur[-11]
-
         gzoo = fits.open(os.path.join('gzoo2', 'zoo2MainSpecz_sizes.fit'))[1].data
-        print(gzoo[gzoo['dr7objid'] == 587722982290620479])
+        # gzoo = fits.open(os.path.join('gzoo2', 'zoo2MainSpecz.fits'))[1].data
         ID = gzoo['dr7objid']
         ra = gzoo['ra']
         dec = gzoo['dec']
@@ -62,25 +52,29 @@ if __name__ == '__main__':
             gzoo_dict[id] = [ra[i], dec[i], R_90[i]]
 
         print("Number of images to be read", ID.shape[0])
-        587722981741363294
-        j = gzoo_dict[587722981741363294]
+        j = gzoo_dict[587741707812143142]
         print(j)
-        _fetch('gzoo2/' + str(587722981741363294) + ".jpg", j[0], j[1], j[2] * 0.024)
-        j = gzoo_dict[587722982290620479]
-        print(j)
-        _fetch('gzoo2/' + str(587722982290620479) + ".jpg", j[0], j[1], j[2] * 0.024)
+        _fetch('gzoo2/' + str(587741707812143142) + ".jpg", j[0], j[1], j[2] * 0.1)
 
         if args.download:
             with Pool(max(cpu_count(), 8)) as pool:
                 args = []
-
                 for j in range(50000, 100000):#ID.shape[0]
                     args.append(['gzoo2/image/' + str(ID[j]) + ".jpg", ra[j], dec[j], R_90[j] * 0.024])
-
                 results = pool.starmap(_fetch, args)
 
 
     elif args.dataset == "dl-DR17":
+        data = []
+        ttype = dict()
+        with open(os.path.join('gzoo2', 'table2.dat')) as file:
+            for line in file:
+                cur = line.rstrip().split()
+                if len(cur) == 60:
+                    cur.pop(-2)
+                data.append(cur)
+                ttype[cur[0]] = cur[-11]
+        
         if not os.path.exists('MaNGA/image'):
             os.makedirs('MaNGA/image')
 
