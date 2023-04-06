@@ -31,26 +31,8 @@ def _fetch(outfile, RA, DEC, scale, width=424, height=424):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Parameter Processing')
-    parser.add_argument('--download', action='store_true', default=True, help='download-dataset')
+    parser.add_argument('--download', action='store_true', default=False, help='download-dataset')
     parser.add_argument('--dataset', type=str, default='gzoo2', help='dataset')
-    # parser.add_argument('--subset', type=str, default='imagenette', help='subset')
-    # parser.add_argument('--model', type=str, default='ConvNet', help='model')
-    # parser.add_argument('--num_experts', type=int, default=100, help='training iterations')
-    # parser.add_argument('--lr_teacher', type=float, default=0.01, help='learning rate for updating network parameters')
-    # parser.add_argument('--batch_train', type=int, default=256, help='batch size for training networks')
-    # parser.add_argument('--batch_real', type=int, default=256, help='batch size for real loader')
-    # parser.add_argument('--dsa', type=str, default='True', choices=['True', 'False'],
-    #                     help='whether to use differentiable Siamese augmentation.')
-    # parser.add_argument('--dsa_strategy', type=str, default='color_crop_cutout_flip_scale_rotate',
-    #                     help='differentiable Siamese augmentation strategy')
-    # parser.add_argument('--data_path', type=str, default='data', help='dataset path')
-    # parser.add_argument('--buffer_path', type=str, default='./buffers', help='buffer path')
-    # parser.add_argument('--train_epochs', type=int, default=50)
-    # parser.add_argument('--zca', action='store_true')
-    # parser.add_argument('--decay', action='store_true')
-    # parser.add_argument('--mom', type=float, default=0, help='momentum')
-    # parser.add_argument('--l2', type=float, default=0, help='l2 regularization')
-    # parser.add_argument('--save_interval', type=int, default=10)
 
     args = parser.parse_args()
 
@@ -70,14 +52,23 @@ if __name__ == '__main__':
                 ttype[cur[0]] = cur[-11]
 
         gzoo = fits.open(os.path.join('gzoo2', 'zoo2MainSpecz_sizes.fit'))[1].data
+        print(gzoo[gzoo['dr7objid'] == 587722982290620479])
         ID = gzoo['dr7objid']
         ra = gzoo['ra']
         dec = gzoo['dec']
         R_90 = gzoo['petroR90_r']
-        R = R_90
+        gzoo_dict = dict()
+        for i, id in enumerate(ID):
+            gzoo_dict[id] = [ra[i], dec[i], R_90[i]]
 
         print("Number of images to be read", ID.shape[0])
-        # pdb.set_trace()
+        587722981741363294
+        j = gzoo_dict[587722981741363294]
+        print(j)
+        _fetch('gzoo2/' + str(587722981741363294) + ".jpg", j[0], j[1], j[2] * 0.024)
+        j = gzoo_dict[587722982290620479]
+        print(j)
+        _fetch('gzoo2/' + str(587722982290620479) + ".jpg", j[0], j[1], j[2] * 0.024)
 
         if args.download:
             with Pool(max(cpu_count(), 8)) as pool:
