@@ -793,20 +793,20 @@ def evaluate_synset(it, it_eval, net, num_classes, images_train, labels_train, d
     if isinstance(args.lr_net, list):
         # [Auto Adjust evaluation training epochs]
         epoch_per_lr = max(args.syn_steps, 500 // len(args.lr_net))
-        args.epoch_eval_train = Epoch = epoch_per_lr * len(args.lr_net) + 500
+        Epoch = epoch_per_lr * len(args.lr_net) + 500
         lr_schedule = [[epoch_per_lr * len(args.lr_net)+1, float(args.lr_net[-1]) * 0.1]]
         for i, lr in reversed(list(enumerate(args.lr_net[1:], 1))):
             lr_schedule.append([epoch_per_lr * i, float(lr)])
         # First LR
         optimizer = torch.optim.SGD(net.parameters(), lr=float(args.lr_net[0]), momentum=0.9, weight_decay=0.0005)
+        if it_eval == 0:
+            print("Current lr schedule:")
+            print([[0, args.lr_net[0]]] + lr_schedule[::-1])
     else:
         lr = float(args.lr_net)
         Epoch = int(args.epoch_eval_train)
         lr_schedule = [[Epoch//2+1, lr * 0.1]]
         optimizer = torch.optim.SGD(net.parameters(), lr=lr, momentum=0.9, weight_decay=0.0005)
-    if it_eval == 0:
-        print("Current lr schedule(showing in backward):")
-        print(lr_schedule)
 
     criterion = nn.CrossEntropyLoss().to(args.device)
 
