@@ -439,8 +439,7 @@ def main(args):
             starting_params = expert_trajectory[start_epoch_cap]
             target_params = expert_trajectory[start_epoch_cap + args.expert_epochs]
             target_params = torch.cat([p.data.to(args.device).reshape(-1) for p in target_params], 0)
-            student_params = torch.cat([p.data.to(args.device).reshape(-1) for p in starting_params], 0).requires_grad_(
-                True)
+            student_params = torch.cat([p.data.to(args.device).reshape(-1) for p in starting_params], 0).requires_grad_(True)
             starting_params = torch.cat([p.data.to(args.device).reshape(-1) for p in starting_params], 0)
 
             syn_images = image_syn
@@ -492,7 +491,7 @@ def main(args):
 
             test_grand_loss = float(param_loss.detach().cpu())
             test_loss.append(test_grand_loss)
-            wandb.log({"Next_Epoch_Test_Loss": test_loss[-1]}, step=it)
+            wandb.log({"Next_Epoch_Loss_" + str(start_epoch_cap): test_loss[-1]}, step=it)
             del param_loss, param_dist, test_grand_loss
         # -----------------------------------------------
 
@@ -509,8 +508,6 @@ def main(args):
 
         y_hat = label_syn.to(args.device)
 
-        param_loss_list = []
-        param_dist_list = []
         indices_chunks = []
 
         for step in range(args.syn_steps):
@@ -552,9 +549,6 @@ def main(args):
         param_loss += torch.nn.functional.mse_loss(student_params[-1], target_params, reduction="sum")
         param_dist += torch.nn.functional.mse_loss(starting_params, target_params, reduction="sum")
 
-        param_loss_list.append(param_loss)
-        param_dist_list.append(param_dist)
-
         param_loss /= num_params
         param_dist /= num_params
 
@@ -589,7 +583,7 @@ def main(args):
                 wandb.log({"Image Learning Rate": param_group['lr']}, step=it)
                 statement = '{:^70}'.format('[LR Decaying] --- Image Learning Rate: {}'.format(param_group['lr']))
                 print("!" * 16, statement, "!" * 16)
-                if param_group['lr'] < args.lr_img * 0.1:
+                if param_group['lr'] < args.lr_img * 0.05:
                     # Automatically Ending the algorithm after fine-tuning
                     print('Test Loss stop improving. End with early stopping!')
                     exit(0)
@@ -693,7 +687,7 @@ if __name__ == '__main__':
     parser.add_argument('--wandb_name', type=str, default=None, help="Custom WanDB name")
     parser.add_argument('--load_syn_image', type=str, default=None, help="previous syn image")
     # Stage Distillation Hyper-parameter
-    parser.add_argument('--min_duration', type=int, default=200, help="Minimum iteration for each epoch")
+    parser.add_argument('--min_duration', type=int, default=1, help="Minimum iteration for each epoch")
     parser.add_argument('--max_duration', type=int, default=1000, help="Maximum iteration for stay in one epoch")
     parser.add_argument('--sigma', type=int, default=5, help="CorrCoef Threshold for starting trending")
     parser.add_argument('--method', type=str, default=None, help="stage-MTT | original-MTT")
