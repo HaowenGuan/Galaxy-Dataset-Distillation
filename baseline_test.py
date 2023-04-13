@@ -120,65 +120,54 @@ def main(args):
     print("Load test!")
     mean_acc_all = []
     trainloader = torch.utils.data.DataLoader(dst_train, batch_size=128, shuffle=False, num_workers=2)
-    for image_set in range(1):
+    label_syn = torch.tensor([np.ones(args.ipc)*i for i in range(num_classes)], dtype=torch.long, requires_grad=False, device=args.device).view(-1)
+    # image_syn = torch.randn(size=(num_classes * args.ipc, channel, im_size[0], im_size[1]), dtype=torch.float)
+    # image_syn = torch.load("/data/sbcaesar/mac_galaxy/logged_files/CIFAR10/cifar10-1ipc-10-no-mini-duration/images_2600.pt")
+    image_syn = torch.load("/data/sbcaesar/guan_galaxy/logged_files/CIFAR10/cifar10-10ipc-zca-stage-noise-final-1/images_4200.pt")
 
-        label_syn = torch.tensor([np.ones(args.ipc)*i for i in range(num_classes)], dtype=torch.long, requires_grad=False, device=args.device).view(-1)
-        # image_syn = torch.randn(size=(num_classes * args.ipc, channel, im_size[0], im_size[1]), dtype=torch.float)
-        image_syn = torch.load("/data/sbcaesar/xuan_galaxy/logged_files/CIFAR10/xuan_cifar10-stagewise-zca_real_final_2/images_3000.pt")
-        # image_syn = torch.load("/data/sbcaesar/guan_galaxy/logged_files/CIFAR10/cifar10-10ipc-zca-stage-noise-final-2/images_4600.pt")
+    # for c in range(num_classes):
+    #     image_syn.data[c * args.ipc:(c + 1) * args.ipc] = get_images_average(c, args.ipc).detach().data
+        # image_syn.data[c * args.ipc:(c + 1) * args.ipc] = get_images(c, args.ipc).detach().data
 
-        # for c in range(num_classes):
-        #     image_syn.data[c * args.ipc:(c + 1) * args.ipc] = get_images_average(c, args.ipc).detach().data
-            # image_syn.data[c * args.ipc:(c + 1) * args.ipc] = get_images(c, args.ipc).detach().data
+    eval_it_pool = np.arange(0, args.Iteration + 1, args.eval_it).tolist()
+    model_eval_pool = get_eval_pool(args.eval_mode, args.model, args.model)
+    syn_lr = torch.tensor(args.lr_teacher).to(args.device)
 
-        eval_it_pool = np.arange(0, args.Iteration + 1, args.eval_it).tolist()
-        model_eval_pool = get_eval_pool(args.eval_mode, args.model, args.model)
-        syn_lr = torch.tensor(args.lr_teacher).to(args.device)
-        # args.lr_net = [0.005886, 0.009666, 0.01157, 0.01119, 0.01072, 0.01047, 0.01036]
-        # args.lr_net += [0.005831] * 13
+    for i in range(1, 2):
+        args.lr_net = [0.030194150283932686, 0.029381312429904938, 0.02614683285355568, 0.025297176092863083, 0.025647904723882675, 0.026483828201889992, 0.027240358293056488, 0.02810422144830227, 0.028140494599938393, 0.027514396235346794, 0.027191029861569405, 0.026667356491088867, 0.026324940845370293, 0.02609262987971306]
+        # args.lr_net += [0.001] * (10 - i)
 
-        # args.lr_net = [0.01] * 10 + [0.00001] * 10
+        for model_eval in model_eval_pool:
+            accs_test = []
+            accs_train = []
+            for it_eval in range(args.num_eval):
+                net_eval = get_network(model_eval, channel, num_classes, im_size).to(args.device) # get a random model
 
-        for x in range(1,21):
-            args.lr_net = [0.01] * x
-            print("lr_net:[0.01]*{}".format(x))
-            # args.lr_net = [0.01644] * x
-            # print("lr_net:[0.01644]*{}".format(x))
-            # args.lr_net = [0.01934, 0.01742, 0.01644, 0.0175, 0.01974, 0.02125, 0.02199, 0.02187, 0.02131, 0.02067]
-            # print("lr_net = [0.01934, 0.01742, 0.01644, 0.0175, 0.01974, 0.02125, 0.02199, 0.02187, 0.02131, 0.02067]")
-
-            for model_eval in model_eval_pool:
-
-                accs_test = []
-                accs_train = []
-                for it_eval in range(args.num_eval):
-                    net_eval = get_network(model_eval, channel, num_classes, im_size).to(args.device) # get a random model
-
-                    eval_labs = label_syn
-                    with torch.no_grad():
-                        image_save = image_syn
-                    image_syn_eval, label_syn_eval = copy.deepcopy(image_save.detach()), copy.deepcopy(eval_labs.detach()) # avoid any unaware modification
+                eval_labs = label_syn
+                with torch.no_grad():
+                    image_save = image_syn
+                image_syn_eval, label_syn_eval = copy.deepcopy(image_save.detach()), copy.deepcopy(eval_labs.detach()) # avoid any unaware modification
 
 
-                    _, acc_train, acc_test, train_cf, test_cf = evaluate_synset(1, it_eval, net_eval, num_classes,
-                                                                                image_syn_eval, label_syn_eval, dst_train, dst_test,
-                                                                                trainloader, testloader, args, texture=args.texture)
-                    accs_test.append(acc_test)
-                    accs_train.append(acc_train)
+                _, acc_train, acc_test, train_cf, test_cf = evaluate_synset(1, it_eval, net_eval, num_classes,
+                                                                            image_syn_eval, label_syn_eval, dst_train, dst_test,
+                                                                            trainloader, testloader, args, texture=args.texture)
+                accs_test.append(acc_test)
+                accs_train.append(acc_train)
 
-                accs_test = np.array(accs_test)
-                accs_train = np.array(accs_train)
-                acc_test_mean = np.mean(accs_test)
-                acc_test_std = np.std(accs_test)
-                acc_train_mean = np.mean(accs_train)
-                acc_train_std = np.std(accs_train)
-                mean_acc_all.append(acc_test_mean)
-            print('Evaluate %d random %s, train set mean = %.4f std = %.4f' % (
-                len(accs_train), model_eval, acc_train_mean, acc_train_std))
-            print('Evaluate %d random %s, test set mean = %.4f std = %.4f\n-------------------------' % (
-                len(accs_test), model_eval, acc_test_mean, acc_test_std))
+            accs_test = np.array(accs_test)
+            accs_train = np.array(accs_train)
+            acc_test_mean = np.mean(accs_test)
+            acc_test_std = np.std(accs_test)
+            acc_train_mean = np.mean(accs_train)
+            acc_train_std = np.std(accs_train)
+            mean_acc_all.append(acc_train_mean)
+        print('Evaluate %d random %s, train set mean = %.4f std = %.4f' % (
+            len(accs_train), model_eval, acc_train_mean, acc_train_std))
+        print('Evaluate %d random %s, test set mean = %.4f std = %.4f\n-------------------------' % (
+            len(accs_test), model_eval, acc_test_mean, acc_test_std))
     print(mean_acc_all)
-    print("Mean test accuracy of {} all trials: {}".format(len(mean_acc_all), sum(mean_acc_all)/len(mean_acc_all)))
+    print("Mean test accuracy of 10 ramdom sets:", sum(mean_acc_all)/len(mean_acc_all))
 
 
 
@@ -226,7 +215,7 @@ if __name__ == '__main__':
     parser.add_argument('--buffer_path', type=str, default='./buffers', help='buffer path')
 
     parser.add_argument('--expert_epochs', type=int, default=3, help='how many expert epochs the target params are')
-    parser.add_argument('--syn_steps', type=int, default=20, help='how many steps to take on synthetic data')
+    parser.add_argument('--syn_steps', type=int, default=50, help='how many steps to take on synthetic data')
     parser.add_argument('--max_start_epoch', type=int, default=25, help='max epoch we can start at')
 
     parser.add_argument('--zca', action='store_true', help="do ZCA whitening")

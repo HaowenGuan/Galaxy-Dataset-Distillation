@@ -31,8 +31,8 @@ channel = 3
 im_size = (128, 128)
 num_classes = 10
 
-mean = [0.0740, 0.0606, 0.0490]
-std = [0.1295, 0.1011, 0.0914]
+mean = [0.0735, 0.0600, 0.0482]
+std = [0.1279, 0.0992, 0.0892]
 
 gzoo = fits.open(os.path.join('Galaxy-DR17-dataset/gzoo2', 'zoo2MainSpecz_sizes.fit'))[1].data
 indexes = dict()
@@ -63,8 +63,15 @@ def get_classes(id):
     return np.argmax(np.array(classes_l))
 
 
-def main():
-    path = '/data/sbcaesar/classes/6000'
+def build(dataset_path: str, aug=1):
+    """
+    Build the dataset
+    :param dataset_path: The dataset path
+    :param aug: The number of augmentation for image
+    :return: None
+    Save a '.pt' file in the dataset folder
+    """
+    path = dataset_path
     dst_train = {"images": [], "labels": []}
     dst_test = {"images": [], "labels": []}
     np.random.seed(1)
@@ -96,7 +103,6 @@ def main():
                 id = int(image[:-4])
                 img_class = get_classes(id)
                 im = Image.open(image_dir)
-                aug = 1
                 for i in range(aug):
                     img = im.rotate((360 // aug) * i)
                     img = np.array(img)[:, :, :3]
@@ -115,7 +121,6 @@ def main():
                 img_class = get_classes(id)
                 im = Image.open(image_dir)
                 im_trans = im.transpose(Image.TRANSPOSE)
-                aug = 1
                 for i in range(aug):
                     img = im.rotate((360 // aug) * i)
                     img = np.array(img)[:, :, :3]
@@ -146,7 +151,7 @@ def main():
     class_map = {x: x for x in range(num_classes)}
 
 if __name__ == '__main__':
-    main()
-    # path = "/data/sbcaesar/classes/6000"
+    path = "/data/sbcaesar/classes/6000"
+    build(path)
     # gzoo_dataset = torch.load(os.path.join(path, "gzoo_dataset.pt"))
     # print(gzoo_dataset.train[0])
