@@ -1,39 +1,28 @@
-import time
 import numpy as np
-import pandas as pd
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
 import os
-import kornia as K
-import tqdm
-from torch.utils.data import Dataset
 from torchvision import datasets, transforms
-from scipy.ndimage.interpolation import rotate as scipyrotate
-from networks import MLP, ConvNet, LeNet, AlexNet, VGG11BN, VGG11, ResNet18, ResNet18BN_AP, ResNet18_AP
 from astropy.io import fits
-from astropy.table import Table
 import cv2 as cv
 from PIL import Image
-from sklearn.metrics import confusion_matrix
 import torch
 from torch.utils.data import Dataset
 
 class CustomDataset(Dataset):
-    def __init__(self, data, target):
-        self.data = data
-        self.target = target
+    def __init__(self, images, labels):
+        self.images = images
+        self.labels = labels
         self.classes = None
 
     def __len__(self):
-        return len(self.data)
+        assert len(self.images) == len(self.labels)
+        return len(self.images)
 
     def __getitem__(self, idx):
-        data = torch.tensor(self.data[idx], dtype=torch.uint8)
-        target = torch.tensor(self.target[idx], dtype=torch.int)
-        return data, target
+        image = self.images[idx]
+        label = self.labels[idx]
+        return image, label
 
-class GZooDataset:
+class GZooDataset(CustomDataset):
     def __init__(self, train, test):
         self.train = train
         self.test = test
@@ -74,44 +63,90 @@ def get_classes(id):
     return np.argmax(np.array(classes_l))
 
 
-path = '/data/sbcaesar/classes/6000'
-dst_train = []
-dst_test = []
-np.random.seed(1)
-for c in range(10):
-    class_path = os.path.join(path, str(c))
-    class_image_list = os.listdir(class_path)
-    np.random.shuffle(class_image_list)
-    # Prepare Train Set with rotation Augmentation
-    for image in class_image_list[:500]:
-        if ".jpg" not in image:
-            continue
-        image_dir = os.path.join(class_path, image)
-        id = int(image[:-4])
-        im = Image.open(image_dir)
-        aug = 1
-        for i in range(aug):
-            img = im.rotate((360 // aug) * i)
-            img = np.array(img)[:, :, :3]
+def main():
+    path = '/data/sbcaesar/classes/6000'
+    dst_train = {"images": [], "labels": []}
+    dst_test = {"images": [], "labels": []}
+    np.random.seed(1)
+    for c in range(10):
+        class_path = os.path.join(path, str(c))
+        class_image_list = os.listdir(class_path)
+        np.random.shuffle(class_image_list)
+        # Prepare Test Set
+        for image in class_image_list[:100]:
+            if ".jpg" not in image:
+                continue
+            image_dir = os.path.join(class_path, image)
+            id = int(image[:-4])
+            img = cv.imread(image_dir)
+            img = cv.cvtColor(img, cv.COLOR_BGR2RGB)  # Only use when open with cv2
             img = img[img.shape[0] // 4:(img.shape[0] * 3) // 4, img.shape[1] // 4:(img.shape[1] * 3) // 4]
             img = cv.resize(img, (128, 128), interpolation=cv.INTER_AREA) / 255
             img = torch.from_numpy(img.T)
             img = transforms.Normalize(mean, std)(img)
-            dst_train.append((img, get_classes(id)))
-    # Prepare Test Set
-    for image in class_image_list[500:]:
-        if ".jpg" not in image:
-            continue
-        image_dir = os.path.join(class_path, image)
-        id = int(image[:-4])
-        img = cv.imread(image_dir)
-        img = cv.cvtColor(img, cv.COLOR_BGR2RGB)  # Only use when open with cv2
-        img = img[img.shape[0] // 4:(img.shape[0] * 3) // 4, img.shape[1] // 4:(img.shape[1] * 3) // 4]
-        img = cv.resize(img, (128, 128), interpolation=cv.INTER_AREA) / 255
-        img = torch.from_numpy(img.T)
-        img = transforms.Normalize(mean, std)(img)
-        dst_test.append((img, get_classes(id)))
-print("Generated Augmented Train Set of", len(dst_train), "images.")
-print("Processed Test Set of", len(dst_test), "images.")
-class_names = [str(i) for i in range(num_classes)]
-class_map = {x: x for x in range(num_classes)}
+            dst_test["images"].append(img)
+            dst_test["labels"].append(get_classes(id))
+
+        # Prepare Train Set with rotation Augmentation
+        if c != 9:
+            for image in class_image_list[100:]:
+                if ".jpg" not in image:
+                    continue
+                image_dir = os.path.join(class_path, image)
+                id = int(image[:-4])
+                img_class = get_classes(id)
+                im = Image.open(image_dir)
+                aug = 1
+                for i in range(aug):
+                    img = im.rotate((360 // aug) * i)
+                    img = np.array(img)[:, :, :3]
+                    img = img[img.shape[0] // 4:(img.shape[0] * 3) // 4, img.shape[1] // 4:(img.shape[1] * 3) // 4]
+                    img = cv.resize(img, (128, 128), interpolation=cv.INTER_AREA) / 255
+                    img = torch.from_numpy(img.T)
+                    img = transforms.Normalize(mean, std)(img)
+                    dst_train["images"].append(img)
+                    dst_train["labels"].append(img_class)
+        else:
+            for image in class_image_list[100:]:
+                if ".jpg" not in image:
+                    continue
+                image_dir = os.path.join(class_path, image)
+                id = int(image[:-4])
+                img_class = get_classes(id)
+                im = Image.open(image_dir)
+                im_trans = im.transpose(Image.TRANSPOSE)
+                aug = 1
+                for i in range(aug):
+                    img = im.rotate((360 // aug) * i)
+                    img = np.array(img)[:, :, :3]
+                    img = img[img.shape[0] // 4:(img.shape[0] * 3) // 4, img.shape[1] // 4:(img.shape[1] * 3) // 4]
+                    img = cv.resize(img, (128, 128), interpolation=cv.INTER_AREA) / 255
+                    img = torch.from_numpy(img.T)
+                    img = transforms.Normalize(mean, std)(img)
+                    dst_train["images"].append(img)
+                    dst_train["labels"].append(img_class)
+
+                    img_trans = im_trans.rotate((360 // aug) * i)
+                    img_trans = np.array(img_trans)[:, :, :3]
+                    img_trans = img_trans[img_trans.shape[0] // 4:(img_trans.shape[0] * 3) // 4, img_trans.shape[1] // 4:(img_trans.shape[1] * 3) // 4]
+                    img_trans = cv.resize(img_trans, (128, 128), interpolation=cv.INTER_AREA) / 255
+                    img_trans = torch.from_numpy(img_trans.T)
+                    img_trans = transforms.Normalize(mean, std)(img_trans)
+                    dst_train["images"].append(img_trans)
+                    dst_train["labels"].append(img_class)
+
+    train_dataset = CustomDataset(dst_train["images"], dst_train["labels"])
+    test_dataset = CustomDataset(dst_test["images"], dst_test["labels"])
+    gzoo_dataset = GZooDataset(train_dataset, test_dataset)
+    torch.save(gzoo_dataset, os.path.join(path, "gzoo_dataset.pt"))
+
+    print("Generated Augmented Train Set of", len(dst_train["images"]), "images.")
+    print("Processed Test Set of", len(dst_test["images"]), "images.")
+    class_names = [str(i) for i in range(num_classes)]
+    class_map = {x: x for x in range(num_classes)}
+
+if __name__ == '__main__':
+    main()
+    # path = "/data/sbcaesar/classes/6000"
+    # gzoo_dataset = torch.load(os.path.join(path, "gzoo_dataset.pt"))
+    # print(gzoo_dataset.train[0])
