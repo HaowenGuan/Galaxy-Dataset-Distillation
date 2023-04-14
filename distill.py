@@ -14,6 +14,7 @@ import pandas as pd
 import seaborn as sn
 import matplotlib.pyplot as plt
 from reparam_module import ReparamModule
+from gzoo2_dataset import GZooDataset, CustomDataset
 
 import warnings
 

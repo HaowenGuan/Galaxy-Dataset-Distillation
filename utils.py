@@ -20,6 +20,7 @@ import cv2 as cv
 from PIL import Image
 from sklearn.metrics import confusion_matrix
 import gzoo2_dataset
+from gzoo2_dataset import GZooDataset, CustomDataset
 
 import warnings
 warnings.filterwarnings("ignore", category=UserWarning)
@@ -67,11 +68,10 @@ def get_dataset(dataset, data_path, batch_size=1, subset="imagenette", args=None
         mean = [0.0735, 0.0600, 0.0482]
         std = [0.1279, 0.0992, 0.0892]
 
-        path = "/data/sbcaesar/classes/6000"
-        if 'gzoo_dataset.pt' not in os.listdir(path):
-            gzoo2_dataset.build(path)
+        if 'gzoo_dataset.pt' not in os.listdir(data_path):
+            gzoo2_dataset.build(data_path)
 
-        gzoo_dataset = torch.load(os.path.join(path, "gzoo_dataset.pt"))
+        gzoo_dataset = torch.load(os.path.join(data_path, "gzoo_dataset.pt"))
         dst_train = gzoo_dataset.train
         dst_test = gzoo_dataset.test
 
@@ -86,11 +86,10 @@ def get_dataset(dataset, data_path, batch_size=1, subset="imagenette", args=None
         mean = [0.0735, 0.0600, 0.0482]
         std = [0.1279, 0.0992, 0.0892]
 
-        path = "/data/sbcaesar/classes/6000"
-        if 'gzoo_dataset_aug.pt' not in os.listdir(path):
-            gzoo2_dataset.build(path, aug=10)
+        if 'gzoo_dataset_aug.pt' not in os.listdir(data_path):
+            gzoo2_dataset.build(data_path, aug=10)
 
-        gzoo_dataset = torch.load(os.path.join(path, "gzoo_dataset_aug.pt"))
+        gzoo_dataset = torch.load(os.path.join(data_path, "gzoo_dataset_aug.pt"))
         dst_train = gzoo_dataset.train
         dst_test = gzoo_dataset.test
 
