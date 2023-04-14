@@ -20,7 +20,6 @@ import cv2 as cv
 from PIL import Image
 from sklearn.metrics import confusion_matrix
 import gzoo2_dataset
-from gzoo2_dataset import GZooDataset, CustomDataset
 
 import warnings
 warnings.filterwarnings("ignore", category=UserWarning)

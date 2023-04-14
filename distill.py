@@ -216,16 +216,27 @@ def main(args):
     from torchvision import transforms
     blur = transforms.GaussianBlur(kernel_size=(3, 3), sigma=(0.3, 0.3)).to(args.device)
 
-    # stage match trajectory #0 --------------------
-    start_epoch_cap = args.init_epoch
-    test_loss = []
-    passed = False
-    fine_tuning = False
+    # stage-wise trajectory matching initialization--------------------------------------
+    if args.method == "original-MTT":
+        stagewise = False
+        independent_lr = False
+    else:
+        stagewise = args.algorithm == "auto-max-epoch"
+        independent_lr = args.lr_mode == "independent-lr"
+
     print("Wandb Job Name:", wandb.run.name)
     print("Input lr_teacher List:", args.lr_teacher)
+
+    if stagewise:
+        test_loss = []
+        passed = fine_tuning = False
+        start_epoch_cap = args.init_epoch
+    else:
+        start_epoch_cap = args.max_start_epoch
+
     log_syn_lr_list = []
     optimizer_lr_list = []
-    if isinstance(args.lr_teacher, list):
+    if independent_lr:
         for i in range(start_epoch_cap):
             if i >= len(args.lr_teacher):
                 i = -1
@@ -235,21 +246,23 @@ def main(args):
             log_syn_lr_list.append(log_syn_lr)
             optimizer_lr_list.append(optimizer_lr)
     else:
-        print("Warning, the lr_teacher should be a list")
-        syn_lr = torch.tensor(args.lr_teacher).to(args.device)
-        for _ in range(start_epoch_cap):
-            log_syn_lr = torch.log(syn_lr).detach().to(args.device).requires_grad_(True)
-            optimizer_lr = torch.optim.SGD([log_syn_lr], lr=args.lr_lr, momentum=0.5)
-            log_syn_lr_list.append(log_syn_lr)
-            optimizer_lr_list.append(optimizer_lr)
-    # ----------------------------------------------
+        syn_lr = torch.tensor(float(args.lr_teacher[0])).to(args.device)
+        log_syn_lr = torch.log(syn_lr).detach().to(args.device).requires_grad_(True)
+        optimizer_lr = torch.optim.SGD([log_syn_lr], lr=args.lr_lr, momentum=0.5)
+        log_syn_lr_list.append(log_syn_lr)
+        optimizer_lr_list.append(optimizer_lr)
+    # -----------------------------------------------------------------------------------
 
     for it in range(args.prev_iter, args.Iteration + 1):
-        # stage match trajectory #1 --------------------
         start_epoch = it % int(start_epoch_cap)
-        syn_lr = torch.exp(log_syn_lr_list[start_epoch])
-        test_syn_lr = torch.exp(log_syn_lr_list[-1])
-        # ----------------------------------------------
+        if independent_lr:
+            syn_lr = torch.exp(log_syn_lr_list[start_epoch])
+            test_syn_lr = torch.exp(log_syn_lr_list[-1])
+            optimizer_lr = optimizer_lr_list[start_epoch]
+        else:
+            syn_lr = torch.exp(log_syn_lr_list[0])
+            test_syn_lr = torch.exp(log_syn_lr_list[0])
+            optimizer_lr = optimizer_lr_list[0]
         save_this_it = False
 
         ''' Evaluate synthetic data '''
@@ -278,9 +291,6 @@ def main(args):
                         image_save = image_syn
                     image_syn_eval, label_syn_eval = copy.deepcopy(image_save.detach()), copy.deepcopy(
                         eval_labs.detach())  # avoid any unaware modification
-
-                    # [Using the last epoch's lr to do evaluation]
-                    # args.lr_net = torch.exp(log_syn_lr_list[-1]).item() * 5
 
                     # [Using the a list of lr to do evaluation]
                     args.lr_net = []
@@ -401,8 +411,10 @@ def main(args):
                             grid = torchvision.utils.make_grid(upsampled, nrow=10, normalize=True, scale_each=True)
                             wandb.log({"Clipped_Reconstructed_Images/std_{}".format(clip_val): wandb.Image(
                                 torch.nan_to_num(grid.detach().cpu()))}, step=it)
-
-        wandb.log({"Synthetic_LR_" + str(start_epoch): syn_lr.detach().cpu()}, step=it)
+        if independent_lr:
+            wandb.log({"Synthetic_LR_" + str(start_epoch): syn_lr.detach().cpu()}, step=it)
+        else:
+            wandb.log({"Synthetic_LR": syn_lr.detach().cpu()}, step=it)
 
         student_net = get_network(args.model, channel, num_classes, im_size, dist=False).to(
             args.device)  # get a random model
@@ -435,8 +447,8 @@ def main(args):
                     buffer = buffer[:args.max_experts]
                 random.shuffle(buffer)
 
-        # Using Next Epoch as Test Set------------------
-        if not fine_tuning:
+        # Collect Next Epoch loss
+        if stagewise and not fine_tuning:
             starting_params = expert_trajectory[start_epoch_cap]
             target_params = expert_trajectory[start_epoch_cap + args.expert_epochs]
             target_params = torch.cat([p.data.to(args.device).reshape(-1) for p in target_params], 0)
@@ -494,7 +506,6 @@ def main(args):
             test_loss.append(test_grand_loss)
             wandb.log({"Next_Epoch_Loss_" + str(start_epoch_cap): test_loss[-1]}, step=it)
             del param_loss, param_dist, test_grand_loss
-        # -----------------------------------------------
 
         starting_params = expert_trajectory[start_epoch]
         target_params = expert_trajectory[start_epoch + args.expert_epochs]
@@ -558,53 +569,55 @@ def main(args):
         grand_loss = param_loss
 
         optimizer_img.zero_grad()
-        optimizer_lr_list[start_epoch].zero_grad()
+        optimizer_lr.zero_grad()
 
         grand_loss.backward()
 
         optimizer_img.step()
         if not args.fix_lr_teacher:
-            optimizer_lr_list[start_epoch].step()
+            optimizer_lr.step()
 
         wandb.log({"Grand_Loss_epoch_" + str(start_epoch): grand_loss.detach().cpu(),
                    "Start_Epoch": start_epoch_cap - 1}, step=it)
 
         # Stage Distillation Algorithm and Level Up
-        cur_duration = len(test_loss)
-        if cur_duration >= args.min_duration and cur_duration % 10 == 0:
-            r = np.corrcoef(test_loss, list(range(cur_duration)))[0, 1]
-            sigma = np.sqrt(1 / (cur_duration - 2))
-            if not passed and not fine_tuning:
-                fine_tuning = cur_duration > args.max_duration
-                if not fine_tuning:
-                    passed = r < -(args.sigma * sigma)
-            if fine_tuning and it % 50 == 0:
-                for param_group in optimizer_img.param_groups:
-                    param_group['lr'] *= 0.8
-                wandb.log({"Image Learning Rate": param_group['lr']}, step=it)
-                statement = '{:^70}'.format('[LR Decaying] --- Image Learning Rate: {}'.format(param_group['lr']))
-                print("!" * 16, statement, "!" * 16)
-                if param_group['lr'] < args.lr_img * 0.05:
-                    # Automatically Ending the algorithm after fine-tuning
-                    print('Test Loss stop improving. End with early stopping!')
-                    exit(0)
-            elif not passed and cur_duration % 20 == 0:
-                statement = '[Pending] --- CorrCoef: {} Threshold: {} Length: {}'
-                statement = '{:^70}'.format(statement.format(round(r, 5), round(-args.sigma * sigma, 5), cur_duration))
-                print("~" * 16, statement, "~" * 16)
-            elif passed or r > 3 * sigma:
-                # Reset Stat and Leveling Up
-                # r > 3 * sigma is the condition for edge case that image is overfitting training epoch
-                statement = '{:^70}'.format('[Leveling Up] --- Current Epoch Length: {}'.format(cur_duration))
-                print("=" * 16, statement, "=" * 16)
-                test_loss = []
-                passed = False
-                if start_epoch_cap + 1 <= args.max_start_epoch:
-                    start_epoch_cap += 1
-                    log_syn_lr = log_syn_lr_list[-1].clone().detach().to(args.device).requires_grad_(True)
-                    optimizer_lr = torch.optim.SGD([log_syn_lr], lr=args.lr_lr, momentum=0.5)
-                    log_syn_lr_list.append(log_syn_lr)
-                    optimizer_lr_list.append(optimizer_lr)
+        if stagewise:
+            cur_duration = len(test_loss)
+            if cur_duration >= args.min_duration and cur_duration % 10 == 0:
+                r = np.corrcoef(test_loss, list(range(cur_duration)))[0, 1]
+                sigma = np.sqrt(1 / (cur_duration - 2))
+                if not passed and not fine_tuning:
+                    fine_tuning = cur_duration > args.max_duration
+                    if not fine_tuning:
+                        passed = r < -(args.sigma * sigma)
+                if fine_tuning and it % 50 == 0:
+                    for param_group in optimizer_img.param_groups:
+                        param_group['lr'] *= 0.8
+                    wandb.log({"Image Learning Rate": param_group['lr']}, step=it)
+                    statement = '{:^70}'.format('[LR Decaying] --- Image Learning Rate: {}'.format(param_group['lr']))
+                    print("!" * 16, statement, "!" * 16)
+                    if param_group['lr'] < args.lr_img * 0.05:
+                        # Automatically Ending the algorithm after fine-tuning
+                        print('Test Loss stop improving. End with early stopping!')
+                        exit(0)
+                elif not passed and cur_duration % 20 == 0:
+                    statement = '[Pending] --- CorrCoef: {} Threshold: {} Length: {}'
+                    statement = '{:^70}'.format(statement.format(round(r, 5), round(-args.sigma * sigma, 5), cur_duration))
+                    print("~" * 16, statement, "~" * 16)
+                elif passed or r > 3 * sigma:
+                    # Reset Stat and Leveling Up
+                    # r > 3 * sigma is the edge case that image is overfitting previous epoch
+                    statement = '{:^70}'.format('[Leveling Up] --- Current Epoch Length: {}'.format(cur_duration))
+                    print("=" * 16, statement, "=" * 16)
+                    test_loss = []
+                    passed = False
+                    if start_epoch_cap + 1 <= args.max_start_epoch:
+                        start_epoch_cap += 1
+                        if independent_lr:
+                            log_syn_lr = log_syn_lr_list[-1].clone().detach().to(args.device).requires_grad_(True)
+                            optimizer_lr = torch.optim.SGD([log_syn_lr], lr=args.lr_lr, momentum=0.5)
+                            log_syn_lr_list.append(log_syn_lr)
+                            optimizer_lr_list.append(optimizer_lr)
 
         for _ in student_params:
             del _
@@ -617,25 +630,16 @@ def main(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Parameter Processing')
-
     parser.add_argument('--dataset', type=str, default='CIFAR10', help='dataset')
 
     parser.add_argument('--subset', type=str, default='imagenette',
                         help='ImageNet subset. This only does anything when --dataset=ImageNet')
-
     parser.add_argument('--model', type=str, default='ConvNet', help='model')
-
     parser.add_argument('--ipc', type=int, default=1, help='image(s) per class')
-
-    parser.add_argument('--eval_mode', type=str, default='S',
-                        help='eval_mode, check utils.py for more info')
-
+    parser.add_argument('--eval_mode', type=str, default='S', help='eval_mode, check utils.py for more info')
     parser.add_argument('--num_eval', type=int, default=5, help='how many networks to evaluate on')
-
     parser.add_argument('--eval_it', type=int, default=100, help='how often to evaluate')
-
-    parser.add_argument('--epoch_eval_train', type=int, default=1000,
-                        help='epochs to train a model with synthetic data')
+    parser.add_argument('--epoch_eval_train', type=int, default=1000, help='epochs to train a model with synthetic data')
     parser.add_argument('--Iteration', type=int, default=4000, help='how many distillation steps to perform')
 
     parser.add_argument('--lr_img', type=float, default=1000, help='learning rate for updating synthetic images')
@@ -649,17 +653,15 @@ if __name__ == '__main__':
 
     parser.add_argument('--pix_init', type=str, default='real', choices=["noise", "real"],
                         help='noise/real: initialize synthetic images from random noise or randomly sampled real images.')
-
     parser.add_argument('--dsa', type=str, default='True', choices=['True', 'False'],
                         help='whether to use differentiable Siamese augmentation.')
-
     parser.add_argument('--dsa_strategy', type=str, default='color_crop_cutout_flip_scale_rotate',
                         help='differentiable Siamese augmentation strategy')
 
     parser.add_argument('--data_path', type=str, default='data', help='dataset path')
     parser.add_argument('--buffer_path', type=str, default='./buffers', help='buffer path')
 
-    parser.add_argument('--expert_epochs', type=int, default=3, help='how many expert epochs the target params are')
+    parser.add_argument('--expert_epochs', type=int, default=1, help='how many expert epochs the target params are')
     parser.add_argument('--syn_steps', type=int, default=20, help='how many steps to take on synthetic data.')
     parser.add_argument('--max_start_epoch', type=int, default=29,
                         help='max epoch we can start at. It must be smaller than buffer epoch.')
@@ -682,17 +684,23 @@ if __name__ == '__main__':
 
     parser.add_argument('--force_save', action='store_true', help='this will save images for 50ipc')
 
-    parser.add_argument('--init_epoch', type=int, default=1, help="starting point of stage wise distillation")
     parser.add_argument('--fix_lr_teacher', action='store_true', help="Fix the lr_teach if you are confident")
     parser.add_argument('--prev_iter', type=int, default=0, help="Resume training start from previous iter")
     parser.add_argument('--wandb_name', type=str, default=None, help="Custom WanDB name")
     parser.add_argument('--load_syn_image', type=str, default=None, help="previous syn image")
+
     # Stage Distillation Hyper-parameter
+    parser.add_argument('--init_epoch', type=int, default=1, help="starting point of stage wise distillation")
     parser.add_argument('--min_duration', type=int, default=1, help="Minimum iteration for each epoch")
     parser.add_argument('--max_duration', type=int, default=1000, help="Maximum iteration for stay in one epoch")
     parser.add_argument('--sigma', type=int, default=5, help="CorrCoef Threshold for starting trending")
-    parser.add_argument('--method', type=str, default=None, help="stage-MTT | original-MTT")
     parser.add_argument('--cuda_gpu', type=str, default=None, help="specify which GPU(s) to use")
+    # Set the following variable independently for Ablation Study
+    parser.add_argument('--method', type=str, default='stage-MTT', help="[stage-MTT | original-MTT]")
+    # If you set method = original-MTT, the following variables will be ignored
+    parser.add_argument('--algorithm', type=str, default='auto-max-epoch', help="[auto-max-epoch | fix-max-epoch]")
+    parser.add_argument('--lr_mode', type=str, default='independent-lr', help="[independent-lr | global-lr]")
+
 
     args = parser.parse_args()
 
