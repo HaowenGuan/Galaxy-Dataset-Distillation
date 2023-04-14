@@ -11,7 +11,6 @@ import numpy as np
 import pandas as pd
 import seaborn as sn
 import matplotlib.pyplot as plt
-from MSECrossEntropyLoss import MSECrossEntropyLoss
 # This is needed to load galaxy dataset file
 from gzoo2_dataset import GZooDataset, CustomDataset
 
