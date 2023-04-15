@@ -62,10 +62,10 @@ def get_dataset(dataset, data_path, batch_size=1, subset="imagenette", args=None
     if dataset == 'GZoo2':
         channel = 3
         im_size = (128, 128)
-        num_classes = 10
+        num_classes = 9
 
-        mean = [0.0735, 0.0600, 0.0482]
-        std = [0.1279, 0.0992, 0.0892]
+        mean = [0.0635, 0.0561, 0.0446]
+        std = [0.1120, 0.0948, 0.0833]
 
         if 'gzoo_dataset.pt' not in os.listdir(data_path):
             gzoo2_dataset.build(data_path)
@@ -80,10 +80,10 @@ def get_dataset(dataset, data_path, batch_size=1, subset="imagenette", args=None
     elif dataset == 'GZoo2_aug':
         channel = 3
         im_size = (128, 128)
-        num_classes = 10
+        num_classes = 9
 
-        mean = [0.0735, 0.0600, 0.0482]
-        std = [0.1279, 0.0992, 0.0892]
+        mean = [0.0635, 0.0561, 0.0446]
+        std = [0.1120, 0.0948, 0.0833]
 
         if 'gzoo_dataset_aug.pt' not in os.listdir(data_path):
             gzoo2_dataset.build(data_path, aug=10)
