@@ -11,6 +11,8 @@ from astropy.io import fits
 # from astropy.table import Table
 from multiprocessing import Pool, cpu_count, get_context
 import argparse
+from PIL import Image
+import matplotlib.pyplot as plt
 
 
 def _fetch(outfile, RA, DEC, scale, width=424, height=424):
@@ -38,8 +40,8 @@ if __name__ == '__main__':
 
     if args.dataset == "gzoo2":
         # gzoo2 here -----------------------------------------
-        if not os.path.exists('gzoo2/image'):
-            os.makedirs('gzoo2/image')
+        # if not os.path.exists('gzoo2/image'):
+        #     os.makedirs('gzoo2/image')
 
         gzoo = fits.open(os.path.join('gzoo2', 'zoo2MainSpecz_sizes.fit'))[1].data
         # gzoo = fits.open(os.path.join('gzoo2', 'zoo2MainSpecz.fits'))[1].data
@@ -51,17 +53,33 @@ if __name__ == '__main__':
         for i, id in enumerate(ID):
             gzoo_dict[id] = [ra[i], dec[i], R_90[i]]
 
-        print("Number of images to be read", ID.shape[0])
-        j = gzoo_dict[587741707812143142]
-        print(j)
-        _fetch('gzoo2/' + str(587741707812143142) + ".jpg", j[0], j[1], j[2] * 0.1)
+        class_9_path = "/data/sbcaesar/classes/6000/9/"
 
-        if args.download:
-            with Pool(max(cpu_count(), 8)) as pool:
-                args = []
-                for j in range(50000, 100000):#ID.shape[0]
-                    args.append(['gzoo2/image/' + str(ID[j]) + ".jpg", ra[j], dec[j], R_90[j] * 0.024])
-                results = pool.starmap(_fetch, args)
+        #
+        # print(len(images))
+
+        for image in os.listdir(class_9_path):
+            if ".jpg" not in image:
+                continue
+            id = int(image[:-4])
+            image_dir = os.path.join(class_9_path, image)
+            print(image_dir)
+            im = Image.open(image_dir)
+            new_im = np.transpose(im)
+        print("Number of images to be read", ID.shape[0])
+        j = gzoo_dict[588848899389522032]
+        print(j)
+        _fetch(class_9_path + "588848899389522032.jpg", j[0], j[1], j[2] * 0.15)
+        image_dir = class_9_path + "588848899389522032.jpg"
+        im = Image.open(image_dir)
+        plt.imshow(im)
+        plt.show()
+        # if args.download:
+        #     with Pool(max(cpu_count(), 8)) as pool:
+        #         args = []
+        #         for j in range(50000, 100000):#ID.shape[0]
+        #             args.append(['gzoo2/image/' + str(ID[j]) + ".jpg", ra[j], dec[j], R_90[j] * 0.024])
+        #         results = pool.starmap(_fetch, args)
 
 
     elif args.dataset == "dl-DR17":
