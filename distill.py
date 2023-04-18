@@ -242,7 +242,7 @@ def main(args):
                 i = -1
             syn_lr = torch.tensor(float(args.lr_teacher[i])).to(args.device)
             log_syn_lr = torch.log(syn_lr).detach().to(args.device).requires_grad_(True)
-            optimizer_lr = torch.optim.SGD([log_syn_lr], lr=args.lr_lr, momentum=0.5)
+            optimizer_lr = torch.optim.SGD([log_syn_lr], lr=args.lr_lr * start_epoch_cap, momentum=0.5)
             log_syn_lr_list.append(log_syn_lr)
             optimizer_lr_list.append(optimizer_lr)
     else:
@@ -618,6 +618,9 @@ def main(args):
                             optimizer_lr = torch.optim.SGD([log_syn_lr], lr=args.lr_lr, momentum=0.5)
                             log_syn_lr_list.append(log_syn_lr)
                             optimizer_lr_list.append(optimizer_lr)
+                            for optimizer_lr_iter in optimizer_lr_list:
+                                for param_group in optimizer_lr_iter.param_groups:
+                                    param_group['lr'] = args.lr_lr * start_epoch_cap
 
         for _ in student_params:
             del _
@@ -703,6 +706,10 @@ if __name__ == '__main__':
 
 
     args = parser.parse_args()
+
+    if args.method == 'original-MTT':
+        args.algorithm = 'fix-max-epoch'
+        args.lr_mode = 'global-lr'
 
     print(args)
     main(args)
