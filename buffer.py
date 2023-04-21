@@ -11,6 +11,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sn
 import matplotlib.pyplot as plt
+import time
 # This is needed to load galaxy dataset file
 from gzoo2_dataset import GZooDataset, CustomDataset
 
@@ -20,7 +21,6 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 def main(args):
 
     args.dsa = True if args.dsa == 'True' else False
-    args.device = 'cuda' if torch.cuda.is_available() else 'cpu'
     args.dsa_param = ParamDiffAug()
 
     channel, im_size, num_classes, class_names, mean, std, dst_train, dst_test, testloader, loader_train_dict, class_map, class_map_inv = get_dataset(args.dataset, args.data_path, args.batch_real, args.subset, args=args)
@@ -71,7 +71,6 @@ def main(args):
     # --------------------------------------------------
 
     criterion = nn.CrossEntropyLoss(weight=loss_weight).to(args.device)
-    # criterion = MSECrossEntropyLoss(weight=loss_weight).to(args.device)
 
     trajectories = []
 
@@ -86,18 +85,17 @@ def main(args):
     total_train_cf, total_test_cf = np.array([[0] * num_classes for _ in range(num_classes)]), np.array([[0] * num_classes for _ in range(num_classes)])
 
     for it in range(0, args.num_experts):
-
+        start = time.time()
         ''' Train synthetic data '''
         teacher_net = get_network(args.model, channel, num_classes, im_size).to(args.device) # get a random model
-        print(teacher_net)
+        if it == 0:
+            print(teacher_net)
         teacher_net.train()
         lr = args.lr_teacher
         teacher_optim = torch.optim.SGD(teacher_net.parameters(), lr=lr, momentum=args.mom, weight_decay=args.l2)  # optimizer_img for synthetic data
         teacher_optim.zero_grad()
 
-        timestamps = []
-
-        timestamps.append([p.detach().cpu() for p in teacher_net.parameters()])
+        timestamps = [[p.detach().cpu() for p in teacher_net.parameters()]]
 
         lr_schedule = [args.train_epochs // 2 + 1]
 
@@ -151,6 +149,7 @@ def main(args):
             plt.xlabel("Prediction")
             plt.ylabel("True Label")
             plt.savefig('./cf_matrix_buffer/cf_expert{}_{}.png'.format(it,name))
+        print("Training Time:", time.time() - start)
 
         trajectories.append(timestamps)
 
@@ -180,7 +179,6 @@ def main(args):
 
 if __name__ == '__main__':
     import argparse
-    # os.environ["CUDA_VISIBLE_DEVICES"] = "0"
     parser = argparse.ArgumentParser(description='Parameter Processing')
     parser.add_argument('--dataset', type=str, default='CIFAR10', help='dataset')
     parser.add_argument('--subset', type=str, default='imagenette', help='subset')
@@ -201,8 +199,14 @@ if __name__ == '__main__':
     parser.add_argument('--mom', type=float, default=0, help='momentum')
     parser.add_argument('--l2', type=float, default=0, help='l2 regularization')
     parser.add_argument('--save_interval', type=int, default=10)
+    parser.add_argument('--cuda_gpu', type=str, default='0', help='Specify which GPU(s) to use, e.g. 0,1,3')
 
     args = parser.parse_args()
+    if args.cuda_gpu:
+        os.environ['CUDA_VISIBLE_DEVICES'] = args.cuda_gpu
+    args.device = 'cuda' if torch.cuda.is_available() else 'cpu'
+
+
     main(args)
 
 

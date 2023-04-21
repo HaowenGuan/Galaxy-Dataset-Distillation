@@ -678,6 +678,9 @@ def epoch(mode, dataloader, net, optimizer, criterion, args, aug, texture=False)
     else:
         net.eval()
 
+    if torch.cuda.device_count() > 1:
+        net = nn.DataParallel(net)
+
     for i_batch, datum in enumerate(dataloader):
         img = datum[0].float().to(args.device)
         lab = datum[1].long().to(args.device)
