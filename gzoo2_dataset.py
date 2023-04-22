@@ -85,7 +85,10 @@ def build(dataset_path: str, aug=1):
     train_dataset = CustomDataset(dst_train["images"], dst_train["labels"])
     test_dataset = CustomDataset(dst_test["images"], dst_test["labels"])
     gzoo_dataset = GZooDataset(train_dataset, test_dataset)
-    torch.save(gzoo_dataset, os.path.join(path, "gzoo_dataset.pt"))
+    if aug == 1:
+        torch.save(gzoo_dataset, os.path.join(path, "gzoo_dataset.pt"))
+    else:
+        torch.save(gzoo_dataset, os.path.join(path, "gzoo_dataset_aug.pt"))
 
     print("Generated Augmented Train Set of", len(dst_train["images"]), "images.")
     print("Processed Test Set of", len(dst_test["images"]), "images.")
