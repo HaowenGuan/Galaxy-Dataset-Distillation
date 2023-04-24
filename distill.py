@@ -254,7 +254,10 @@ def main(args):
     # -----------------------------------------------------------------------------------
 
     for it in range(args.prev_iter, args.Iteration + 1):
-        start_epoch = it % int(start_epoch_cap)
+        if args.sample_method == 'cycle':
+            start_epoch = it % int(start_epoch_cap)
+        else:
+            start_epoch = random.randint(0, int(start_epoch_cap) - 1)
         if independent_lr:
             syn_lr = torch.exp(log_syn_lr_list[start_epoch])
             test_syn_lr = torch.exp(log_syn_lr_list[-1])
@@ -698,11 +701,13 @@ if __name__ == '__main__':
     parser.add_argument('--max_duration', type=int, default=1000, help="Maximum iteration for stay in one epoch")
     parser.add_argument('--sigma', type=int, default=5, help="CorrCoef Threshold for starting trending")
     parser.add_argument('--cuda_gpu', type=str, default=None, help="specify which GPU(s) to use")
-    # Set the following variable independently for Ablation Study
+    # Ablation Study -------------------------------------------------------------------
     parser.add_argument('--method', type=str, default='stage-MTT', help="[stage-MTT | original-MTT]")
+    parser.add_argument('--sample_method', type=str, default='cycle', help="[cycle | random]")
     # If you set method = original-MTT, the following variables will be ignored
     parser.add_argument('--algorithm', type=str, default='auto-max-epoch', help="[auto-max-epoch | fix-max-epoch]")
     parser.add_argument('--lr_mode', type=str, default='independent-lr', help="[independent-lr | global-lr]")
+    # ----------------------------------------------------------------------------------
 
 
     args = parser.parse_args()
