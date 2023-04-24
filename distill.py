@@ -646,7 +646,7 @@ if __name__ == '__main__':
     parser.add_argument('--num_eval', type=int, default=5, help='how many networks to evaluate on')
     parser.add_argument('--eval_it', type=int, default=100, help='how often to evaluate')
     parser.add_argument('--epoch_eval_train', type=int, default=1000, help='epochs to train a model with synthetic data')
-    parser.add_argument('--Iteration', type=int, default=4000, help='how many distillation steps to perform')
+    parser.add_argument('--Iteration', type=int, default=5001, help='how many distillation steps to perform')
 
     parser.add_argument('--lr_img', type=float, default=1000, help='learning rate for updating synthetic images')
     parser.add_argument('--lr_lr', type=float, default=1e-05, help='learning rate for updating... learning rate')
@@ -706,7 +706,7 @@ if __name__ == '__main__':
     parser.add_argument('--sample_method', type=str, default='cycle', help="[cycle | random]")
     # If you set method = original-MTT, the following variables will be ignored
     parser.add_argument('--algorithm', type=str, default='auto-max-epoch', help="[auto-max-epoch | fix-max-epoch]")
-    parser.add_argument('--lr_mode', type=str, default='independent-lr', help="[independent-lr | global-lr]")
+    parser.add_argument('--lr_mode', type=str, default='global-lr', help="[independent-lr | global-lr]")
     # ----------------------------------------------------------------------------------
 
 
@@ -714,7 +714,10 @@ if __name__ == '__main__':
 
     if args.method == 'original-MTT':
         args.algorithm = 'fix-max-epoch'
-        args.lr_mode = 'global-lr'
+        args.Iteration = 5001
+    elif args.method == 'stage-MTT':
+        args.algorithm = 'auto-max-epoch'
+        args.Iteration = 20001
 
     print(args)
     main(args)
