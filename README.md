@@ -26,6 +26,14 @@ Below is our current best distilled **one per class synthetic images**. The ACC 
 
 ### Distillation Hyperparameter
 
+| Dataset | Img/Cls | Synthetic Steps $(N)$ | Max Start Epoch $(U)$ | Distillation Iteration $(K)$ |     |
+| ------- | ------- | --------------------- | --------------------- | ---------------------------- | --- |
+| 1       | 1       |                       | 1                     |                              |     |
+|         | 1       |                       | 1                     |                              |     |
+
+
+### Distillation Documentation
+
 | Argument Example                    | Description                                                                                                 |
 | ----------------------------------- | ----------------------------------------------------------------------------------------------------------- |
 | `--init_epoch=1`                    | Stage Distillation starting epoch range, (recommending value: 1): `[0, init_epoch)`                         |
