@@ -26,10 +26,17 @@ Below is our current best distilled **one per class synthetic images**. The ACC 
 
 ### Distillation Hyperparameter
 
-| Dataset | Img/Cls | Synthetic Steps $(N)$ | Max Start Epoch $(U)$ | Distillation Iteration $(K)$ |     |
-| ------- | ------- | --------------------- | --------------------- | ---------------------------- | --- |
-| 1       | 1       |                       | 1                     |                              |     |
-|         | 1       |                       | 1                     |                              |     |
+| Dataset   | Img/Cls | Synthetic Steps <br />$(N)$ | Maximum <br />Stage Iteration <br />$(T_{max})$ | Threshold <br />$(\sigma)$ | Learning Rate <br />(Pixels) | Learning Rate <br />(Step Size) | Initial Step Size <br />$(\alpha)$ |
+| --------- | ------- | --------------------------- | ----------------------------------------------- | -------------------------- | ---------------------------- | ------------------------------- | ---------------------------------- |
+|           | 1       | 50                          | 1000                                            | 5                          | 1000                         | 0.01                            | 0.01                               |
+| CIFAR-10  | 10      | 30                          | 1000                                            | 5                          | 1000                         | 0.01                            | 0.01                               |
+|           | 50      | 30                          | 1000                                            | 5                          | 1000                         | 0.01                            | 0.01                               |
+|           | 1       | 20                          | 1000                                            | 5                          | 1000                         | 0.01                            | 0.01                               |
+| CIFAR-100 | 10      | 20                          | 1000                                            | 5                          | 1000                         | 0.01                            | 0.01                               |
+|           | 50      | -                           | -                                               | -                          | -                            | -                               | -                                  |
+|           | 1       | 50                          | 1000                                            | 5                          | 1000                         | 0.01                            | 0.001                              |
+| GZoo2     | 10      | -                           | -                                               | -                          | -                            | -                               | -                                  |
+|           | 50      | -                           | -                                               | -                          | -                            | -                               | -                                  |
 
 
 ### Distillation Documentation

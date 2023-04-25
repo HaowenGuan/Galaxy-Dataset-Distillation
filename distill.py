@@ -225,7 +225,7 @@ def main(args):
         independent_lr = args.lr_mode == "independent-lr"
 
     print("Wandb Job Name:", wandb.run.name)
-    print("Input lr_teacher List:", args.lr_teacher)
+    print("Input lr_teacher:", args.lr_teacher)
 
     if stagewise:
         test_loss = []
@@ -238,15 +238,13 @@ def main(args):
     optimizer_lr_list = []
     if independent_lr:
         for i in range(start_epoch_cap):
-            if i >= len(args.lr_teacher):
-                i = -1
-            syn_lr = torch.tensor(float(args.lr_teacher[i])).to(args.device)
+            syn_lr = torch.tensor(args.lr_teacher).to(args.device)
             log_syn_lr = torch.log(syn_lr).detach().to(args.device).requires_grad_(True)
             optimizer_lr = torch.optim.SGD([log_syn_lr], lr=args.lr_lr * start_epoch_cap, momentum=0.5)
             log_syn_lr_list.append(log_syn_lr)
             optimizer_lr_list.append(optimizer_lr)
     else:
-        syn_lr = torch.tensor(float(args.lr_teacher[0])).to(args.device)
+        syn_lr = torch.tensor(args.lr_teacher).to(args.device)
         log_syn_lr = torch.log(syn_lr).detach().to(args.device).requires_grad_(True)
         optimizer_lr = torch.optim.SGD([log_syn_lr], lr=args.lr_lr, momentum=0.5)
         log_syn_lr_list.append(log_syn_lr)
@@ -650,8 +648,8 @@ if __name__ == '__main__':
 
     parser.add_argument('--lr_img', type=float, default=1000, help='learning rate for updating synthetic images')
     parser.add_argument('--lr_lr', type=float, default=1e-05, help='learning rate for updating... learning rate')
-    # parser.add_argument('--lr_teacher', type=float, default=0.01, help='initialization for synthetic learning rate')
-    parser.add_argument('--lr_teacher', '--list', nargs='+', help='<Required> Set flag', required=True)
+    parser.add_argument('--lr_teacher', type=float, default=0.01, help='initialization for synthetic learning rate')
+    # parser.add_argument('--lr_teacher', '--list', nargs='+', help='<Required> Set flag', required=True)
 
     parser.add_argument('--batch_real', type=int, default=256, help='batch size for real data')
     parser.add_argument('--batch_syn', type=int, default=None, help='should only use this if you run out of VRAM')
@@ -701,6 +699,7 @@ if __name__ == '__main__':
     parser.add_argument('--max_duration', type=int, default=1000, help="Maximum iteration for stay in one epoch")
     parser.add_argument('--sigma', type=int, default=5, help="CorrCoef Threshold for starting trending")
     parser.add_argument('--cuda_gpu', type=str, default=None, help="specify which GPU(s) to use")
+
     # Ablation Study -------------------------------------------------------------------
     parser.add_argument('--method', type=str, default='stage-MTT', help="[stage-MTT | original-MTT]")
     parser.add_argument('--sample_method', type=str, default='cycle', help="[cycle | random]")
