@@ -770,7 +770,7 @@ def evaluate_synset(it, it_eval, net, num_classes, images_train, labels_train, d
     images_train = images_train.to(args.device)
     labels_train = labels_train.to(args.device)
     if isinstance(args.lr_net, list):
-        # [Auto Adjust evaluation training epochs]
+        # Evenly spaced list of LR to 500 epochs training
         epoch_per_lr = max(args.syn_steps, 500 // len(args.lr_net))
         Epoch = epoch_per_lr * len(args.lr_net) + 500
         lr_schedule = [[epoch_per_lr * len(args.lr_net)+1, float(args.lr_net[-1]) * 0.1]]

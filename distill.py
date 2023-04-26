@@ -363,6 +363,9 @@ def main(args):
                     torch.save(image_save.cpu(), os.path.join(save_dir, "images_best.pt".format(it)))
                     torch.save(label_syn.cpu(), os.path.join(save_dir, "labels_best.pt".format(it)))
 
+                torch.save(image_save.cpu(), os.path.join(save_dir, "images_last.pt".format(it)))
+                torch.save(label_syn.cpu(), os.path.join(save_dir, "labels_last.pt".format(it)))
+
                 # wandb.log({"Pixels": wandb.Histogram(torch.nan_to_num(image_syn.detach().cpu()))}, step=it)
 
                 if args.ipc < 50 or args.force_save:
@@ -597,7 +600,7 @@ def main(args):
                     wandb.log({"Image Learning Rate": param_group['lr']}, step=it)
                     statement = '{:^70}'.format('[LR Decaying] --- Image Learning Rate: {}'.format(param_group['lr']))
                     print("!" * 16, statement, "!" * 16)
-                    if param_group['lr'] < args.lr_img * 0.05:
+                    if param_group['lr'] < 50:
                         # Automatically Ending the algorithm after fine-tuning
                         print('Test Loss stop improving. End with early stopping!')
                         exit(0)
