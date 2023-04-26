@@ -113,7 +113,8 @@ def main(args):
     images_all = torch.cat(images_all, dim=0).to("cpu")
     labels_all = torch.tensor(labels_all, dtype=torch.long, device="cpu")
     #
-
+    for ch in range(3):
+        print('real images channel %d, mean = %.4f, std = %.4f' % (ch, torch.mean(images_all[:, ch]), torch.std(images_all[:, ch])))
     print("Loading test:")
 
     # dst_test, testloader = ds_test_on_original()
@@ -136,8 +137,8 @@ def main(args):
     model_eval_pool = get_eval_pool(args.eval_mode, args.model, args.model)
     syn_lr = torch.tensor(args.lr_teacher).to(args.device)
 
-    for i in range(1):
-        args.lr_net = [0.0001] * 10
+    for i in range(10):
+        args.lr_net = 0.0001
 
         for model_eval in model_eval_pool:
             accs_test = []
@@ -163,7 +164,7 @@ def main(args):
             acc_test_std = np.std(accs_test)
             acc_train_mean = np.mean(accs_train)
             acc_train_std = np.std(accs_train)
-            mean_acc_all.append(acc_train_mean)
+            mean_acc_all.append(acc_test_mean)
         print('Evaluate %d random %s, train set mean = %.4f std = %.4f' % (
             len(accs_train), model_eval, acc_train_mean, acc_train_std))
         print('Evaluate %d random %s, test set mean = %.4f std = %.4f\n-------------------------' % (

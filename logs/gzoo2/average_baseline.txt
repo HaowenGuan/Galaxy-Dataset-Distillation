@@ -1,0 +1,109 @@
+** lr_net = 0.01 **
+
+/data/sbcaesar/xuan_venv/bin/python3 /data/sbcaesar/xuan_galaxy/baseline_test.py --dataset=GZoo2 --ipc=1 --syn_steps=50 --num_eval=5 --lr_teacher=0.0001 --pix_init=real --data_path=/data/sbcaesar/gzoo2_500ipc --eval_method=average
+BUILDING DATASET
+100%|██████████| 4500/4500 [00:00<00:00, 162576.92it/s]
+4500it [00:00, 4209270.29it/s]
+Loading test:
+Load test!
+100%|██████████| 1001/1001 [00:29<00:00, 34.44it/s]
+[2023-04-25 18:49:59] Evaluate_00: epoch = 1000 train time = 29 s train loss = 2.197272, validation acc = 0.1060, test acc = 0.1044
+100%|██████████| 1001/1001 [00:16<00:00, 59.29it/s]
+[2023-04-25 18:50:19] Evaluate_01: epoch = 1000 train time = 16 s train loss = 4.859033, validation acc = 0.2951, test acc = 0.2856
+100%|██████████| 1001/1001 [00:16<00:00, 59.01it/s]
+[2023-04-25 18:50:39] Evaluate_02: epoch = 1000 train time = 16 s train loss = 1.636371, validation acc = 0.2116, test acc = 0.2133
+100%|██████████| 1001/1001 [00:17<00:00, 58.44it/s]
+[2023-04-25 18:50:59] Evaluate_03: epoch = 1000 train time = 17 s train loss = 0.438307, validation acc = 0.3131, test acc = 0.3056
+100%|██████████| 1001/1001 [00:17<00:00, 58.52it/s]
+[2023-04-25 18:51:19] Evaluate_04: epoch = 1000 train time = 17 s train loss = 0.033841, validation acc = 0.2544, test acc = 0.2644
+Evaluate 5 random ConvNet, train set mean = 0.2360 std = 0.0739
+Evaluate 5 random ConvNet, test set mean = 0.2347 std = 0.0720
+-------------------------
+
+** lr_net = 0.001 **
+
+/data/sbcaesar/xuan_venv/bin/python3 /data/sbcaesar/xuan_galaxy/baseline_test.py --dataset=GZoo2 --ipc=1 --syn_steps=50 --num_eval=5 --lr_teacher=0.0001 --pix_init=real --data_path=/data/sbcaesar/gzoo2_500ipc --eval_method=average
+BUILDING DATASET
+100%|██████████| 4500/4500 [00:00<00:00, 175534.69it/s]
+4500it [00:00, 4235719.93it/s]
+Loading test:
+Load test!
+100%|██████████| 1001/1001 [00:36<00:00, 27.76it/s]
+[2023-04-25 18:41:01] Evaluate_00: epoch = 1000 train time = 36 s train loss = 0.052263, validation acc = 0.2711, test acc = 0.2311
+100%|██████████| 1001/1001 [00:20<00:00, 47.75it/s]
+[2023-04-25 18:41:26] Evaluate_01: epoch = 1000 train time = 20 s train loss = 0.035725, validation acc = 0.3180, test acc = 0.2833
+100%|██████████| 1001/1001 [00:21<00:00, 46.32it/s]
+[2023-04-25 18:41:51] Evaluate_02: epoch = 1000 train time = 21 s train loss = 0.018108, validation acc = 0.3378, test acc = 0.2833
+100%|██████████| 1001/1001 [00:21<00:00, 47.14it/s]
+[2023-04-25 18:42:15] Evaluate_03: epoch = 1000 train time = 21 s train loss = 0.012921, validation acc = 0.2907, test acc = 0.2567
+100%|██████████| 1001/1001 [00:20<00:00, 49.80it/s]
+[2023-04-25 18:42:39] Evaluate_04: epoch = 1000 train time = 20 s train loss = 0.013370, validation acc = 0.2984, test acc = 0.2600
+Evaluate 5 random ConvNet, train set mean = 0.3032 std = 0.0229
+Evaluate 5 random ConvNet, test set mean = 0.2629 std = 0.0195
+-------------------------
+
+** lr_net = 0.0001 **
+
+/data/sbcaesar/xuan_venv/bin/python3 /data/sbcaesar/xuan_galaxy/baseline_test.py --dataset=GZoo2 --ipc=1 --syn_steps=50 --num_eval=5 --lr_teacher=0.0001 --pix_init=real --data_path=/data/sbcaesar/gzoo2_500ipc --eval_method=average
+  0%|          | 0/4500 [00:00<?, ?it/s]BUILDING DATASET
+100%|██████████| 4500/4500 [00:00<00:00, 149327.26it/s]
+4500it [00:00, 4299400.46it/s]
+Loading test:
+Load test!
+100%|██████████| 1001/1001 [00:30<00:00, 32.46it/s]
+[2023-04-25 18:40:47] Evaluate_00: epoch = 1000 train time = 30 s train loss = 0.004972, validation acc = 0.3896, test acc = 0.3878
+100%|██████████| 1001/1001 [00:20<00:00, 48.40it/s]
+[2023-04-25 18:41:12] Evaluate_01: epoch = 1000 train time = 20 s train loss = 0.017253, validation acc = 0.4187, test acc = 0.4244
+100%|██████████| 1001/1001 [00:21<00:00, 47.16it/s]
+[2023-04-25 18:41:36] Evaluate_02: epoch = 1000 train time = 21 s train loss = 0.203637, validation acc = 0.4162, test acc = 0.4178
+100%|██████████| 1001/1001 [00:21<00:00, 46.77it/s]
+[2023-04-25 18:42:01] Evaluate_03: epoch = 1000 train time = 21 s train loss = 0.199994, validation acc = 0.4060, test acc = 0.4156
+100%|██████████| 1001/1001 [00:21<00:00, 47.33it/s]
+[2023-04-25 18:42:26] Evaluate_04: epoch = 1000 train time = 21 s train loss = 0.076596, validation acc = 0.3858, test acc = 0.4122
+Evaluate 5 random ConvNet, train set mean = 0.4032 std = 0.0135
+Evaluate 5 random ConvNet, test set mean = 0.4116 std = 0.0125
+-------------------------
+
+** lr_net = 0.00001 **
+
+/data/sbcaesar/xuan_venv/bin/python3 /data/sbcaesar/xuan_galaxy/baseline_test.py --dataset=GZoo2 --ipc=1 --syn_steps=50 --num_eval=5 --lr_teacher=0.0001 --pix_init=real --data_path=/data/sbcaesar/gzoo2_500ipc --eval_method=average
+BUILDING DATASET
+100%|██████████| 4500/4500 [00:00<00:00, 180141.90it/s]
+4500it [00:00, 4321054.95it/s]
+Loading test:
+Load test!
+100%|██████████| 1001/1001 [00:27<00:00, 36.30it/s]
+[2023-04-25 18:46:17] Evaluate_00: epoch = 1000 train time = 27 s train loss = 0.276277, validation acc = 0.3724, test acc = 0.3711
+100%|██████████| 1001/1001 [00:20<00:00, 49.58it/s]
+[2023-04-25 18:46:40] Evaluate_01: epoch = 1000 train time = 20 s train loss = 0.643733, validation acc = 0.3764, test acc = 0.3956
+100%|██████████| 1001/1001 [00:21<00:00, 45.89it/s]
+[2023-04-25 18:47:05] Evaluate_02: epoch = 1000 train time = 21 s train loss = 0.326251, validation acc = 0.3371, test acc = 0.3289
+100%|██████████| 1001/1001 [00:21<00:00, 45.79it/s]
+[2023-04-25 18:47:31] Evaluate_03: epoch = 1000 train time = 21 s train loss = 0.649408, validation acc = 0.3487, test acc = 0.3556
+100%|██████████| 1001/1001 [00:21<00:00, 47.18it/s]
+[2023-04-25 18:47:55] Evaluate_04: epoch = 1000 train time = 21 s train loss = 0.646863, validation acc = 0.3667, test acc = 0.3500
+Evaluate 5 random ConvNet, train set mean = 0.3603 std = 0.0150
+Evaluate 5 random ConvNet, test set mean = 0.3602 std = 0.0222
+-------------------------
+
+** lr_net = 0.000001 **
+
+/data/sbcaesar/xuan_venv/bin/python3 /data/sbcaesar/xuan_galaxy/baseline_test.py --dataset=GZoo2 --ipc=1 --syn_steps=50 --num_eval=5 --lr_teacher=0.0001 --pix_init=real --data_path=/data/sbcaesar/gzoo2_500ipc --eval_method=average
+BUILDING DATASET
+100%|██████████| 4500/4500 [00:00<00:00, 153974.66it/s]
+4500it [00:00, 3863739.61it/s]
+Loading test:
+Load test!
+100%|██████████| 1001/1001 [00:32<00:00, 30.34it/s]
+[2023-04-25 18:46:36] Evaluate_00: epoch = 1000 train time = 32 s train loss = 1.527899, validation acc = 0.2751, test acc = 0.2678
+100%|██████████| 1001/1001 [00:21<00:00, 46.56it/s]
+[2023-04-25 18:47:01] Evaluate_01: epoch = 1000 train time = 21 s train loss = 1.458205, validation acc = 0.2531, test acc = 0.2444
+100%|██████████| 1001/1001 [00:21<00:00, 45.76it/s]
+[2023-04-25 18:47:26] Evaluate_02: epoch = 1000 train time = 21 s train loss = 2.129480, validation acc = 0.2471, test acc = 0.2500
+100%|██████████| 1001/1001 [00:21<00:00, 46.00it/s]
+[2023-04-25 18:47:52] Evaluate_03: epoch = 1000 train time = 21 s train loss = 1.836297, validation acc = 0.2387, test acc = 0.2533
+100%|██████████| 1001/1001 [00:18<00:00, 55.55it/s]
+[2023-04-25 18:48:13] Evaluate_04: epoch = 1000 train time = 18 s train loss = 1.840739, validation acc = 0.2900, test acc = 0.3000
+Evaluate 5 random ConvNet, train set mean = 0.2608 std = 0.0189
+Evaluate 5 random ConvNet, test set mean = 0.2631 std = 0.0200
+-------------------------

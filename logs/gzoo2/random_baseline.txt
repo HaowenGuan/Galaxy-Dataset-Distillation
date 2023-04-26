@@ -1,0 +1,245 @@
+** lr_net = 0.0001 **
+
+/data/sbcaesar/xuan_venv/bin/python3 /data/sbcaesar/xuan_galaxy/baseline_test.py --dataset=GZoo2 --ipc=1 --syn_steps=50 --num_eval=10 --lr_teacher=0.0001 --pix_init=real --data_path=/data/sbcaesar/gzoo2_500ipc --eval_method=random
+BUILDING DATASET
+100%|██████████| 4500/4500 [00:00<00:00, 176592.36it/s]
+4500it [00:00, 4301360.07it/s]
+real images channel 0, mean = 0.0002, std = 0.9998
+real images channel 1, mean = 0.0002, std = 1.0001
+real images channel 2, mean = 0.0005, std = 0.9999
+Loading test:
+Load test!
+100%|██████████| 1001/1001 [00:19<00:00, 50.56it/s]
+[2023-04-25 19:49:18] Evaluate_00: epoch = 1000 train time = 19 s train loss = 0.008322, validation acc = 0.2824, test acc = 0.2633
+100%|██████████| 1001/1001 [00:09<00:00, 106.81it/s]
+[2023-04-25 19:49:30] Evaluate_01: epoch = 1000 train time = 9 s train loss = 0.002545, validation acc = 0.2700, test acc = 0.2700
+100%|██████████| 1001/1001 [00:09<00:00, 106.06it/s]
+[2023-04-25 19:49:42] Evaluate_02: epoch = 1000 train time = 9 s train loss = 0.035542, validation acc = 0.2756, test acc = 0.2811
+100%|██████████| 1001/1001 [00:10<00:00, 99.86it/s]
+[2023-04-25 19:49:54] Evaluate_03: epoch = 1000 train time = 10 s train loss = 0.001388, validation acc = 0.2676, test acc = 0.2756
+100%|██████████| 1001/1001 [00:09<00:00, 104.93it/s]
+[2023-04-25 19:50:07] Evaluate_04: epoch = 1000 train time = 9 s train loss = 0.021019, validation acc = 0.2649, test acc = 0.2700
+100%|██████████| 1001/1001 [00:09<00:00, 102.44it/s]
+[2023-04-25 19:50:19] Evaluate_05: epoch = 1000 train time = 9 s train loss = 0.003076, validation acc = 0.2827, test acc = 0.2822
+100%|██████████| 1001/1001 [00:09<00:00, 105.29it/s]
+[2023-04-25 19:50:31] Evaluate_06: epoch = 1000 train time = 9 s train loss = 0.009063, validation acc = 0.2789, test acc = 0.2722
+100%|██████████| 1001/1001 [00:09<00:00, 105.39it/s]
+[2023-04-25 19:50:43] Evaluate_07: epoch = 1000 train time = 9 s train loss = 0.017852, validation acc = 0.2738, test acc = 0.2589
+100%|██████████| 1001/1001 [00:09<00:00, 106.47it/s]
+[2023-04-25 19:50:55] Evaluate_08: epoch = 1000 train time = 9 s train loss = 0.002131, validation acc = 0.2760, test acc = 0.2756
+100%|██████████| 1001/1001 [00:09<00:00, 105.46it/s]
+[2023-04-25 19:51:07] Evaluate_09: epoch = 1000 train time = 9 s train loss = 0.003653, validation acc = 0.2711, test acc = 0.2744
+Evaluate 10 random ConvNet, train set mean = 0.2743 std = 0.0057
+Evaluate 10 random ConvNet, test set mean = 0.2723 std = 0.0069
+-------------------------
+100%|██████████| 1001/1001 [00:10<00:00, 98.98it/s]
+[2023-04-25 19:51:19] Evaluate_00: epoch = 1000 train time = 10 s train loss = 0.146214, validation acc = 0.2691, test acc = 0.2722
+100%|██████████| 1001/1001 [00:09<00:00, 103.90it/s]
+[2023-04-25 19:51:32] Evaluate_01: epoch = 1000 train time = 9 s train loss = 0.002456, validation acc = 0.2869, test acc = 0.2844
+100%|██████████| 1001/1001 [00:09<00:00, 104.95it/s]
+[2023-04-25 19:51:44] Evaluate_02: epoch = 1000 train time = 9 s train loss = 0.250735, validation acc = 0.2736, test acc = 0.2744
+100%|██████████| 1001/1001 [00:10<00:00, 95.00it/s]
+[2023-04-25 19:51:57] Evaluate_03: epoch = 1000 train time = 10 s train loss = 0.016614, validation acc = 0.2751, test acc = 0.2778
+100%|██████████| 1001/1001 [00:09<00:00, 103.70it/s]
+[2023-04-25 19:52:09] Evaluate_04: epoch = 1000 train time = 9 s train loss = 0.003435, validation acc = 0.2744, test acc = 0.2767
+100%|██████████| 1001/1001 [00:09<00:00, 106.93it/s]
+[2023-04-25 19:52:21] Evaluate_05: epoch = 1000 train time = 9 s train loss = 0.155346, validation acc = 0.2651, test acc = 0.2622
+100%|██████████| 1001/1001 [00:09<00:00, 106.16it/s]
+[2023-04-25 19:52:33] Evaluate_06: epoch = 1000 train time = 9 s train loss = 0.019855, validation acc = 0.2831, test acc = 0.2789
+100%|██████████| 1001/1001 [00:09<00:00, 102.53it/s]
+[2023-04-25 19:52:45] Evaluate_07: epoch = 1000 train time = 9 s train loss = 0.014031, validation acc = 0.2709, test acc = 0.2800
+100%|██████████| 1001/1001 [00:09<00:00, 100.64it/s]
+[2023-04-25 19:52:57] Evaluate_08: epoch = 1000 train time = 9 s train loss = 0.276566, validation acc = 0.2776, test acc = 0.2744
+100%|██████████| 1001/1001 [00:09<00:00, 105.54it/s]
+[2023-04-25 19:53:09] Evaluate_09: epoch = 1000 train time = 9 s train loss = 0.007208, validation acc = 0.2793, test acc = 0.2800
+  0%|          | 0/1001 [00:00<?, ?it/s]Evaluate 10 random ConvNet, train set mean = 0.2755 std = 0.0062
+Evaluate 10 random ConvNet, test set mean = 0.2761 std = 0.0057
+-------------------------
+100%|██████████| 1001/1001 [00:09<00:00, 105.26it/s]
+[2023-04-25 19:53:21] Evaluate_00: epoch = 1000 train time = 9 s train loss = 0.004297, validation acc = 0.2649, test acc = 0.2622
+100%|██████████| 1001/1001 [00:09<00:00, 105.33it/s]
+[2023-04-25 19:53:33] Evaluate_01: epoch = 1000 train time = 9 s train loss = 0.004792, validation acc = 0.2847, test acc = 0.2744
+100%|██████████| 1001/1001 [00:09<00:00, 104.97it/s]
+[2023-04-25 19:53:45] Evaluate_02: epoch = 1000 train time = 9 s train loss = 0.008082, validation acc = 0.2760, test acc = 0.2711
+100%|██████████| 1001/1001 [00:10<00:00, 96.68it/s]
+[2023-04-25 19:53:58] Evaluate_03: epoch = 1000 train time = 10 s train loss = 0.001780, validation acc = 0.2747, test acc = 0.2656
+100%|██████████| 1001/1001 [00:09<00:00, 104.48it/s]
+[2023-04-25 19:54:10] Evaluate_04: epoch = 1000 train time = 9 s train loss = 0.303680, validation acc = 0.2642, test acc = 0.2778
+100%|██████████| 1001/1001 [00:09<00:00, 102.66it/s]
+[2023-04-25 19:54:23] Evaluate_05: epoch = 1000 train time = 9 s train loss = 0.003611, validation acc = 0.2598, test acc = 0.2611
+100%|██████████| 1001/1001 [00:09<00:00, 104.36it/s]
+[2023-04-25 19:54:35] Evaluate_06: epoch = 1000 train time = 9 s train loss = 0.017731, validation acc = 0.2789, test acc = 0.2822
+100%|██████████| 1001/1001 [00:09<00:00, 106.17it/s]
+[2023-04-25 19:54:47] Evaluate_07: epoch = 1000 train time = 9 s train loss = 0.000947, validation acc = 0.2624, test acc = 0.2544
+100%|██████████| 1001/1001 [00:09<00:00, 104.25it/s]
+[2023-04-25 19:54:59] Evaluate_08: epoch = 1000 train time = 9 s train loss = 0.002995, validation acc = 0.2753, test acc = 0.2811
+100%|██████████| 1001/1001 [00:09<00:00, 104.43it/s]
+[2023-04-25 19:55:11] Evaluate_09: epoch = 1000 train time = 9 s train loss = 0.008173, validation acc = 0.2749, test acc = 0.2711
+Evaluate 10 random ConvNet, train set mean = 0.2716 std = 0.0077
+Evaluate 10 random ConvNet, test set mean = 0.2701 std = 0.0087
+-------------------------
+100%|██████████| 1001/1001 [00:09<00:00, 104.74it/s]
+[2023-04-25 19:55:23] Evaluate_00: epoch = 1000 train time = 9 s train loss = 0.003137, validation acc = 0.2698, test acc = 0.2644
+100%|██████████| 1001/1001 [00:09<00:00, 105.95it/s]
+[2023-04-25 19:55:36] Evaluate_01: epoch = 1000 train time = 9 s train loss = 0.010056, validation acc = 0.2727, test acc = 0.2678
+100%|██████████| 1001/1001 [00:09<00:00, 104.57it/s]
+[2023-04-25 19:55:48] Evaluate_02: epoch = 1000 train time = 9 s train loss = 0.107706, validation acc = 0.2798, test acc = 0.2678
+100%|██████████| 1001/1001 [00:09<00:00, 105.72it/s]
+[2023-04-25 19:56:00] Evaluate_03: epoch = 1000 train time = 9 s train loss = 0.003866, validation acc = 0.2840, test acc = 0.2900
+100%|██████████| 1001/1001 [00:09<00:00, 101.15it/s]
+[2023-04-25 19:56:12] Evaluate_04: epoch = 1000 train time = 9 s train loss = 0.009619, validation acc = 0.2760, test acc = 0.2867
+100%|██████████| 1001/1001 [00:09<00:00, 102.26it/s]
+[2023-04-25 19:56:25] Evaluate_05: epoch = 1000 train time = 9 s train loss = 0.007800, validation acc = 0.2664, test acc = 0.2633
+100%|██████████| 1001/1001 [00:10<00:00, 96.62it/s]
+[2023-04-25 19:56:38] Evaluate_06: epoch = 1000 train time = 10 s train loss = 0.028495, validation acc = 0.2820, test acc = 0.2622
+100%|██████████| 1001/1001 [00:09<00:00, 103.73it/s]
+[2023-04-25 19:56:50] Evaluate_07: epoch = 1000 train time = 9 s train loss = 0.019452, validation acc = 0.2673, test acc = 0.2722
+100%|██████████| 1001/1001 [00:10<00:00, 98.47it/s]
+[2023-04-25 19:57:02] Evaluate_08: epoch = 1000 train time = 10 s train loss = 0.000868, validation acc = 0.2687, test acc = 0.2722
+100%|██████████| 1001/1001 [00:09<00:00, 101.05it/s]
+[2023-04-25 19:57:15] Evaluate_09: epoch = 1000 train time = 9 s train loss = 0.023822, validation acc = 0.2740, test acc = 0.2733
+Evaluate 10 random ConvNet, train set mean = 0.2741 std = 0.0059
+Evaluate 10 random ConvNet, test set mean = 0.2720 std = 0.0090
+-------------------------
+100%|██████████| 1001/1001 [00:10<00:00, 100.01it/s]
+[2023-04-25 19:57:27] Evaluate_00: epoch = 1000 train time = 10 s train loss = 0.048824, validation acc = 0.2791, test acc = 0.2767
+100%|██████████| 1001/1001 [00:10<00:00, 98.55it/s]
+[2023-04-25 19:57:40] Evaluate_01: epoch = 1000 train time = 10 s train loss = 0.002342, validation acc = 0.2780, test acc = 0.2856
+100%|██████████| 1001/1001 [00:10<00:00, 94.30it/s]
+[2023-04-25 19:57:53] Evaluate_02: epoch = 1000 train time = 10 s train loss = 0.002938, validation acc = 0.2682, test acc = 0.2656
+100%|██████████| 1001/1001 [00:09<00:00, 100.13it/s]
+[2023-04-25 19:58:06] Evaluate_03: epoch = 1000 train time = 9 s train loss = 0.002285, validation acc = 0.2580, test acc = 0.2778
+100%|██████████| 1001/1001 [00:10<00:00, 98.66it/s]
+[2023-04-25 19:58:18] Evaluate_04: epoch = 1000 train time = 10 s train loss = 0.390808, validation acc = 0.2636, test acc = 0.2689
+100%|██████████| 1001/1001 [00:09<00:00, 105.97it/s]
+[2023-04-25 19:58:30] Evaluate_05: epoch = 1000 train time = 9 s train loss = 0.002096, validation acc = 0.2702, test acc = 0.2811
+100%|██████████| 1001/1001 [00:10<00:00, 99.30it/s]
+[2023-04-25 19:58:43] Evaluate_06: epoch = 1000 train time = 10 s train loss = 0.017640, validation acc = 0.2838, test acc = 0.2700
+100%|██████████| 1001/1001 [00:10<00:00, 99.62it/s]
+[2023-04-25 19:58:56] Evaluate_07: epoch = 1000 train time = 10 s train loss = 0.004340, validation acc = 0.2920, test acc = 0.2922
+100%|██████████| 1001/1001 [00:09<00:00, 102.58it/s]
+[2023-04-25 19:59:08] Evaluate_08: epoch = 1000 train time = 9 s train loss = 0.001784, validation acc = 0.2600, test acc = 0.2656
+100%|██████████| 1001/1001 [00:10<00:00, 99.80it/s]
+[2023-04-25 19:59:20] Evaluate_09: epoch = 1000 train time = 10 s train loss = 0.010921, validation acc = 0.2791, test acc = 0.2911
+Evaluate 10 random ConvNet, train set mean = 0.2732 std = 0.0104
+Evaluate 10 random ConvNet, test set mean = 0.2774 std = 0.0095
+-------------------------
+100%|██████████| 1001/1001 [00:09<00:00, 101.50it/s]
+[2023-04-25 19:59:33] Evaluate_00: epoch = 1000 train time = 9 s train loss = 0.002736, validation acc = 0.2638, test acc = 0.2756
+100%|██████████| 1001/1001 [00:09<00:00, 101.35it/s]
+[2023-04-25 19:59:45] Evaluate_01: epoch = 1000 train time = 9 s train loss = 0.141877, validation acc = 0.2662, test acc = 0.2678
+100%|██████████| 1001/1001 [00:10<00:00, 93.69it/s]
+[2023-04-25 19:59:58] Evaluate_02: epoch = 1000 train time = 10 s train loss = 0.014288, validation acc = 0.2700, test acc = 0.2600
+100%|██████████| 1001/1001 [00:10<00:00, 99.81it/s]
+[2023-04-25 20:00:11] Evaluate_03: epoch = 1000 train time = 10 s train loss = 0.008105, validation acc = 0.2702, test acc = 0.2722
+100%|██████████| 1001/1001 [00:09<00:00, 100.12it/s]
+[2023-04-25 20:00:23] Evaluate_04: epoch = 1000 train time = 9 s train loss = 0.003273, validation acc = 0.2627, test acc = 0.2800
+100%|██████████| 1001/1001 [00:10<00:00, 100.08it/s]
+[2023-04-25 20:00:36] Evaluate_05: epoch = 1000 train time = 10 s train loss = 0.004350, validation acc = 0.2789, test acc = 0.2744
+100%|██████████| 1001/1001 [00:09<00:00, 101.40it/s]
+[2023-04-25 20:00:48] Evaluate_06: epoch = 1000 train time = 9 s train loss = 0.005855, validation acc = 0.2804, test acc = 0.2733
+100%|██████████| 1001/1001 [00:09<00:00, 100.86it/s]
+[2023-04-25 20:01:01] Evaluate_07: epoch = 1000 train time = 9 s train loss = 0.013737, validation acc = 0.2867, test acc = 0.2844
+100%|██████████| 1001/1001 [00:09<00:00, 101.26it/s]
+[2023-04-25 20:01:13] Evaluate_08: epoch = 1000 train time = 9 s train loss = 0.000958, validation acc = 0.2724, test acc = 0.2733
+100%|██████████| 1001/1001 [00:09<00:00, 101.03it/s]
+[2023-04-25 20:01:26] Evaluate_09: epoch = 1000 train time = 9 s train loss = 0.623083, validation acc = 0.2629, test acc = 0.2444
+Evaluate 10 random ConvNet, train set mean = 0.2714 std = 0.0078
+Evaluate 10 random ConvNet, test set mean = 0.2706 std = 0.0107
+-------------------------
+100%|██████████| 1001/1001 [00:09<00:00, 100.74it/s]
+[2023-04-25 20:01:38] Evaluate_00: epoch = 1000 train time = 9 s train loss = 0.002031, validation acc = 0.2780, test acc = 0.2733
+100%|██████████| 1001/1001 [00:10<00:00, 99.97it/s]
+[2023-04-25 20:01:51] Evaluate_01: epoch = 1000 train time = 10 s train loss = 0.017432, validation acc = 0.2664, test acc = 0.2622
+100%|██████████| 1001/1001 [00:10<00:00, 99.20it/s]
+[2023-04-25 20:02:03] Evaluate_02: epoch = 1000 train time = 10 s train loss = 0.097287, validation acc = 0.2740, test acc = 0.2700
+100%|██████████| 1001/1001 [00:10<00:00, 99.83it/s]
+[2023-04-25 20:02:16] Evaluate_03: epoch = 1000 train time = 10 s train loss = 0.002509, validation acc = 0.2631, test acc = 0.2633
+100%|██████████| 1001/1001 [00:10<00:00, 93.46it/s]
+[2023-04-25 20:02:29] Evaluate_04: epoch = 1000 train time = 10 s train loss = 0.020483, validation acc = 0.2749, test acc = 0.2733
+100%|██████████| 1001/1001 [00:10<00:00, 99.41it/s]
+[2023-04-25 20:02:42] Evaluate_05: epoch = 1000 train time = 10 s train loss = 0.006907, validation acc = 0.2736, test acc = 0.2811
+100%|██████████| 1001/1001 [00:10<00:00, 99.94it/s]
+[2023-04-25 20:02:54] Evaluate_06: epoch = 1000 train time = 10 s train loss = 0.017583, validation acc = 0.2704, test acc = 0.2667
+100%|██████████| 1001/1001 [00:10<00:00, 97.79it/s]
+[2023-04-25 20:03:07] Evaluate_07: epoch = 1000 train time = 10 s train loss = 0.003578, validation acc = 0.2856, test acc = 0.2967
+100%|██████████| 1001/1001 [00:09<00:00, 100.67it/s]
+[2023-04-25 20:03:19] Evaluate_08: epoch = 1000 train time = 9 s train loss = 0.015412, validation acc = 0.2724, test acc = 0.2689
+100%|██████████| 1001/1001 [00:10<00:00, 94.05it/s]
+[2023-04-25 20:03:33] Evaluate_09: epoch = 1000 train time = 10 s train loss = 0.003443, validation acc = 0.2667, test acc = 0.2656
+  0%|          | 0/1001 [00:00<?, ?it/s]Evaluate 10 random ConvNet, train set mean = 0.2725 std = 0.0061
+Evaluate 10 random ConvNet, test set mean = 0.2721 std = 0.0097
+-------------------------
+100%|██████████| 1001/1001 [00:09<00:00, 100.11it/s]
+[2023-04-25 20:03:45] Evaluate_00: epoch = 1000 train time = 9 s train loss = 0.019539, validation acc = 0.2629, test acc = 0.2644
+100%|██████████| 1001/1001 [00:10<00:00, 96.72it/s]
+[2023-04-25 20:03:58] Evaluate_01: epoch = 1000 train time = 10 s train loss = 0.001031, validation acc = 0.2738, test acc = 0.2678
+100%|██████████| 1001/1001 [00:10<00:00, 98.29it/s]
+[2023-04-25 20:04:11] Evaluate_02: epoch = 1000 train time = 10 s train loss = 0.008421, validation acc = 0.2684, test acc = 0.2644
+100%|██████████| 1001/1001 [00:10<00:00, 97.49it/s]
+[2023-04-25 20:04:24] Evaluate_03: epoch = 1000 train time = 10 s train loss = 0.105810, validation acc = 0.2682, test acc = 0.2656
+100%|██████████| 1001/1001 [00:10<00:00, 95.40it/s]
+[2023-04-25 20:04:37] Evaluate_04: epoch = 1000 train time = 10 s train loss = 0.004187, validation acc = 0.2647, test acc = 0.2578
+100%|██████████| 1001/1001 [00:10<00:00, 96.81it/s]
+[2023-04-25 20:04:49] Evaluate_05: epoch = 1000 train time = 10 s train loss = 0.008512, validation acc = 0.2751, test acc = 0.2689
+100%|██████████| 1001/1001 [00:10<00:00, 96.47it/s]
+[2023-04-25 20:05:02] Evaluate_06: epoch = 1000 train time = 10 s train loss = 0.000919, validation acc = 0.2900, test acc = 0.2844
+100%|██████████| 1001/1001 [00:10<00:00, 96.41it/s]
+[2023-04-25 20:05:15] Evaluate_07: epoch = 1000 train time = 10 s train loss = 0.004443, validation acc = 0.2596, test acc = 0.2656
+100%|██████████| 1001/1001 [00:10<00:00, 95.12it/s]
+[2023-04-25 20:05:28] Evaluate_08: epoch = 1000 train time = 10 s train loss = 0.003928, validation acc = 0.2831, test acc = 0.2800
+100%|██████████| 1001/1001 [00:10<00:00, 95.15it/s]
+[2023-04-25 20:05:42] Evaluate_09: epoch = 1000 train time = 10 s train loss = 0.239059, validation acc = 0.2847, test acc = 0.2844
+Evaluate 10 random ConvNet, train set mean = 0.2730 std = 0.0096
+Evaluate 10 random ConvNet, test set mean = 0.2703 std = 0.0088
+-------------------------
+100%|██████████| 1001/1001 [00:10<00:00, 96.88it/s]
+[2023-04-25 20:05:54] Evaluate_00: epoch = 1000 train time = 10 s train loss = 0.206879, validation acc = 0.2633, test acc = 0.2633
+100%|██████████| 1001/1001 [00:10<00:00, 96.30it/s]
+[2023-04-25 20:06:07] Evaluate_01: epoch = 1000 train time = 10 s train loss = 0.014212, validation acc = 0.2760, test acc = 0.2789
+100%|██████████| 1001/1001 [00:10<00:00, 94.11it/s]
+[2023-04-25 20:06:21] Evaluate_02: epoch = 1000 train time = 10 s train loss = 0.004237, validation acc = 0.2718, test acc = 0.2767
+100%|██████████| 1001/1001 [00:09<00:00, 100.22it/s]
+[2023-04-25 20:06:33] Evaluate_03: epoch = 1000 train time = 9 s train loss = 0.003179, validation acc = 0.2749, test acc = 0.2722
+100%|██████████| 1001/1001 [00:10<00:00, 94.32it/s]
+[2023-04-25 20:06:46] Evaluate_04: epoch = 1000 train time = 10 s train loss = 0.041543, validation acc = 0.2624, test acc = 0.2667
+100%|██████████| 1001/1001 [00:10<00:00, 95.74it/s]
+[2023-04-25 20:06:59] Evaluate_05: epoch = 1000 train time = 10 s train loss = 0.002188, validation acc = 0.2716, test acc = 0.2611
+100%|██████████| 1001/1001 [00:10<00:00, 94.98it/s]
+[2023-04-25 20:07:12] Evaluate_06: epoch = 1000 train time = 10 s train loss = 0.003523, validation acc = 0.2767, test acc = 0.2867
+100%|██████████| 1001/1001 [00:10<00:00, 95.00it/s]
+[2023-04-25 20:07:25] Evaluate_07: epoch = 1000 train time = 10 s train loss = 0.066135, validation acc = 0.2687, test acc = 0.2711
+100%|██████████| 1001/1001 [00:10<00:00, 93.24it/s]
+[2023-04-25 20:07:39] Evaluate_08: epoch = 1000 train time = 10 s train loss = 0.009848, validation acc = 0.2664, test acc = 0.2600
+100%|██████████| 1001/1001 [00:10<00:00, 96.12it/s]
+[2023-04-25 20:07:52] Evaluate_09: epoch = 1000 train time = 10 s train loss = 0.007824, validation acc = 0.2558, test acc = 0.2611
+Evaluate 10 random ConvNet, train set mean = 0.2688 std = 0.0064
+Evaluate 10 random ConvNet, test set mean = 0.2698 std = 0.0085
+-------------------------
+100%|██████████| 1001/1001 [00:10<00:00, 95.58it/s]
+[2023-04-25 20:08:05] Evaluate_00: epoch = 1000 train time = 10 s train loss = 0.004095, validation acc = 0.2756, test acc = 0.2756
+100%|██████████| 1001/1001 [00:10<00:00, 94.95it/s]
+[2023-04-25 20:08:18] Evaluate_01: epoch = 1000 train time = 10 s train loss = 0.223754, validation acc = 0.2689, test acc = 0.2744
+100%|██████████| 1001/1001 [00:10<00:00, 95.08it/s]
+[2023-04-25 20:08:31] Evaluate_02: epoch = 1000 train time = 10 s train loss = 0.026279, validation acc = 0.2698, test acc = 0.2667
+100%|██████████| 1001/1001 [00:10<00:00, 93.01it/s]
+[2023-04-25 20:08:44] Evaluate_03: epoch = 1000 train time = 10 s train loss = 0.191721, validation acc = 0.2853, test acc = 0.2800
+100%|██████████| 1001/1001 [00:10<00:00, 94.16it/s]
+[2023-04-25 20:08:58] Evaluate_04: epoch = 1000 train time = 10 s train loss = 0.008604, validation acc = 0.2522, test acc = 0.2689
+100%|██████████| 1001/1001 [00:10<00:00, 94.55it/s]
+[2023-04-25 20:09:11] Evaluate_05: epoch = 1000 train time = 10 s train loss = 0.000716, validation acc = 0.2771, test acc = 0.2744
+100%|██████████| 1001/1001 [00:10<00:00, 96.66it/s]
+[2023-04-25 20:09:24] Evaluate_06: epoch = 1000 train time = 10 s train loss = 0.021038, validation acc = 0.2736, test acc = 0.2722
+100%|██████████| 1001/1001 [00:10<00:00, 97.97it/s]
+[2023-04-25 20:09:36] Evaluate_07: epoch = 1000 train time = 10 s train loss = 0.012533, validation acc = 0.2733, test acc = 0.2833
+100%|██████████| 1001/1001 [00:10<00:00, 94.26it/s]
+[2023-04-25 20:09:50] Evaluate_08: epoch = 1000 train time = 10 s train loss = 0.010430, validation acc = 0.2749, test acc = 0.2733
+100%|██████████| 1001/1001 [00:10<00:00, 95.81it/s]
+[2023-04-25 20:10:03] Evaluate_09: epoch = 1000 train time = 10 s train loss = 0.003785, validation acc = 0.2800, test acc = 0.2722
+Evaluate 10 random ConvNet, train set mean = 0.2731 std = 0.0083
+Evaluate 10 random ConvNet, test set mean = 0.2741 std = 0.0046
+-------------------------
+[0.27233333333333326, 0.2761111111111111, 0.27011111111111114, 0.27199999999999996, 0.2774444444444445, 0.27055555555555555, 0.2721111111111111, 0.2703333333333333, 0.2697777777777778, 0.2741111111111111]
+Mean test accuracy of 10 ramdom sets: 0.2724888888888889
+
+Process finished with exit code 0
