@@ -13,6 +13,7 @@ from torchvision.utils import save_image
 from astropy.io import fits
 import cv2 as cv
 from torchvision import datasets, transforms
+from gzoo2_dataset import GZooDataset, CustomDataset
 
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -79,7 +80,14 @@ def ds_test_on_original():
     testloader = torch.utils.data.DataLoader(dst_test, batch_size=128, shuffle=False, num_workers=2)
     return dst_test, testloader
 
+def get_images_average(c, images_all, indices_class):
+     avg_pic = torch.mean(images_all[indices_class[c]],0)
+     save_image(avg_pic, 'logs/gzoo2/average_images/class_'+str(c)+"_average.png")
+     return avg_pic
 
+def get_random_images(c, images_all, indices_class, n=1):  # get random n images from class c
+    idx_shuffle = np.random.permutation(indices_class[c])[:n]
+    return images_all[idx_shuffle]
 
 def main(args):
 
@@ -105,15 +113,8 @@ def main(args):
     images_all = torch.cat(images_all, dim=0).to("cpu")
     labels_all = torch.tensor(labels_all, dtype=torch.long, device="cpu")
     #
-    # def get_images(c, n):  # get random n images from class c
-    #     idx_shuffle = np.random.permutation(indices_class[c])[:n]
-    #     return images_all[idx_shuffle]
-
-    # def get_images_average(c,n):
-    #     avg_pic = torch.mean(images_all[indices_class[c]],0)
-    #     save_image(avg_pic, 'logs/average_images/class_'+str(c)+"_average.png")
-    #     return avg_pic
-
+    for ch in range(3):
+        print('real images channel %d, mean = %.4f, std = %.4f' % (ch, torch.mean(images_all[:, ch]), torch.std(images_all[:, ch])))
     print("Loading test:")
 
     # dst_test, testloader = ds_test_on_original()
@@ -121,21 +122,23 @@ def main(args):
     mean_acc_all = []
     trainloader = torch.utils.data.DataLoader(dst_train, batch_size=128, shuffle=False, num_workers=2)
     label_syn = torch.tensor([np.ones(args.ipc)*i for i in range(num_classes)], dtype=torch.long, requires_grad=False, device=args.device).view(-1)
-    # image_syn = torch.randn(size=(num_classes * args.ipc, channel, im_size[0], im_size[1]), dtype=torch.float)
-    # image_syn = torch.load("/data/sbcaesar/mac_galaxy/logged_files/CIFAR10/cifar10-1ipc-10-no-mini-duration/images_2600.pt")
-    image_syn = torch.load("/data/sbcaesar/guan_galaxy/logged_files/CIFAR10/cifar10-10ipc-zca-stage-noise-final-1/images_4200.pt")
+    image_syn = torch.randn(size=(num_classes * args.ipc, channel, im_size[0], im_size[1]), dtype=torch.float)
+    if args.eval_method == "distilled":
+        image_syn = torch.load(args.distilled_path)
 
-    # for c in range(num_classes):
-    #     image_syn.data[c * args.ipc:(c + 1) * args.ipc] = get_images_average(c, args.ipc).detach().data
-        # image_syn.data[c * args.ipc:(c + 1) * args.ipc] = get_images(c, args.ipc).detach().data
+    else:
+        for c in range(num_classes):
+            if args.eval_method == "average":
+                image_syn.data[c * args.ipc:(c + 1) * args.ipc] = get_images_average(c, images_all, indices_class).detach().data
+            elif args.eval_method == "random":
+                image_syn.data[c * args.ipc:(c + 1) * args.ipc] = get_random_images(c, images_all, indices_class).detach().data
 
     eval_it_pool = np.arange(0, args.Iteration + 1, args.eval_it).tolist()
     model_eval_pool = get_eval_pool(args.eval_mode, args.model, args.model)
     syn_lr = torch.tensor(args.lr_teacher).to(args.device)
 
-    for i in range(1, 2):
-        args.lr_net = [0.030194150283932686, 0.029381312429904938, 0.02614683285355568, 0.025297176092863083, 0.025647904723882675, 0.026483828201889992, 0.027240358293056488, 0.02810422144830227, 0.028140494599938393, 0.027514396235346794, 0.027191029861569405, 0.026667356491088867, 0.026324940845370293, 0.02609262987971306]
-        # args.lr_net += [0.001] * (10 - i)
+    for i in range(10):
+        args.lr_net = 0.0001
 
         for model_eval in model_eval_pool:
             accs_test = []
@@ -161,7 +164,7 @@ def main(args):
             acc_test_std = np.std(accs_test)
             acc_train_mean = np.mean(accs_train)
             acc_train_std = np.std(accs_train)
-            mean_acc_all.append(acc_train_mean)
+            mean_acc_all.append(acc_test_mean)
         print('Evaluate %d random %s, train set mean = %.4f std = %.4f' % (
             len(accs_train), model_eval, acc_train_mean, acc_train_std))
         print('Evaluate %d random %s, test set mean = %.4f std = %.4f\n-------------------------' % (
@@ -233,6 +236,9 @@ if __name__ == '__main__':
     parser.add_argument('--max_experts', type=int, default=None, help='number of experts to read per file (leave as None unless doing ablations)')
 
     parser.add_argument('--force_save', action='store_true', help='this will save images for 50ipc')
+
+    parser.add_argument('--eval_method', type=str, default='distilled', help='evaluation method: distilled, average or random')
+    parser.add_argument('--distilled_path', type=str, default='/data/sbcaesar/mac_galaxy/logged_files/CIFAR10/cifar10-1ipc-10-no-mini-duration/images_2600.pt', help='path to your distilled images')
 
     args = parser.parse_args()
 
