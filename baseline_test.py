@@ -152,7 +152,7 @@ def main(args):
                 image_syn_eval, label_syn_eval = copy.deepcopy(image_save.detach()), copy.deepcopy(eval_labs.detach()) # avoid any unaware modification
 
 
-                _, acc_train, acc_test, train_cf, test_cf = evaluate_synset(1, it_eval, net_eval, num_classes,
+                _, acc_train, acc_test, train_cf, test_cf = evaluate_synset(it_eval, net_eval, num_classes,
                                                                             image_syn_eval, label_syn_eval, dst_train, dst_test,
                                                                             trainloader, testloader, args, texture=args.texture)
                 accs_test.append(acc_test)

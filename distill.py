@@ -298,7 +298,7 @@ def main(args):
                     for i in log_syn_lr_list:
                         args.lr_net.append(torch.exp(i).item())
 
-                    _, acc_train, acc_test, train_cf, test_cf = evaluate_synset(it, it_eval, net_eval, num_classes,
+                    _, acc_train, acc_test, train_cf, test_cf = evaluate_synset(it_eval, net_eval, num_classes,
                                                                                 image_syn_eval, label_syn_eval,
                                                                                 dst_train, dst_test, trainloader,
                                                                                 testloader, args, texture=args.texture)
@@ -421,7 +421,7 @@ def main(args):
         else:
             wandb.log({"Synthetic_LR": syn_lr.detach().cpu()}, step=it)
 
-        student_net = get_network(args.model, channel, num_classes, im_size, dist=False).to(
+        student_net = get_network(args.model, channel, num_classes, im_size).to(
             args.device)  # get a random model
 
         student_net = ReparamModule(student_net)

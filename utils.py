@@ -535,7 +535,7 @@ def get_default_convnet_setting():
 
 
 
-def get_network(model, channel, num_classes, im_size=(32, 32), dist=True):
+def get_network(model, channel, num_classes, im_size=(32, 32)):
     torch.random.manual_seed(int(time.time() * 1000) % 100000)
     net_width, net_depth, net_act, net_norm, net_pooling = get_default_convnet_setting()
 
@@ -754,7 +754,7 @@ def epoch_regression(mode, dataloader, net, optimizer, criterion, args, aug, tex
 
         loss_avg += loss.item()*n_b
         num_exp += n_b
-        # print(output[0], lab[0])
+
         if mode == 'train':
             optimizer.zero_grad()
             loss.backward()
@@ -765,26 +765,25 @@ def epoch_regression(mode, dataloader, net, optimizer, criterion, args, aug, tex
     return loss_avg
 
 
-def evaluate_synset(it, it_eval, net, num_classes, images_train, labels_train, dst_val, dst_test, valloader, testloader, args, return_loss=False, texture=False):
+def evaluate_synset(it_eval, net, num_classes, images_train, labels_train, dst_val, dst_test, valloader, testloader, args, return_loss=False, texture=False):
     net = net.to(args.device)
     images_train = images_train.to(args.device)
     labels_train = labels_train.to(args.device)
     if isinstance(args.lr_net, list):
-        # Evenly spaced list of LR to 500 epochs training
+        # Evenly space LR schedule list to 500 epochs training
         epoch_per_lr = max(args.syn_steps, 500 // len(args.lr_net))
-        Epoch = epoch_per_lr * len(args.lr_net) + 500
+        epochs = epoch_per_lr * len(args.lr_net) + 500
         lr_schedule = [[epoch_per_lr * len(args.lr_net)+1, float(args.lr_net[-1]) * 0.1]]
         for i, lr in reversed(list(enumerate(args.lr_net[1:], 1))):
             lr_schedule.append([epoch_per_lr * i, float(lr)])
-        # First LR
         optimizer = torch.optim.SGD(net.parameters(), lr=float(args.lr_net[0]), momentum=0.9, weight_decay=0.0005)
         if it_eval == 0:
             print("Current lr schedule:")
             print([[0, args.lr_net[0]]] + lr_schedule[::-1])
     else:
         lr = float(args.lr_net)
-        Epoch = int(args.epoch_eval_train)
-        lr_schedule = [[Epoch//2+1, lr * 0.1]]
+        epochs = int(args.epoch_eval_train)
+        lr_schedule = [[epochs//2+1, lr * 0.1]]
         optimizer = torch.optim.SGD(net.parameters(), lr=lr, momentum=0.9, weight_decay=0.0005)
 
     criterion = nn.CrossEntropyLoss().to(args.device)
@@ -793,14 +792,15 @@ def evaluate_synset(it, it_eval, net, num_classes, images_train, labels_train, d
     trainloader = torch.utils.data.DataLoader(dst_train, batch_size=args.batch_train, shuffle=True, num_workers=0)
 
     start = time.time()
+    loss_train = 0
     acc_train_list = []
     loss_train_list = []
 
-    for ep in tqdm.tqdm(range(Epoch+1)):
+    for ep in tqdm.tqdm(range(epochs+1)):
         loss_train, acc_train = epoch('train', trainloader, net, optimizer, criterion, args, aug=True, texture=texture)
         acc_train_list.append(acc_train)
         loss_train_list.append(loss_train)
-        if ep == Epoch:
+        if ep == epochs:
             with torch.no_grad():
                 loss_val, acc_val = epoch('test', valloader, net, optimizer, criterion, args, aug=False)
                 loss_test, acc_test = epoch('test', testloader, net, optimizer, criterion, args, aug=False)
@@ -810,7 +810,7 @@ def evaluate_synset(it, it_eval, net, num_classes, images_train, labels_train, d
 
     time_train = time.time() - start
 
-    print('%s Evaluate_%02d: epoch = %04d train time = %d s train loss = %.6f, validation acc = %.4f, test acc = %.4f' % (get_time(), it_eval, Epoch, int(time_train), loss_train, acc_val, acc_test))
+    print('%s Evaluate_%02d: epoch = %04d train time = %d s train loss = %.6f, validation acc = %.4f, test acc = %.4f' % (get_time(), it_eval, epochs, int(time_train), loss_train, acc_val, acc_test))
 
     # Calculate Confusion Matrices
     val_cf, test_cf = np.array([[0] * num_classes for _ in range(num_classes)]), np.array([[0] * num_classes for _ in range(num_classes)])
@@ -834,10 +834,45 @@ def evaluate_synset(it, it_eval, net, num_classes, images_train, labels_train, d
         return net, acc_val, acc_test, val_cf, test_cf
 
 
+def eval_aug(args, image_syn, label_syn):
+
+    if args.flip_h or args.flip_v or args.transpose:
+        image_syn_list = [image_syn]
+        label_syn_list = [label_syn]
+
+        if args.flip_h:
+            print("Flipping images horizontally for augmentation")
+            image_syn_list.append(torch.flip(image_syn, [3]))
+            label_syn_list.append(label_syn)
+
+
+        if args.flip_v:
+            print("Flipping images vertically for augmentation")
+            image_syn_list.append(torch.flip(image_syn, [2]))
+            label_syn_list.append(label_syn)
+
+        if args.transpose:
+            print("Transposing images for augmentation")
+            image_syn_list.append(torch.transpose(image_syn, 2, 3))
+            label_syn_list.append(label_syn)
+
+        image_syn = torch.cat(image_syn_list, dim=0)
+        label_syn = torch.cat(label_syn_list, dim=0)
+
+    if args.rotate:
+        print("Rotating images for augmentation")
+        image_syn_list = [image_syn]
+        for i in range(3):
+            image_syn_list.append(torch.rot90(image_syn, i+1, [2, 3]))
+        image_syn = torch.cat(image_syn_list, dim=0)
+        label_syn = torch.cat([label_syn for _ in range(4)], dim=0)
+    return image_syn, label_syn
+
+
 def augment(images, dc_aug_param, device):
     # This can be sped up in the future.
 
-    if dc_aug_param != None and dc_aug_param['strategy'] != 'none':
+    if dc_aug_param is not None and dc_aug_param['strategy'] != 'none':
         scale = dc_aug_param['scale']
         crop = dc_aug_param['crop']
         rotate = dc_aug_param['rotate']
@@ -849,18 +884,18 @@ def augment(images, dc_aug_param, device):
         for c in range(shape[1]):
             mean.append(float(torch.mean(images[:,c])))
 
-        def cropfun(i):
+        def cropfun(j):
             im_ = torch.zeros(shape[1],shape[2]+crop*2,shape[3]+crop*2, dtype=torch.float, device=device)
             for c in range(shape[1]):
                 im_[c] = mean[c]
-            im_[:, crop:crop+shape[2], crop:crop+shape[3]] = images[i]
+            im_[:, crop:crop+shape[2], crop:crop+shape[3]] = images[j]
             r, c = np.random.permutation(crop*2)[0], np.random.permutation(crop*2)[0]
-            images[i] = im_[:, r:r+shape[2], c:c+shape[3]]
+            images[j] = im_[:, r:r + shape[2], c:c + shape[3]]
 
-        def scalefun(i):
+        def scalefun(j):
             h = int((np.random.uniform(1 - scale, 1 + scale)) * shape[2])
             w = int((np.random.uniform(1 - scale, 1 + scale)) * shape[2])
-            tmp = F.interpolate(images[i:i + 1], [h, w], )[0]
+            tmp = F.interpolate(images[j:j + 1], [h, w], )[0]
             mhw = max(h, w, shape[2], shape[3])
             im_ = torch.zeros(shape[1], mhw, mhw, dtype=torch.float, device=device)
             r = int((mhw - h) / 2)
@@ -868,16 +903,16 @@ def augment(images, dc_aug_param, device):
             im_[:, r:r + h, c:c + w] = tmp
             r = int((mhw - shape[2]) / 2)
             c = int((mhw - shape[3]) / 2)
-            images[i] = im_[:, r:r + shape[2], c:c + shape[3]]
+            images[j] = im_[:, r:r + shape[2], c:c + shape[3]]
 
-        def rotatefun(i):
-            im_ = scipyrotate(images[i].cpu().data.numpy(), angle=np.random.randint(-rotate, rotate), axes=(-2, -1), cval=np.mean(mean))
+        def rotatefun(j):
+            im_ = scipyrotate(images[j].cpu().data.numpy(), angle=np.random.randint(-rotate, rotate), axes=(-2, -1), cval=np.mean(mean))
             r = int((im_.shape[-2] - shape[-2]) / 2)
             c = int((im_.shape[-1] - shape[-1]) / 2)
-            images[i] = torch.tensor(im_[:, r:r + shape[-2], c:c + shape[-1]], dtype=torch.float, device=device)
+            images[j] = torch.tensor(im_[:, r:r + shape[-2], c:c + shape[-1]], dtype=torch.float, device=device)
 
-        def noisefun(i):
-            images[i] = images[i] + noise * torch.randn(shape[1:], dtype=torch.float, device=device)
+        def noisefun(j):
+            images[j] = images[j] + noise * torch.randn(shape[1:], dtype=torch.float, device=device)
 
 
         augs = strategy.split('_')
