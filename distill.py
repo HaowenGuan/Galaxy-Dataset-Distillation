@@ -327,6 +327,11 @@ def main(args):
                 wandb.log({'Std/{}'.format(model_eval): acc_train_std}, step=it)
                 wandb.log({'Max_Std/{}'.format(model_eval): best_std[model_eval]}, step=it)
 
+                printing_lr_list = []
+                for lr in log_syn_lr_list:
+                    printing_lr_list.append(torch.exp(lr).item())
+                print('lr_list:', printing_lr_list)
+
                 for name, cf_matrix in [["train", total_train_cf], ["test", total_test_cf]]:
                     cf_matrix = cf_matrix.tolist()
                     for r in cf_matrix:
@@ -344,10 +349,6 @@ def main(args):
                     plt.close()
 
         if it in eval_it_pool and (save_this_it or it % 1000 == 0):
-            printing_lr_list = []
-            for lr in log_syn_lr_list:
-                printing_lr_list.append(torch.exp(lr).item())
-            print('lr_list:', printing_lr_list)
             with torch.no_grad():
                 image_save = image_syn.cuda()
 
