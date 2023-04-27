@@ -385,7 +385,7 @@ Current lr schedule:
 [2023-04-27 04:22:10] Evaluate_04: epoch = 1000 train time = 64 s train loss = 0.014625, validation acc = 0.6900, test acc = 0.6833
 Evaluate 5 random ConvNet, train set mean = 0.6920 std = 0.0129
 Evaluate 5 random ConvNet, test set mean = 0.6693 std = 0.0110
--------------------------
+
 [0.6693333333333333]
 Mean test accuracy of 10 ramdom sets: 0.6693333333333333
 
@@ -420,7 +420,7 @@ Current lr schedule:
 [2023-04-27 04:50:46] Evaluate_04: epoch = 1000 train time = 404 s train loss = 0.004718, validation acc = 0.6504, test acc = 0.6378
 Evaluate 5 random ConvNet, train set mean = 0.6821 std = 0.0174
 Evaluate 5 random ConvNet, test set mean = 0.6693 std = 0.0193
--------------------------
+
 [0.6693333333333333]
 Mean test accuracy of 10 ramdom sets: 0.6693333333333333
 
@@ -452,7 +452,7 @@ Current lr schedule:
 [2023-04-27 05:24:34] Evaluate_04: epoch = 1000 train time = 802 s train loss = 0.003229, validation acc = 0.6733, test acc = 0.6678
 Evaluate 5 random ConvNet, train set mean = 0.6722 std = 0.0163
 Evaluate 5 random ConvNet, test set mean = 0.6629 std = 0.0165
--------------------------
+
 [0.6628888888888889]
 Mean test accuracy of 10 ramdom sets: 0.6628888888888889
 
@@ -493,7 +493,7 @@ Current lr schedule:
 [2023-04-27 05:15:12] Evaluate_04: epoch = 1000 train time = 8 s train loss = 0.016938, validation acc = 0.5522, test acc = 0.5378
 Evaluate 5 random ConvNet, train set mean = 0.5574 std = 0.0054
 Evaluate 5 random ConvNet, test set mean = 0.5413 std = 0.0089
--------------------------
+
 [0.5413333333333333]
 Mean test accuracy of 10 ramdom sets: 0.5413333333333333
 
@@ -530,7 +530,7 @@ Current lr schedule:
 [2023-04-27 05:20:44] Evaluate_04: epoch = 1000 train time = 41 s train loss = 0.014602, validation acc = 0.5293, test acc = 0.5411
 Evaluate 5 random ConvNet, train set mean = 0.5316 std = 0.0054
 Evaluate 5 random ConvNet, test set mean = 0.5373 std = 0.0062
--------------------------
+
 [0.5373333333333333]
 Mean test accuracy of 10 ramdom sets: 0.5373333333333333
 
