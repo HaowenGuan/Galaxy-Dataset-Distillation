@@ -44,11 +44,12 @@ Current lr schedule:
 [2023-04-27 03:32:47] Evaluate_04: epoch = 1000 train time = 19 s train loss = 0.004402, validation acc = 0.5040, test acc = 0.5000
 Evaluate 5 random ConvNet, train set mean = 0.5172 std = 0.0148
 Evaluate 5 random ConvNet, test set mean = 0.5113 std = 0.0113
--------------------------
+
 [0.5113333333333333]
 Mean test accuracy of 10 ramdom sets: 0.5113333333333333
 
 Process finished with exit code 0
+
 
 </details>
 
@@ -77,7 +78,7 @@ Current lr schedule:
 [2023-04-27 03:41:53] Evaluate_04: epoch = 1000 train time = 22 s train loss = 0.034356, validation acc = 0.5135, test acc = 0.5067
 Evaluate 5 random ConvNet, train set mean = 0.5197 std = 0.0181
 Evaluate 5 random ConvNet, test set mean = 0.4971 std = 0.0204
--------------------------
+
 [0.49711111111111117]
 Mean test accuracy of 10 ramdom sets: 0.49711111111111117
 
@@ -110,7 +111,7 @@ Current lr schedule:
 [2023-04-27 03:42:28] Evaluate_04: epoch = 1500 train time = 24 s train loss = 0.163811, validation acc = 0.5337, test acc = 0.5167
 Evaluate 5 random ConvNet, train set mean = 0.5152 std = 0.0142
 Evaluate 5 random ConvNet, test set mean = 0.4993 std = 0.0145
--------------------------
+
 [0.4993333333333333]
 Mean test accuracy of 10 ramdom sets: 0.4993333333333333
 
@@ -154,11 +155,12 @@ Current lr schedule:
 [2023-04-27 03:22:48] Evaluate_04: epoch = 1000 train time = 54 s train loss = 0.001665, validation acc = 0.5466, test acc = 0.5278
 Evaluate 5 random ConvNet, train set mean = 0.5562 std = 0.0156
 Evaluate 5 random ConvNet, test set mean = 0.5451 std = 0.0117
--------------------------
+
 [0.5451111111111111]
 Mean test accuracy of 10 ramdom sets: 0.5451111111111111
 
 Process finished with exit code 0
+
 </details>
 
 > --rotate --transpose --flip_h --flip_v
@@ -192,7 +194,7 @@ Current lr schedule:
 [2023-04-27 03:33:08] Evaluate_04: epoch = 1000 train time = 94 s train loss = 0.004306, validation acc = 0.5653, test acc = 0.5422
 Evaluate 5 random ConvNet, train set mean = 0.5537 std = 0.0158
 Evaluate 5 random ConvNet, test set mean = 0.5389 std = 0.0157
--------------------------
+
 [0.5388888888888889]
 Mean test accuracy of 10 ramdom sets: 0.5388888888888889
 
@@ -230,7 +232,7 @@ Current lr schedule:
 [2023-04-27 03:16:43] Evaluate_04: epoch = 1000 train time = 22 s train loss = 0.005131, validation acc = 0.5689, test acc = 0.5467
 Evaluate 5 random ConvNet, train set mean = 0.5570 std = 0.0110
 Evaluate 5 random ConvNet, test set mean = 0.5431 std = 0.0020
--------------------------
+
 [0.5431111111111111]
 Mean test accuracy of 10 ramdom sets: 0.5431111111111111
 
@@ -267,7 +269,7 @@ Current lr schedule:
 [2023-04-27 03:11:05] Evaluate_04: epoch = 1500 train time = 31 s train loss = 0.002885, validation acc = 0.5425, test acc = 0.5244
 Evaluate 5 random ConvNet, train set mean = 0.5665 std = 0.0184
 Evaluate 5 random ConvNet, test set mean = 0.5464 std = 0.0204
--------------------------
+
 [0.5464444444444444]
 Mean test accuracy of 10 ramdom sets: 0.5464444444444444
 
@@ -304,7 +306,7 @@ Current lr schedule:
 [2023-04-27 03:50:37] Evaluate_04: epoch = 2000 train time = 98 s train loss = 0.003890, validation acc = 0.5610, test acc = 0.5444
 Evaluate 5 random ConvNet, train set mean = 0.5488 std = 0.0144
 Evaluate 5 random ConvNet, test set mean = 0.5378 std = 0.0117
--------------------------
+
 [0.5377777777777777]
 Mean test accuracy of 10 ramdom sets: 0.5377777777777777
 
@@ -343,7 +345,7 @@ Current lr schedule:
 [2023-04-27 03:55:59] Evaluate_04: epoch = 1000 train time = 93 s train loss = 0.072360, validation acc = 0.5759, test acc = 0.5633
 Evaluate 5 random ConvNet, train set mean = 0.5575 std = 0.0141
 Evaluate 5 random ConvNet, test set mean = 0.5462 std = 0.0130
--------------------------
+
 [0.5462222222222223]
 Mean test accuracy of 10 ramdom sets: 0.5462222222222223
 
