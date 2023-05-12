@@ -1,3 +1,4 @@
+**** GZ2 No AUG ****
 ** lr_net = 0.01 **
 
 /data/sbcaesar/xuan_venv/bin/python3 /data/sbcaesar/xuan_galaxy/baseline_test.py --dataset=GZoo2 --ipc=1 --syn_steps=50 --num_eval=5 --lr_teacher=0.0001 --pix_init=real --data_path=/data/sbcaesar/gzoo2_500ipc --eval_method=average
@@ -106,4 +107,33 @@ Load test!
 [2023-04-25 18:48:13] Evaluate_04: epoch = 1000 train time = 18 s train loss = 1.840739, validation acc = 0.2900, test acc = 0.3000
 Evaluate 5 random ConvNet, train set mean = 0.2608 std = 0.0189
 Evaluate 5 random ConvNet, test set mean = 0.2631 std = 0.0200
+-------------------------
+
+
+
+**** GZ2 AUG ****
+** lr_net = 0.0001 **
+
+/data/sbcaesar/xuan_venv/bin/python3 /data/sbcaesar/xuan_galaxy/baseline_test.py --dataset=GZoo2_aug --ipc=1 --syn_steps=50 --num_eval=5 --lr_teacher=0.0001 --pix_init=noise --data_path=/data/sbcaesar/gzoo2_500ipc --eval_method=average --distilled_path=/data/sbcaesar/mac_galaxy/logged_files/GZoo2/Final-GZoo2-1ipc/images_best.pt
+  0%|          | 0/45000 [00:00<?, ?it/s]BUILDING DATASET
+100%|██████████| 45000/45000 [00:00<00:00, 168396.65it/s]
+45000it [00:00, 4395623.56it/s]
+real images channel 0, mean = 0.0004, std = 0.9997
+real images channel 1, mean = 0.0003, std = 0.9998
+real images channel 2, mean = 0.0006, std = 0.9994
+Loading test:
+Load test!
+torch.Size([9, 3, 128, 128])
+100%|██████████| 1001/1001 [00:47<00:00, 21.24it/s]
+[2023-05-07 18:25:55] Evaluate_00: epoch = 1000 train time = 47 s train loss = 0.015793, validation acc = 0.4103, test acc = 0.4189
+100%|██████████| 1001/1001 [00:34<00:00, 29.29it/s]
+[2023-05-07 18:26:56] Evaluate_01: epoch = 1000 train time = 34 s train loss = 0.013091, validation acc = 0.3954, test acc = 0.4256
+100%|██████████| 1001/1001 [00:34<00:00, 29.31it/s]
+[2023-05-07 18:27:56] Evaluate_02: epoch = 1000 train time = 34 s train loss = 0.054066, validation acc = 0.4186, test acc = 0.4267
+100%|██████████| 1001/1001 [00:35<00:00, 28.03it/s]
+[2023-05-07 18:28:57] Evaluate_03: epoch = 1000 train time = 35 s train loss = 0.035416, validation acc = 0.4039, test acc = 0.4156
+100%|██████████| 1001/1001 [00:37<00:00, 27.00it/s]
+[2023-05-07 18:29:59] Evaluate_04: epoch = 1000 train time = 37 s train loss = 0.287928, validation acc = 0.4104, test acc = 0.4267
+Evaluate 5 random ConvNet, train set mean = 0.4077 std = 0.0077
+Evaluate 5 random ConvNet, test set mean = 0.4227 std = 0.0046
 -------------------------
