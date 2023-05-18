@@ -462,6 +462,65 @@ Process finished with exit code 0
 
 </details>
 
+# GZoo2-Aug Global LR Eval
+
+## 1 IPC
+
+```txt
+--real_init
+"/data/sbcaesar/mac_galaxy/logged_files/GZoo2_aug/Final-GZoo2-1ipc-aug/images_3200.pt"
+args.lr_net = [0.000092]
+```
+### No Augmentation
+
+<details open>
+<summary> Detail </summary>
+
+<details>
+<summary>5 Net ACC: </summary>
+
+
+</details>
+
+</details>
+
+### Augmentation
+
+<details open>
+<summary> Detail </summary>
+
+> --rotate --transpose
+
+<details>
+<summary>5 Net ACC: 0.5317777777777778 </summary>
+
+ssh://sbcaesar@dais10.uwb.edu:22/data/sbcaesar/xuan_venv/bin/python3 -u /data/sbcaesar/mac_galaxy/evaluate_synthetic_dataset.py --dataset=GZoo2_aug --ipc=1 --syn_steps=50 --data_path=/data/sbcaesar/gzoo2_500ipc --num_eval=5 --gpu=0 --transpose --rotate
+Loading synthetic dataset from /data/sbcaesar/mac_galaxy/logged_files/GZoo2_aug/Final-GZoo2-1ipc-aug-real/images_last.pt
+Transposing images for augmentation
+Rotating images for augmentation
+Current lr schedule:
+[[0, 0.0004806], [501, 4.8060000000000004e-05]]
+100%|███████████████████████████████████████| 1001/1001 [00:55<00:00, 18.17it/s]
+[2023-05-07 13:09:45] Evaluate_00: epoch = 1000 train time = 55 s train loss = 0.000439, validation acc = 0.5322, test acc = 0.5167
+100%|███████████████████████████████████████| 1001/1001 [00:54<00:00, 18.44it/s]
+[2023-05-07 13:10:53] Evaluate_01: epoch = 1000 train time = 54 s train loss = 0.037172, validation acc = 0.5529, test acc = 0.5467
+100%|███████████████████████████████████████| 1001/1001 [00:54<00:00, 18.45it/s]
+[2023-05-07 13:12:02] Evaluate_02: epoch = 1000 train time = 54 s train loss = 0.001494, validation acc = 0.5416, test acc = 0.5222
+100%|███████████████████████████████████████| 1001/1001 [00:54<00:00, 18.39it/s]
+[2023-05-07 13:13:11] Evaluate_03: epoch = 1000 train time = 54 s train loss = 0.001797, validation acc = 0.5379, test acc = 0.5378
+100%|███████████████████████████████████████| 1001/1001 [00:54<00:00, 18.33it/s]
+[2023-05-07 13:14:20] Evaluate_04: epoch = 1000 train time = 54 s train loss = 0.002705, validation acc = 0.5319, test acc = 0.5356
+Evaluate 5 random ConvNet, train set mean = 0.5393 std = 0.0077
+Evaluate 5 random ConvNet, test set mean = 0.5318 std = 0.0109
+[0.5317777777777778]
+Mean test accuracy of 10 ramdom sets: 0.5317777777777778
+
+Process finished with exit code 0
+
+</details>
+
+</details>
+
 # GZoo2 Dataset Evaluation
 
 ## 1 IPC
@@ -538,4 +597,34 @@ Process finished with exit code 0
 
 </details>
 
+> --rotate --transpose 2nd
+
+<details>
+<summary>5 Net ACC: 0.5466666666666666 </summary>
+
+ssh://sbcaesar@dais10.uwb.edu:22/data/sbcaesar/xuan_venv/bin/python3 -u /data/sbcaesar/mac_galaxy/evaluate_synthetic_dataset.py --dataset=GZoo2 --ipc=1 --syn_steps=50 --data_path=/data/sbcaesar/gzoo2_500ipc --num_eval=5 --gpu=0 --rotate --transpose
+Transposing images for augmentation
+Rotating images for augmentation
+Current lr schedule:
+[[0, 9.194e-05], [501, 9.194e-06]]
+100%|███████████████████████████████████████| 1001/1001 [00:43<00:00, 23.22it/s]
+[2023-05-07 03:33:52] Evaluate_00: epoch = 1000 train time = 43 s train loss = 0.033620, validation acc = 0.5367, test acc = 0.5467
+100%|███████████████████████████████████████| 1001/1001 [00:42<00:00, 23.83it/s]
+[2023-05-07 03:34:37] Evaluate_01: epoch = 1000 train time = 42 s train loss = 0.017033, validation acc = 0.5333, test acc = 0.5478
+100%|███████████████████████████████████████| 1001/1001 [00:41<00:00, 23.84it/s]
+[2023-05-07 03:35:21] Evaluate_02: epoch = 1000 train time = 41 s train loss = 0.021264, validation acc = 0.5400, test acc = 0.5478
+100%|███████████████████████████████████████| 1001/1001 [00:42<00:00, 23.83it/s]
+[2023-05-07 03:36:05] Evaluate_03: epoch = 1000 train time = 42 s train loss = 0.225695, validation acc = 0.5296, test acc = 0.5344
+100%|███████████████████████████████████████| 1001/1001 [00:42<00:00, 23.83it/s]
+[2023-05-07 03:36:49] Evaluate_04: epoch = 1000 train time = 42 s train loss = 0.180011, validation acc = 0.5344, test acc = 0.5567
+Evaluate 5 random ConvNet, train set mean = 0.5348 std = 0.0035
+Evaluate 5 random ConvNet, test set mean = 0.5467 std = 0.0071
+[0.5466666666666666]
+Mean test accuracy of 10 ramdom sets: 0.5466666666666666
+
+Process finished with exit code 0
+
 </details>
+
+</details>
+
