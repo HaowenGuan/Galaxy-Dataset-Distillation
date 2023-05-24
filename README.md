@@ -64,7 +64,7 @@ python distill.py --dataset=CIFAR10 --ipc=1 --syn_steps=50 --zca --lr_img=1000 -
 | GZoo2     | 10      | 20                          | 10000                        | 0.0001                             | 0.01                            |
 |           | 50      | -                           | -                            | -                                  | -                               |
 
-### Distillation Documentation
+### Distillation Parameters
 
 | Argument          | Description                                                |
 | ----------------- | ---------------------------------------------------------- |
@@ -76,7 +76,7 @@ python distill.py --dataset=CIFAR10 --ipc=1 --syn_steps=50 --zca --lr_img=1000 -
 | `--lr_img`        | Learning rate for updating synthetic image: `int`          |
 | `--pix_init=real` | Synthetic image initialization. Choose from: {noise/real}  |
 
-#### Optional STM Arguments
+#### Optional Parameters
 
 | Argument                        | Description                                                                                       |
 | ------------------------------- | ------------------------------------------------------------------------------------------------- |
