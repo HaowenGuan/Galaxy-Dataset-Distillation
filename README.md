@@ -85,14 +85,11 @@ python distill.py --dataset=CIFAR10 --ipc=1 --syn_steps=50 --zca --lr_img=1000 -
 | `--sigma=5`                     | The number of sigma $(\lambda\sigma)$ as the critical value of Hypothesis testing: `float`        |
 | `--buffer_path={path}`          | Buffer path: `str`                                                                                |
 | `--data_path={path_to_dataset}` | Dataset Path: `str`                                                                               |
-| `--eval_it=100`                 | Evaluation interval, smaller value evaluate more frequently: `int`                                |
-| `--sigma=5`                     | The number of sigma as the critical value of Hypothesis testing: `float`                          |
+| `--eval_it=100`                 | Evaluation interval, smaller value will evaluate more frequently: `int`                           |
 | `--init_epoch=1`                | Initial trajectory matching epoch pool size, (Default is 1): `[0, init_epoch)`                    |
 | `--expert_epochs=1`             | MTT parameter. We fix it to 1 for STM: `int`                                                      |
 | `--max_start_epoch=29`          | Maximum epoch for stage distillation: `int`. Use the `train_epochs` value during expert training. |
 | `--Iteration=10000`             | Maximum global iteration, in case distillation run too long: `int`                                |
-| `--lr_lr`                       | Learning rate for updating step size: `float`                                                     |
-| `--lr_img`                      | Learning rate for updating synthetic image: `int`                                                 |
 
 ## WanDB Guide
 
