@@ -148,7 +148,7 @@ def main(args):
             plt.title('Confusion Matrix Expert{} {}'.format(it,name))
             plt.xlabel("Prediction")
             plt.ylabel("True Label")
-            plt.savefig('./cf_matrix_buffer/cf_expert{}_{}.png'.format(it,name))
+            plt.savefig('./'+args.buffer_path+'/cf_expert{}_{}.png'.format(it,name))
         print("Training Time:", time.time() - start)
 
         trajectories.append(timestamps)
@@ -174,7 +174,7 @@ def main(args):
         plt.title('Confusion Matrix total {}'.format(name))
         plt.xlabel("Prediction")
         plt.ylabel("True Label")
-        plt.savefig('./cf_matrix_buffer/cf_total_{}.png'.format(name))
+        plt.savefig('./'+args.buffer_path+'/cf_total_{}.png'.format(name))
 
 
 if __name__ == '__main__':
