@@ -2,7 +2,8 @@
 
 ![gz2_1ipc_aug_noise](docs/gz2_1ipc_aug_noise.png)
 
-This repository contains code for Self-Adaptive Trajectory Matching (STM) algorithm, an improved version of Matching Training Trajectory (MTT). It also includes code for processing Galaxy Zoo 2 dataset for paper: Galaxy Dataset Distillation.
+This is the official repository for paper [Discovering Galaxy Features via Dataset Distillation](https://arxiv.org/abs/2311.17967).
+Our work contains the experiment code for galaxy dataset distillation and Self-Adaptive Trajectory Matching (STM) algorithm, an improved version of Matching Training Trajectory (MTT).
 
 ## Getting Started
 
