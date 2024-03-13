@@ -1,6 +1,11 @@
-pytorch
+torch
 torchvision
 kornia
 scipy
 tqdm
 wandb
+pandas
+astropy
+opencv-python
+scikit-learn
+seaborn

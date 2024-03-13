@@ -344,7 +344,7 @@ def main(args):
                     plt.title('Confusion Matrix Iteration{} {}'.format(it, name))
                     plt.xlabel("Prediction")
                     plt.ylabel("True Label")
-                    plt.savefig('./cf_matrix_distill/cf_iteration_{}_{}.png'.format(it, name))
+                    plt.savefig('./'+args.buffer_path+'/cf_iteration_{}_{}.png'.format(it, name))
                     wandb.log({"cf_iteration": wandb.Image(plt)}, step=it)
                     plt.close()
 
